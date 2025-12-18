@@ -1,26 +1,27 @@
 {
-  "name": "nextjs",
+  "name": "stride",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
-  },
-  "dependencies": {
-    "next": "16.0.10",
-    "react": "19.2.1",
-    "react-dom": "19.2.1"
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "start": "turbo run start",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,mdx,css,scss,yaml,yml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,mdx,css,scss,yaml,yml}\"",
+    "test": "turbo run test",
+    "clean": "turbo run clean"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.0.10",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "turbo": "^2.0.0",
+    "typescript": "^5",
+    "@types/node": "^24",
+    "prettier": "^3.7.4",
+    "eslint-config-prettier": "^10.1.8"
+  },
+  "packageManager": "pnpm@10.26.0",
+  "engines": {
+    "node": ">=24.0.0",
+    "pnpm": ">=10.26.0"
   }
 }

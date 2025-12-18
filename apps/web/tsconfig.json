@@ -1,0 +1,18 @@
+{
+  "extends": "../../packages/tsconfig/nextjs.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@stride/ui": ["../../packages/ui/src"],
+      "@stride/database": ["../../packages/database/src"],
+      "@stride/types": ["../../packages/types/src"],
+      "@stride/yaml-config": ["../../packages/yaml-config/src"]
+    },
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+

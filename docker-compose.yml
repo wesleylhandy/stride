@@ -1,0 +1,132 @@
+# Stride Docker Compose Configuration
+# 
+# Environment Variables:
+# All environment variables are loaded from .env file in the project root.
+# Docker Compose automatically loads .env files.
+# 
+# Required variables (no defaults):
+# - JWT_SECRET: Secret for JWT token signing (min 32 characters)
+# - SESSION_SECRET: Secret for session encryption (min 32 characters)
+#
+# Optional variables with defaults:
+# - DB_PASSWORD: Database password (default: stride_dev_password)
+# - NODE_ENV: Environment mode (default: development)
+# - NEXT_PUBLIC_APP_URL: Public application URL (default: http://localhost:3000)
+#
+# See .env.example for complete list of available environment variables.
+# Copy .env.example to .env and configure your values:
+#   cp .env.example .env
+
+services:
+  # PostgreSQL Database Service
+  stride-postgres:
+    image: postgres:16-alpine
+    container_name: stride-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: stride
+      # DB_PASSWORD from .env file, fallback to development default
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-stride_dev_password}
+      POSTGRES_DB: stride
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      # Use 5433 to avoid conflicts with other PostgreSQL instances on port 5432
+      - "5433:5432"
+    volumes:
+      # Named volume for data persistence
+      - stride-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stride -d stride"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - stride-network
+
+  # Next.js Web Application
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: stride-web
+    restart: unless-stopped
+    depends_on:
+      stride-postgres:
+        condition: service_healthy
+    # Environment variables loaded from .env file
+    # All variables support defaults via ${VAR:-default} syntax
+    environment:
+      # Database
+      DATABASE_URL: postgresql://stride:${DB_PASSWORD:-stride_dev_password}@stride-postgres:5432/stride
+      
+      # Application Configuration
+      NODE_ENV: ${NODE_ENV:-development}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      APP_VERSION: ${APP_VERSION:-}
+      
+      # Authentication (REQUIRED - must be set in .env for production)
+      JWT_SECRET: ${JWT_SECRET}
+      SESSION_SECRET: ${SESSION_SECRET}
+      
+      # AI Gateway
+      AI_GATEWAY_URL: ${AI_GATEWAY_URL:-http://ai-gateway:3001}
+      
+      # Email Configuration (optional)
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      
+      # OAuth Configuration (optional, for repository integration)
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      GITLAB_CLIENT_ID: ${GITLAB_CLIENT_ID:-}
+      GITLAB_CLIENT_SECRET: ${GITLAB_CLIENT_SECRET:-}
+      
+      # Rate Limiting (optional)
+      RATE_LIMIT_ENABLED: ${RATE_LIMIT_ENABLED:-true}
+      RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-100}
+      RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-60000}
+      
+      # Logging (optional)
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      LOG_FORMAT: ${LOG_FORMAT:-json}
+      
+      # Error Tracking (optional)
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      ERROR_TRACKING_ENABLED: ${ERROR_TRACKING_ENABLED:-false}
+    ports:
+      - "3000:3000"
+    networks:
+      - stride-network
+
+  # AI Gateway Service (Optional)
+  # This service can be disabled if AI features are not needed.
+  # To disable, comment out this service or don't start it.
+  ai-gateway:
+    build:
+      context: .
+      dockerfile: packages/ai-gateway/Dockerfile
+    container_name: stride-ai-gateway
+    restart: unless-stopped
+    environment:
+      # LLM Configuration
+      LLM_ENDPOINT: ${LLM_ENDPOINT:-http://localhost:11434}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      
+      # Application Configuration
+      NODE_ENV: ${NODE_ENV:-development}
+    ports:
+      - "3001:3001"
+    networks:
+      - stride-network
+
+volumes:
+  stride-postgres-data:
+    driver: local
+
+networks:
+  stride-network:
+    driver: bridge

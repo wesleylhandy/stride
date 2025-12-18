@@ -1,24 +1,12 @@
 {
+  "extends": "./packages/tsconfig/base.json",
   "compilerOptions": {
-    "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "react-jsx",
-    "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
     "paths": {
+      "@stride/ui": ["./packages/ui/src"],
+      "@stride/database": ["./packages/database/src"],
+      "@stride/types": ["./packages/types/src"],
+      "@stride/yaml-config": ["./packages/yaml-config/src"],
+      "@stride/ai-gateway": ["./packages/ai-gateway/src"],
       "@/*": ["./*"]
     }
   },
@@ -30,5 +18,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "dist", "build", ".next"]
 }

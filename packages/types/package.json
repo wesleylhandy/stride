@@ -1,0 +1,56 @@
+{
+  "name": "@stride/types",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./user": {
+      "types": "./src/user.ts",
+      "default": "./src/user.ts"
+    },
+    "./project": {
+      "types": "./src/project.ts",
+      "default": "./src/project.ts"
+    },
+    "./issue": {
+      "types": "./src/issue.ts",
+      "default": "./src/issue.ts"
+    },
+    "./cycle": {
+      "types": "./src/cycle.ts",
+      "default": "./src/cycle.ts"
+    },
+    "./api": {
+      "types": "./src/api.ts",
+      "default": "./src/api.ts"
+    },
+    "./config": {
+      "types": "./src/config.ts",
+      "default": "./src/config.ts"
+    },
+    "./prisma": {
+      "types": "./src/prisma.ts",
+      "default": "./src/prisma.ts"
+    },
+    "./logger": {
+      "types": "./src/logger.ts",
+      "default": "./src/logger.ts"
+    }
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@prisma/client": "^7.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}
+
