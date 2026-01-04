@@ -95,3 +95,6 @@ export interface IRepository<T, CreateInput, UpdateInput> {
   exists(id: string): Promise<boolean>;
 }
 
+// Export repository implementations
+export * from "./project-repository";
+

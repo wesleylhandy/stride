@@ -177,13 +177,13 @@ Where:
 
 ### Marketing Site
 
-- [ ] T059 [US1] Create Next.js app with MDX support in apps/site/
-- [ ] T060 [US1] Create hero section component in apps/site/app/page.tsx
-- [ ] T061 [US1] Add feature highlights section in apps/site/app/page.tsx
-- [ ] T062 [US1] Create comparison section in apps/site/app/page.tsx
-- [ ] T063 [US1] Add installation documentation page in apps/site/app/docs/install/page.tsx
-- [ ] T064 [US1] Implement dark/light theme toggle in apps/site/app/components/ThemeToggle.tsx
-- [ ] T065 [US1] Optimize for SEO with metadata in apps/site/app/layout.tsx
+- [x] T059 [US1] Create Next.js app with MDX support in apps/site/
+- [x] T060 [US1] Create hero section component in apps/site/app/page.tsx
+- [x] T061 [US1] Add feature highlights section in apps/site/app/page.tsx
+- [x] T062 [US1] Create comparison section in apps/site/app/page.tsx
+- [x] T063 [US1] Add installation documentation page in apps/site/app/docs/install/page.tsx
+- [x] T064 [US1] Implement dark/light theme toggle in apps/site/app/components/ThemeToggle.tsx
+- [x] T065 [US1] Optimize for SEO with metadata in apps/site/app/layout.tsx
 
 **Acceptance Criteria**:
 
@@ -194,18 +194,18 @@ Where:
 
 ### Authentication & User Management
 
-- [ ] T066 [US1] Implement password hashing with bcrypt/argon2 in apps/web/src/lib/auth/password.ts
-- [ ] T067 [US1] Create user registration API route in apps/web/app/api/auth/register/route.ts
-- [ ] T068 [US1] Create login API route with JWT in apps/web/app/api/auth/login/route.ts
-- [ ] T069 [US1] Implement session management with database in apps/web/src/lib/auth/session.ts
-- [ ] T070 [US1] Create logout API route in apps/web/app/api/auth/logout/route.ts
-- [ ] T071 [US1] Create /api/auth/me endpoint in apps/web/app/api/auth/me/route.ts
-- [ ] T072 [US1] Implement role enum (Admin, Member, Viewer) in packages/types/src/user.ts
-- [ ] T073 [US1] Create permission checking utilities in apps/web/src/lib/auth/permissions.ts
-- [ ] T074 [US1] Add middleware for route protection in apps/web/src/middleware/auth.ts
-- [ ] T075 [US1] Create first-run detection logic in apps/web/src/lib/setup/first-run.ts
-- [ ] T076 [US1] Implement admin account creation page in apps/web/app/setup/page.tsx
-- [ ] T077 [US1] Prevent multiple admin creation in apps/web/src/lib/setup/first-run.ts
+- [x] T066 [US1] Implement password hashing with bcrypt/argon2 in apps/web/src/lib/auth/password.ts
+- [x] T067 [US1] Create user registration API route in apps/web/app/api/auth/register/route.ts
+- [x] T068 [US1] Create login API route with JWT in apps/web/app/api/auth/login/route.ts
+- [x] T069 [US1] Implement session management with database in apps/web/src/lib/auth/session.ts
+- [x] T070 [US1] Create logout API route in apps/web/app/api/auth/logout/route.ts
+- [x] T071 [US1] Create /api/auth/me endpoint in apps/web/app/api/auth/me/route.ts
+- [x] T072 [US1] Implement role enum (Admin, Member, Viewer) in packages/types/src/user.ts
+- [x] T073 [US1] Create permission checking utilities in apps/web/src/lib/auth/permissions.ts
+- [x] T074 [US1] Add middleware for route protection in apps/web/src/middleware/auth.ts
+- [x] T075 [US1] Create first-run detection logic in apps/web/src/lib/setup/first-run.ts
+- [x] T076 [US1] Implement admin account creation page in apps/web/app/setup/page.tsx
+- [x] T077 [US1] Prevent multiple admin creation in apps/web/src/lib/setup/first-run.ts
 - [ ] T078 [US1] Add onboarding flow component in apps/web/app/onboarding/page.tsx
 
 **Acceptance Criteria**:
@@ -219,11 +219,11 @@ Where:
 
 ### Project Management
 
-- [ ] T079 [US1] Create project creation API route in apps/web/app/api/projects/route.ts
-- [ ] T080 [US1] Create project listing API route in apps/web/app/api/projects/route.ts
-- [ ] T081 [US1] Create project detail API route in apps/web/app/api/projects/[projectId]/route.ts
-- [ ] T082 [US1] Implement project repository in packages/database/src/repositories/project-repository.ts
-- [ ] T083 [US1] Add project key uniqueness validation in apps/web/src/lib/validation/project.ts
+- [x] T079 [US1] Create project creation API route in apps/web/app/api/projects/route.ts
+- [x] T080 [US1] Create project listing API route in apps/web/app/api/projects/route.ts
+- [x] T081 [US1] Create project detail API route in apps/web/app/api/projects/[projectId]/route.ts
+- [x] T082 [US1] Implement project repository in packages/database/src/repositories/project-repository.ts
+- [x] T083 [US1] Add project key uniqueness validation in apps/web/src/lib/validation/project.ts
 
 **Acceptance Criteria**:
 
@@ -233,13 +233,13 @@ Where:
 
 ### Repository Connection
 
-- [ ] T084 [US1] Create repository connection API route in apps/web/app/api/projects/[projectId]/repositories/route.ts
-- [ ] T085 [US1] Implement GitHub OAuth integration in apps/web/src/lib/integrations/github.ts
-- [ ] T086 [US1] Implement GitLab OAuth integration in apps/web/src/lib/integrations/gitlab.ts
-- [ ] T087 [US1] Store repository credentials securely (encrypted) in apps/web/src/lib/integrations/storage.ts
-- [ ] T088 [US1] Create webhook registration logic in apps/web/src/lib/integrations/webhooks.ts
-- [ ] T089 [US1] Implement config file cloning from repository in apps/web/src/lib/integrations/config-sync.ts
-- [ ] T090 [US1] Create default configuration generator in packages/yaml-config/src/default-config.ts
+- [x] T084 [US1] Create repository connection API route in apps/web/app/api/projects/[projectId]/repositories/route.ts
+- [x] T085 [US1] Implement GitHub OAuth integration in apps/web/src/lib/integrations/github.ts
+- [x] T086 [US1] Implement GitLab OAuth integration in apps/web/src/lib/integrations/gitlab.ts
+- [x] T087 [US1] Store repository credentials securely (encrypted) in apps/web/src/lib/integrations/storage.ts
+- [x] T088 [US1] Create webhook registration logic in apps/web/src/lib/integrations/webhooks.ts
+- [x] T089 [US1] Implement config file cloning from repository in apps/web/src/lib/integrations/config-sync.ts
+- [x] T090 [US1] Create default configuration generator in packages/yaml-config/src/default-config.ts
 - [ ] T091 [US1] Create repository connection UI in apps/web/app/onboarding/repository/page.tsx
 
 **Acceptance Criteria**:
@@ -252,11 +252,11 @@ Where:
 
 ### Onboarding UI
 
-- [ ] T092 [US1] Create onboarding flow layout in apps/web/app/onboarding/layout.tsx
-- [ ] T093 [US1] Create admin account creation form in apps/web/app/onboarding/admin/page.tsx
-- [ ] T094 [US1] Create repository linking step in apps/web/app/onboarding/repository/page.tsx
-- [ ] T095 [US1] Create project initialization step in apps/web/app/onboarding/project/page.tsx
-- [ ] T096 [US1] Create completion/dashboard redirect in apps/web/app/onboarding/complete/page.tsx
+- [x] T092 [US1] Create onboarding flow layout in apps/web/app/onboarding/layout.tsx
+- [x] T093 [US1] Create admin account creation form in apps/web/app/onboarding/admin/page.tsx
+- [x] T094 [US1] Create repository linking step in apps/web/app/onboarding/repository/page.tsx
+- [x] T095 [US1] Create project initialization step in apps/web/app/onboarding/project/page.tsx
+- [x] T096 [US1] Create completion/dashboard redirect in apps/web/app/onboarding/complete/page.tsx
 
 **Acceptance Criteria**:
 
