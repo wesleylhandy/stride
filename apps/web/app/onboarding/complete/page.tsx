@@ -54,23 +54,23 @@ export default function CompletePage() {
             />
           </svg>
         </div>
-        <h1 className="mt-6 text-3xl font-bold text-gray-900">
+        <h1 className="mt-6 text-3xl font-bold text-foreground dark:text-foreground-dark">
           Setup Complete!
         </h1>
-        <p className="mt-2 text-gray-600">
+        <p className="mt-2 text-foreground-secondary dark:text-foreground-dark-secondary">
           You're all set to start using Stride. Your admin account has been
           created and your project is ready.
         </p>
       </div>
 
-      <div className="rounded-lg border border-gray-200 bg-white p-6 text-left">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">
+      <div className="rounded-lg border border-border dark:border-border-dark bg-surface dark:bg-surface-dark p-6 text-left">
+        <h2 className="mb-4 text-lg font-semibold text-foreground dark:text-foreground-dark">
           What's Next?
         </h2>
-        <ul className="space-y-3 text-sm text-gray-600">
+        <ul className="space-y-3 text-sm text-foreground-secondary dark:text-foreground-dark-secondary">
           <li className="flex items-start">
             <svg
-              className="mr-2 h-5 w-5 flex-shrink-0 text-primary-600"
+              className="mr-2 h-5 w-5 flex-shrink-0 text-accent"
               fill="currentColor"
               viewBox="0 0 20 20"
             >
@@ -86,7 +86,7 @@ export default function CompletePage() {
           </li>
           <li className="flex items-start">
             <svg
-              className="mr-2 h-5 w-5 flex-shrink-0 text-primary-600"
+              className="mr-2 h-5 w-5 flex-shrink-0 text-accent"
               fill="currentColor"
               viewBox="0 0 20 20"
             >
@@ -102,7 +102,7 @@ export default function CompletePage() {
           </li>
           <li className="flex items-start">
             <svg
-              className="mr-2 h-5 w-5 flex-shrink-0 text-primary-600"
+              className="mr-2 h-5 w-5 flex-shrink-0 text-accent"
               fill="currentColor"
               viewBox="0 0 20 20"
             >
@@ -119,7 +119,7 @@ export default function CompletePage() {
           {projects.length === 0 && (
             <li className="flex items-start">
               <svg
-                className="mr-2 h-5 w-5 flex-shrink-0 text-primary-600"
+                className="mr-2 h-5 w-5 flex-shrink-0 text-accent"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >

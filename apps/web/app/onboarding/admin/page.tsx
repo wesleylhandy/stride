@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Input } from "@stride/ui";
 
@@ -8,6 +8,7 @@ export default function AdminAccountPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [checking, setChecking] = useState(true);
   const [formData, setFormData] = useState({
     email: "",
     username: "",
@@ -15,6 +16,28 @@ export default function AdminAccountPage() {
     confirmPassword: "",
     name: "",
   });
+
+  // Check if admin already exists on mount
+  useEffect(() => {
+    async function checkAdminStatus() {
+      try {
+        const response = await fetch("/api/setup/status");
+        const data = await response.json();
+
+        if (data.adminExists) {
+          // Admin already exists, skip to project step
+          router.replace("/onboarding/project");
+          return;
+        }
+      } catch (err) {
+        console.error("Failed to check admin status:", err);
+      } finally {
+        setChecking(false);
+      }
+    }
+
+    checkAdminStatus();
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,11 +99,25 @@ export default function AdminAccountPage() {
     }
   };
 
+  // Show loading state while checking admin status
+  if (checking) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="mb-4">
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-accent border-r-transparent"></div>
+          </div>
+          <p className="text-sm text-foreground-secondary">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-2xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Create Admin Account</h1>
-        <p className="mt-2 text-gray-600">
+        <h1 className="text-3xl font-bold text-foreground dark:text-foreground-dark">Create Admin Account</h1>
+        <p className="mt-2 text-foreground-secondary dark:text-foreground-dark-secondary">
           Create your admin account to get started with Stride. This will be the
           first user and will have full administrative access.
         </p>
@@ -97,7 +134,7 @@ export default function AdminAccountPage() {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-foreground dark:text-foreground-dark"
             >
               Email Address
             </label>
@@ -117,7 +154,7 @@ export default function AdminAccountPage() {
           <div>
             <label
               htmlFor="username"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-foreground dark:text-foreground-dark"
             >
               Username
             </label>
@@ -139,7 +176,7 @@ export default function AdminAccountPage() {
           <div>
             <label
               htmlFor="name"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-foreground dark:text-foreground-dark"
             >
               Full Name (Optional)
             </label>
@@ -158,7 +195,7 @@ export default function AdminAccountPage() {
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-foreground dark:text-foreground-dark"
             >
               Password
             </label>
@@ -174,7 +211,7 @@ export default function AdminAccountPage() {
               placeholder="••••••••"
               minLength={8}
             />
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-foreground-tertiary dark:text-foreground-dark-tertiary">
               Must be at least 8 characters long
             </p>
           </div>
@@ -182,7 +219,7 @@ export default function AdminAccountPage() {
           <div>
             <label
               htmlFor="confirmPassword"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-foreground dark:text-foreground-dark"
             >
               Confirm Password
             </label>

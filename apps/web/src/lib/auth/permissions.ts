@@ -155,3 +155,39 @@ export function canManageProjectConfig(role: UserRole): boolean {
   return hasPermission(role, Permission.MANAGE_PROJECT_CONFIG);
 }
 
+/**
+ * Check if user can create issues (Member+)
+ * @param role - User role
+ * @returns True if user can create issues
+ */
+export function canCreateIssue(role: UserRole): boolean {
+  return hasPermission(role, Permission.CREATE_ISSUE);
+}
+
+/**
+ * Check if user can update issues (Member+)
+ * @param role - User role
+ * @returns True if user can update issues
+ */
+export function canUpdateIssue(role: UserRole): boolean {
+  return hasPermission(role, Permission.UPDATE_ISSUE);
+}
+
+/**
+ * Check if user can delete issues (Admin only)
+ * @param role - User role
+ * @returns True if user can delete issues
+ */
+export function canDeleteIssue(role: UserRole): boolean {
+  return hasPermission(role, Permission.DELETE_ISSUE);
+}
+
+/**
+ * Check if user can view issues (all roles)
+ * @param role - User role
+ * @returns True if user can view issues
+ */
+export function canViewIssue(role: UserRole): boolean {
+  return hasPermission(role, Permission.VIEW_ISSUE);
+}
+

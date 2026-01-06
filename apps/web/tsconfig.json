@@ -3,7 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
+      "@/*": ["./src/*"],
       "@stride/ui": ["../../packages/ui/src"],
       "@stride/database": ["../../packages/database/src"],
       "@stride/types": ["../../packages/types/src"],

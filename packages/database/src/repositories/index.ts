@@ -97,4 +97,5 @@ export interface IRepository<T, CreateInput, UpdateInput> {
 
 // Export repository implementations
 export * from "./project-repository";
+export * from "./issue-repository";
 

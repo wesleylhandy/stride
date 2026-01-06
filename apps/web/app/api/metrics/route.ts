@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { metrics } from '@/src/lib/metrics';
+import { metrics } from '@/lib/metrics';
 
 /**
  * GET /api/metrics

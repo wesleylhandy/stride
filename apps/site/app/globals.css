@@ -1,12 +1,144 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* Font variables are set by Next.js font optimization in layout.tsx */
+
+@theme {
+  /* Background colors */
+  --color-background: #ffffff;
+  --color-background-secondary: #f6f8fa;
+  --color-background-tertiary: #f0f2f5;
+  --color-background-dark: #0d1117;
+  --color-background-dark-secondary: #161b22;
+  --color-background-dark-tertiary: #1a1d2e;
+  
+  /* Surface colors */
+  --color-surface: #ffffff;
+  --color-surface-secondary: #f0f2f5;
+  --color-surface-dark: #21262d;
+  --color-surface-dark-secondary: #2d333b;
+  
+  /* Foreground/text colors */
+  --color-foreground: #24292f;
+  --color-foreground-secondary: #57606a;
+  --color-foreground-tertiary: #848d97;
+  --color-foreground-muted: #8b949e;
+  --color-foreground-dark: #e6edf3;
+  --color-foreground-dark-secondary: #8b949e;
+  --color-foreground-dark-tertiary: #6e7681;
+  --color-foreground-dark-muted: #6e7681;
+  
+  /* Accent colors */
+  --color-accent: #00d4aa;
+  --color-accent-cyan: #00b8d4;
+  --color-accent-hover: #00c29a;
+  --color-accent-active: #00b08a;
+  
+  /* Primary colors */
+  --color-primary: #00d4aa;
+  --color-primary-hover: #00c29a;
+  --color-primary-active: #00b08a;
+  --color-primary-light: #e6faf5;
+  --color-primary-dark: #00b08a;
+  
+  /* Secondary colors */
+  --color-secondary: #4a9eff;
+  --color-secondary-hover: #3a8eef;
+  --color-secondary-active: #2a7edf;
+  --color-secondary-light: #e6f2ff;
+  --color-secondary-dark: #2a7edf;
+  
+  /* Electric colors */
+  --color-electric: #4a9eff;
+  --color-electric-light: #5b9fff;
+  --color-electric-hover: #3a8eef;
+  --color-electric-active: #2a7edf;
+  
+  /* Navy colors */
+  --color-navy: #1a1d2e;
+  --color-navy-light: #2d3142;
+  
+  /* Border colors */
+  --color-border: #d0d7de;
+  --color-border-hover: #afb8c1;
+  --color-border-focus: #00d4aa;
+  --color-border-dark: #30363d;
+  --color-border-dark-hover: #484f58;
+  --color-border-dark-focus: #00d4aa;
+  --color-border-subtle: #d0d7de;
+  --color-border-subtle-dark: #30363d;
+  
+  /* Status colors */
+  --color-success: #00e676;
+  --color-success-light: #26c281;
+  --color-warning: #ffab00;
+  --color-warning-light: #ff9800;
+  --color-error: #ff5252;
+  --color-error-light: #ef5350;
+  --color-info: #b388ff;
+  --color-info-light: #9c27b0;
+  
+  /* Code colors */
+  --color-code-highlight: #1f6feb;
+  --color-code-bg: rgba(110, 118, 129, 0.1);
+  
+  /* Git colors */
+  --color-git-pr: #6e40c9;
+  --color-git-branch: #6e40c9;
+  
+  /* Status colors */
+  --color-status-backlog: #6e7681;
+  --color-status-todo: #4a9eff;
+  --color-status-in-progress: #00b8d4;
+  --color-status-review: #ffab00;
+  --color-status-done: #00e676;
+  --color-status-cancelled: #6e7681;
+  --color-status-merged: #b388ff;
+  
+  /* Fonts */
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
+}
 
 :root {
-  --font-inter: 'Inter', sans-serif;
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+  
+  /* Override colors for dark mode */
+  --color-background: #0d1117;
+  --color-background-secondary: #161b22;
+  --color-background-tertiary: #1a1d2e;
+  --color-background-dark: #0d1117;
+  --color-background-dark-secondary: #161b22;
+  --color-background-dark-tertiary: #1a1d2e;
+  
+  --color-surface: #21262d;
+  --color-surface-secondary: #2d333b;
+  --color-surface-dark: #21262d;
+  --color-surface-dark-secondary: #2d333b;
+  
+  --color-foreground: #e6edf3;
+  --color-foreground-secondary: #8b949e;
+  --color-foreground-tertiary: #6e7681;
+  --color-foreground-muted: #6e7681;
+  --color-foreground-dark: #e6edf3;
+  --color-foreground-dark-secondary: #8b949e;
+  --color-foreground-dark-tertiary: #6e7681;
+  --color-foreground-dark-muted: #6e7681;
+  
+  --color-border: #30363d;
+  --color-border-hover: #484f58;
+  --color-border-focus: #00d4aa;
+  --color-border-dark: #30363d;
+  --color-border-dark-hover: #484f58;
+  --color-border-dark-focus: #00d4aa;
+  --color-border-subtle: #30363d;
+  --color-border-subtle-dark: #30363d;
 }
 
 body {
-  @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
 }
-

@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss';
+import typography from '@tailwindcss/typography';
 
 const config: Config = {
   content: ['./src/**/*.{js,ts,jsx,tsx}'],
@@ -6,82 +7,132 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Semantic color tokens
+        // Primary Palette - Deep Navy/Charcoal backgrounds
+        navy: {
+          DEFAULT: '#1a1d2e', // Deep Navy
+          light: '#2d3142', // Charcoal
+        },
+        // Accent Colors - Teal/Cyan for primary actions
+        accent: {
+          DEFAULT: '#00d4aa', // Accent Teal
+          cyan: '#00b8d4', // Accent Cyan
+          hover: '#00c29a', // Slightly darker teal for hover
+          active: '#00b08a', // Darker for active state
+        },
+        // Electric Blue for links and interactive elements
+        electric: {
+          DEFAULT: '#4a9eff',
+          light: '#5b9fff',
+          hover: '#3a8eef',
+          active: '#2a7edf',
+        },
+        // Semantic color tokens - GitHub-style backgrounds
         background: {
-          DEFAULT: 'hsl(0 0% 100%)',
-          secondary: 'hsl(0 0% 98%)',
-          tertiary: 'hsl(0 0% 96%)',
-          dark: 'hsl(0 0% 9%)',
-          'dark-secondary': 'hsl(0 0% 11%)',
-          'dark-tertiary': 'hsl(0 0% 13%)',
+          DEFAULT: '#ffffff', // Light mode primary
+          secondary: '#f6f8fa', // Light mode secondary
+          tertiary: '#f0f2f5', // Light mode tertiary
+          dark: '#0d1117', // Dark mode primary
+          'dark-secondary': '#161b22', // Dark mode secondary
+          'dark-tertiary': '#1a1d2e', // Deep Navy
         },
+        // Surface colors for cards and elevated elements
+        surface: {
+          DEFAULT: '#ffffff', // Light mode
+          secondary: '#f0f2f5', // Light mode secondary
+          dark: '#21262d', // Dark mode
+          'dark-secondary': '#2d333b', // Dark mode secondary
+        },
+        // Foreground/text colors - GitHub-style
         foreground: {
-          DEFAULT: 'hsl(0 0% 9%)',
-          secondary: 'hsl(0 0% 45%)',
-          tertiary: 'hsl(0 0% 65%)',
-          muted: 'hsl(0 0% 75%)',
-          dark: 'hsl(0 0% 98%)',
-          'dark-secondary': 'hsl(0 0% 85%)',
-          'dark-tertiary': 'hsl(0 0% 70%)',
-          'dark-muted': 'hsl(0 0% 55%)',
+          DEFAULT: '#24292f', // Light mode primary text
+          secondary: '#57606a', // Light mode secondary text
+          tertiary: '#848d97', // Light mode tertiary text
+          muted: '#8b949e', // Light mode muted
+          dark: '#e6edf3', // Dark mode primary text
+          'dark-secondary': '#8b949e', // Dark mode secondary text
+          'dark-tertiary': '#6e7681', // Dark mode tertiary text
+          'dark-muted': '#6e7681', // Dark mode muted
         },
+        // Border colors
         border: {
-          DEFAULT: 'hsl(0 0% 90%)',
-          hover: 'hsl(0 0% 80%)',
-          focus: 'hsl(221 83% 53%)',
-          dark: 'hsl(0 0% 20%)',
-          'dark-hover': 'hsl(0 0% 30%)',
-          'dark-focus': 'hsl(221 83% 53%)',
+          DEFAULT: '#d0d7de', // Light mode
+          hover: '#afb8c1', // Light mode hover
+          focus: '#00d4aa', // Accent teal for focus
+          dark: '#30363d', // Dark mode
+          'dark-hover': '#484f58', // Dark mode hover
+          'dark-focus': '#00d4aa', // Accent teal for focus
+          subtle: {
+            DEFAULT: '#d0d7de', // Light mode subtle
+            dark: '#30363d', // Dark mode subtle
+          },
         },
-        // Brand colors (inspired by Linear's palette)
+        // Primary brand color - using Accent Teal as primary
         primary: {
-          DEFAULT: 'hsl(221 83% 53%)',
-          hover: 'hsl(221 83% 48%)',
-          active: 'hsl(221 83% 43%)',
-          light: 'hsl(221 83% 95%)',
-          dark: 'hsl(221 83% 40%)',
+          DEFAULT: '#00d4aa', // Accent Teal
+          hover: '#00c29a',
+          active: '#00b08a',
+          light: '#e6faf5', // Very light teal for backgrounds
+          dark: '#00b08a', // Darker variant
         },
+        // Secondary brand color - using Electric Blue
         secondary: {
-          DEFAULT: 'hsl(0 0% 96%)',
-          hover: 'hsl(0 0% 92%)',
-          active: 'hsl(0 0% 88%)',
-          dark: 'hsl(0 0% 15%)',
-          'dark-hover': 'hsl(0 0% 20%)',
-          'dark-active': 'hsl(0 0% 25%)',
+          DEFAULT: '#4a9eff', // Electric Blue
+          hover: '#3a8eef',
+          active: '#2a7edf',
+          light: '#e6f2ff', // Very light blue for backgrounds
+          dark: '#2a7edf', // Darker variant
         },
-        // Status colors
+        // Semantic status colors - matching design prompt
         success: {
-          DEFAULT: 'hsl(142 76% 36%)',
-          light: 'hsl(142 76% 95%)',
-          dark: 'hsl(142 76% 30%)',
+          DEFAULT: '#00e676', // Success Green
+          light: '#26c281', // Alternative success green
+          bg: 'rgba(0, 230, 118, 0.1)', // 10% opacity for badges
+          'bg-light': 'rgba(0, 230, 118, 0.15)', // 15% opacity variant
         },
         warning: {
-          DEFAULT: 'hsl(38 92% 50%)',
-          light: 'hsl(38 92% 95%)',
-          dark: 'hsl(38 92% 45%)',
+          DEFAULT: '#ffab00', // Warning Amber
+          light: '#ff9800', // Alternative warning
+          bg: 'rgba(255, 171, 0, 0.1)', // 10% opacity for badges
+          'bg-light': 'rgba(255, 171, 0, 0.15)', // 15% opacity variant
         },
         error: {
-          DEFAULT: 'hsl(0 84% 60%)',
-          light: 'hsl(0 84% 95%)',
-          dark: 'hsl(0 84% 55%)',
+          DEFAULT: '#ff5252', // Error/Danger Red
+          light: '#ef5350', // Alternative error
+          bg: 'rgba(255, 82, 82, 0.1)', // 10% opacity for badges
+          'bg-light': 'rgba(255, 82, 82, 0.15)', // 15% opacity variant
         },
         info: {
-          DEFAULT: 'hsl(199 89% 48%)',
-          light: 'hsl(199 89% 95%)',
-          dark: 'hsl(199 89% 43%)',
+          DEFAULT: '#b388ff', // Info Purple
+          light: '#9c27b0', // Alternative info purple
+          bg: 'rgba(179, 136, 255, 0.1)', // 10% opacity for badges
+          'bg-light': 'rgba(179, 136, 255, 0.15)', // 15% opacity variant
         },
-        // Issue status colors
+        // Accent & Highlight Colors
+        code: {
+          highlight: '#1f6feb', // Code highlight blue
+          bg: 'rgba(110, 118, 129, 0.1)', // Inline code background
+        },
+        git: {
+          pr: '#6e40c9', // PR/Branch indicator purple
+          branch: '#6e40c9', // Branch indicator
+        },
+        // Issue status colors - updated to use new palette
         status: {
-          backlog: 'hsl(0 0% 70%)',
-          todo: 'hsl(221 83% 53%)',
-          'in-progress': 'hsl(199 89% 48%)',
-          review: 'hsl(38 92% 50%)',
-          done: 'hsl(142 76% 36%)',
-          cancelled: 'hsl(0 0% 50%)',
+          backlog: '#6e7681', // Tertiary text color
+          todo: '#4a9eff', // Electric Blue
+          'in-progress': '#00b8d4', // Accent Cyan
+          review: '#ffab00', // Warning Amber
+          done: '#00e676', // Success Green
+          cancelled: '#6e7681', // Tertiary text color
+          merged: '#b388ff', // Info Purple
         },
       },
       fontFamily: {
+        // Primary Interface Font - Inter as specified in design prompt
+        // Uses CSS variable from Next.js font optimization
         sans: [
+          'var(--font-inter)',
+          'Inter',
           '-apple-system',
           'BlinkMacSystemFont',
           '"Segoe UI"',
@@ -93,14 +144,27 @@ const config: Config = {
           '"Segoe UI Emoji"',
           '"Segoe UI Symbol"',
         ],
+        // Monospace/Code Font - JetBrains Mono as specified
+        // Uses CSS variable from Next.js font optimization
         mono: [
+          'var(--font-jetbrains-mono)',
+          '"JetBrains Mono"',
+          '"Fira Code"',
           '"SF Mono"',
           'Monaco',
-          '"Cascadia Code"',
-          '"Roboto Mono"',
           'Consolas',
           '"Courier New"',
           'monospace',
+        ],
+        // Display/Heading Font - Inter with bolder weights
+        display: [
+          'var(--font-inter)',
+          'Inter',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          '"Segoe UI"',
+          'Roboto',
+          'sans-serif',
         ],
       },
       fontSize: {
@@ -145,7 +209,7 @@ const config: Config = {
         '2xl': '0 25px 50px -12px rgb(0 0 0 / 0.25)',
         inner: 'inset 0 2px 4px 0 rgb(0 0 0 / 0.05)',
         // Custom shadows for UI components
-        'focus-ring': '0 0 0 3px hsl(221 83% 53% / 0.1)',
+        'focus-ring': '0 0 0 3px rgba(0, 212, 170, 0.1)', // Accent teal focus ring
         'card': '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
         'card-hover': '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
         'dropdown': '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
@@ -215,7 +279,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [typography],
 };
 
 export default config;

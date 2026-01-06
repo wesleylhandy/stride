@@ -84,8 +84,8 @@ export default function RepositoryPage() {
   return (
     <div className="mx-auto max-w-2xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Connect Repository</h1>
-        <p className="mt-2 text-gray-600">
+        <h1 className="text-3xl font-bold text-foreground dark:text-foreground-dark">Connect Repository</h1>
+        <p className="mt-2 text-foreground-secondary dark:text-foreground-dark-secondary">
           Connect your GitHub or GitLab repository to enable automatic issue
           tracking and configuration sync.
         </p>
@@ -114,7 +114,7 @@ export default function RepositoryPage() {
       <div className="space-y-6">
         {/* OAuth Options */}
         <div>
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">
+          <h2 className="mb-4 text-lg font-semibold text-foreground dark:text-foreground-dark">
             Connect via OAuth (Recommended)
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -122,7 +122,7 @@ export default function RepositoryPage() {
               type="button"
               onClick={() => handleOAuth("GitHub")}
               disabled={!projectId || oauthLoading}
-              className="flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center justify-center rounded-md border border-border dark:border-border-dark bg-surface dark:bg-surface-dark px-4 py-3 text-sm font-medium text-foreground dark:text-foreground-dark shadow-sm hover:bg-surface-secondary dark:hover:bg-surface-dark-secondary disabled:cursor-not-allowed disabled:opacity-50"
             >
               {oauthLoading ? (
                 "Connecting..."
@@ -144,7 +144,7 @@ export default function RepositoryPage() {
               type="button"
               onClick={() => handleOAuth("GitLab")}
               disabled={!projectId || oauthLoading}
-              className="flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center justify-center rounded-md border border-border dark:border-border-dark bg-surface dark:bg-surface-dark px-4 py-3 text-sm font-medium text-foreground dark:text-foreground-dark shadow-sm hover:bg-surface-secondary dark:hover:bg-surface-dark-secondary disabled:cursor-not-allowed disabled:opacity-50"
             >
               {oauthLoading ? (
                 "Connecting..."
@@ -165,15 +165,15 @@ export default function RepositoryPage() {
         </div>
 
         {/* Manual Connection (Optional) */}
-        <div className="border-t border-gray-200 pt-6">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">
+        <div className="border-t border-border dark:border-border-dark pt-6">
+          <h2 className="mb-4 text-lg font-semibold text-foreground dark:text-foreground-dark">
             Or Connect Manually
           </h2>
           <form onSubmit={handleManualConnection} className="space-y-4">
             <div>
               <label
                 htmlFor="repositoryType"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-foreground dark:text-foreground-dark"
               >
                 Repository Type
               </label>
@@ -185,7 +185,7 @@ export default function RepositoryPage() {
                     e.target.value as "GitHub" | "GitLab" | null,
                   )
                 }
-                className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500"
+                className="mt-1 block w-full rounded-md border border-border dark:border-border-dark bg-surface dark:bg-surface-dark px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-accent"
                 required
               >
                 <option value="">Select a repository type</option>
@@ -197,7 +197,7 @@ export default function RepositoryPage() {
             <div>
               <label
                 htmlFor="repositoryUrl"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-foreground dark:text-foreground-dark"
               >
                 Repository URL
               </label>

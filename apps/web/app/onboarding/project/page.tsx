@@ -51,8 +51,8 @@ export default function ProjectPage() {
   return (
     <div className="mx-auto max-w-2xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Create Your First Project</h1>
-        <p className="mt-2 text-gray-600">
+        <h1 className="text-3xl font-bold text-foreground dark:text-foreground-dark">Create Your First Project</h1>
+        <p className="mt-2 text-foreground-secondary dark:text-foreground-dark-secondary">
           Create a project to organize your issues and workflows. You can add
           more projects later.
         </p>
@@ -69,7 +69,7 @@ export default function ProjectPage() {
           <div>
             <label
               htmlFor="key"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-foreground dark:text-foreground-dark"
             >
               Project Key
             </label>
@@ -90,7 +90,7 @@ export default function ProjectPage() {
               maxLength={10}
               pattern="[A-Z0-9]{2,10}"
             />
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-foreground-tertiary dark:text-foreground-dark-tertiary">
               2-10 uppercase letters and numbers. This will be used as a prefix
               for issue keys (e.g., APP-123).
             </p>
@@ -99,7 +99,7 @@ export default function ProjectPage() {
           <div>
             <label
               htmlFor="name"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-foreground dark:text-foreground-dark"
             >
               Project Name
             </label>
@@ -120,7 +120,7 @@ export default function ProjectPage() {
           <div>
             <label
               htmlFor="description"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-foreground dark:text-foreground-dark"
             >
               Description (Optional)
             </label>
@@ -130,7 +130,7 @@ export default function ProjectPage() {
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
               }
-              className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500"
+              className="mt-1 block w-full rounded-md border border-border dark:border-border-dark bg-surface dark:bg-surface-dark px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-accent"
               rows={3}
               placeholder="A brief description of your project"
               maxLength={500}

@@ -206,7 +206,7 @@ Where:
 - [x] T075 [US1] Create first-run detection logic in apps/web/src/lib/setup/first-run.ts
 - [x] T076 [US1] Implement admin account creation page in apps/web/app/setup/page.tsx
 - [x] T077 [US1] Prevent multiple admin creation in apps/web/src/lib/setup/first-run.ts
-- [ ] T078 [US1] Add onboarding flow component in apps/web/app/onboarding/page.tsx
+- [x] T078 [US1] Add onboarding flow component in apps/web/app/onboarding/page.tsx
 
 **Acceptance Criteria**:
 
@@ -240,7 +240,7 @@ Where:
 - [x] T088 [US1] Create webhook registration logic in apps/web/src/lib/integrations/webhooks.ts
 - [x] T089 [US1] Implement config file cloning from repository in apps/web/src/lib/integrations/config-sync.ts
 - [x] T090 [US1] Create default configuration generator in packages/yaml-config/src/default-config.ts
-- [ ] T091 [US1] Create repository connection UI in apps/web/app/onboarding/repository/page.tsx
+- [x] T091 [US1] Create repository connection UI in apps/web/app/onboarding/repository/page.tsx
 
 **Acceptance Criteria**:
 
@@ -277,13 +277,13 @@ Where:
 
 ### Issue Model & Repository
 
-- [ ] T097 [US2] Create IssueRepository with CRUD operations in packages/database/src/repositories/issue-repository.ts
-- [ ] T098 [US2] Implement issue key generation logic (PROJECT-NUMBER format) in packages/database/src/repositories/issue-repository.ts
-- [ ] T099 [US2] Implement custom fields storage (JSONB) in packages/database/src/repositories/issue-repository.ts
-- [ ] T100 [US2] Add issue filtering and pagination in packages/database/src/repositories/issue-repository.ts
-- [ ] T101 [US2] Create issue search functionality in packages/database/src/repositories/issue-repository.ts
-- [ ] T102 [US2] Ensure key uniqueness per project with composite unique index in packages/database/prisma/schema.prisma
-- [ ] T103 [US2] Handle concurrent issue creation to prevent duplicate keys in packages/database/src/repositories/issue-repository.ts
+- [x] T097 [US2] Create IssueRepository with CRUD operations in packages/database/src/repositories/issue-repository.ts
+- [x] T098 [US2] Implement issue key generation logic (PROJECT-NUMBER format) in packages/database/src/repositories/issue-repository.ts
+- [x] T099 [US2] Implement custom fields storage (JSONB) in packages/database/src/repositories/issue-repository.ts
+- [x] T100 [US2] Add issue filtering and pagination in packages/database/src/repositories/issue-repository.ts
+- [x] T101 [US2] Create issue search functionality in packages/database/src/repositories/issue-repository.ts
+- [x] T102 [US2] Ensure key uniqueness per project with composite unique index in packages/database/prisma/schema.prisma
+- [x] T103 [US2] Handle concurrent issue creation to prevent duplicate keys in packages/database/src/repositories/issue-repository.ts
 
 **Acceptance Criteria**:
 
@@ -294,13 +294,13 @@ Where:
 
 ### Issue API Endpoints
 
-- [ ] T104 [US2] Create issue creation API route in apps/web/app/api/projects/[projectId]/issues/route.ts
-- [ ] T105 [US2] Create issue listing API route with filters in apps/web/app/api/projects/[projectId]/issues/route.ts
-- [ ] T106 [US2] Create issue detail API route in apps/web/app/api/projects/[projectId]/issues/[issueKey]/route.ts
-- [ ] T107 [US2] Create issue update API route in apps/web/app/api/projects/[projectId]/issues/[issueKey]/route.ts
-- [ ] T108 [US2] Create issue status update API route in apps/web/app/api/projects/[projectId]/issues/[issueKey]/status/route.ts
-- [ ] T109 [US2] Implement permission checks (Member+ can create/edit) in apps/web/src/lib/auth/permissions.ts
-- [ ] T110 [US2] Add input validation with Zod schemas in apps/web/src/lib/validation/issue.ts
+- [x] T104 [US2] Create issue creation API route in apps/web/app/api/projects/[projectId]/issues/route.ts
+- [x] T105 [US2] Create issue listing API route with filters in apps/web/app/api/projects/[projectId]/issues/route.ts
+- [x] T106 [US2] Create issue detail API route in apps/web/app/api/projects/[projectId]/issues/[issueKey]/route.ts
+- [x] T107 [US2] Create issue update API route in apps/web/app/api/projects/[projectId]/issues/[issueKey]/route.ts
+- [x] T108 [US2] Create issue status update API route in apps/web/app/api/projects/[projectId]/issues/[issueKey]/status/route.ts
+- [x] T109 [US2] Implement permission checks (Member+ can create/edit) in apps/web/src/lib/auth/permissions.ts
+- [x] T110 [US2] Add input validation with Zod schemas in apps/web/src/lib/validation/issue.ts
 
 **Acceptance Criteria**:
 
@@ -311,14 +311,14 @@ Where:
 
 ### Command Palette
 
-- [ ] T111 [US2] Create CommandPalette component in packages/ui/src/organisms/CommandPalette.tsx
-- [ ] T112 [US2] Implement keyboard shortcuts (Cmd/Ctrl+K) in packages/ui/src/organisms/CommandPalette.tsx
-- [ ] T113 [US2] Add fuzzy search functionality in packages/ui/src/organisms/CommandPalette.tsx
-- [ ] T114 [US2] Create command registry system in apps/web/src/lib/commands/registry.ts
-- [ ] T115 [US2] Implement "create issue" command in apps/web/src/lib/commands/create-issue.ts
-- [ ] T116 [US2] Add navigation commands in apps/web/src/lib/commands/navigation.ts
-- [ ] T117 [US2] Implement recent items tracking in apps/web/src/lib/commands/recent.ts
-- [ ] T118 [US2] Integrate CommandPalette in main layout in apps/web/app/layout.tsx
+- [x] T111 [US2] Create CommandPalette component in packages/ui/src/organisms/CommandPalette.tsx
+- [x] T112 [US2] Implement keyboard shortcuts (Cmd/Ctrl+K) in packages/ui/src/organisms/CommandPalette.tsx
+- [x] T113 [US2] Add fuzzy search functionality in packages/ui/src/organisms/CommandPalette.tsx
+- [x] T114 [US2] Create command registry system in apps/web/src/lib/commands/registry.ts
+- [x] T115 [US2] Implement "create issue" command in apps/web/src/lib/commands/create-issue.ts
+- [x] T116 [US2] Add navigation commands in apps/web/src/lib/commands/navigation.ts
+- [x] T117 [US2] Implement recent items tracking in apps/web/src/lib/commands/recent.ts
+- [x] T118 [US2] Integrate CommandPalette in main layout in apps/web/app/layout.tsx
 
 **Acceptance Criteria**:
 
@@ -329,12 +329,12 @@ Where:
 
 ### Issue Creation Form
 
-- [ ] T119 [US2] Create IssueForm component in packages/ui/src/organisms/IssueForm.tsx
-- [ ] T120 [US2] Integrate React Hook Form in packages/ui/src/organisms/IssueForm.tsx
-- [ ] T121 [US2] Add custom field inputs (dynamic from config) in packages/ui/src/organisms/IssueForm.tsx
-- [ ] T122 [US2] Implement Markdown editor for description in packages/ui/src/molecules/MarkdownEditor.tsx
-- [ ] T123 [US2] Add form validation in packages/ui/src/organisms/IssueForm.tsx
-- [ ] T124 [US2] Implement save functionality in packages/ui/src/organisms/IssueForm.tsx
+- [x] T119 [US2] Create IssueForm component in packages/ui/src/organisms/IssueForm.tsx
+- [x] T120 [US2] Integrate React Hook Form in packages/ui/src/organisms/IssueForm.tsx
+- [x] T121 [US2] Add custom field inputs (dynamic from config) in packages/ui/src/organisms/IssueForm.tsx
+- [x] T122 [US2] Implement Markdown editor for description in packages/ui/src/molecules/MarkdownEditor.tsx
+- [x] T123 [US2] Add form validation in packages/ui/src/organisms/IssueForm.tsx
+- [x] T124 [US2] Implement save functionality in packages/ui/src/organisms/IssueForm.tsx
 
 **Acceptance Criteria**:
 
@@ -345,13 +345,13 @@ Where:
 
 ### Issue Detail View
 
-- [ ] T125 [US2] Create IssueDetail component in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T126 [US2] Display issue information in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T127 [US2] Show custom fields in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T128 [US2] Display linked branches/PRs in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T129 [US2] Add edit functionality in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T130 [US2] Implement status change UI in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T131 [US2] Create issue detail page route in apps/web/app/projects/[projectId]/issues/[issueKey]/page.tsx
+- [x] T125 [US2] Create IssueDetail component in packages/ui/src/organisms/IssueDetail.tsx
+- [x] T126 [US2] Display issue information in packages/ui/src/organisms/IssueDetail.tsx
+- [x] T127 [US2] Show custom fields in packages/ui/src/organisms/IssueDetail.tsx
+- [x] T128 [US2] Display linked branches/PRs in packages/ui/src/organisms/IssueDetail.tsx
+- [x] T129 [US2] Add edit functionality in packages/ui/src/organisms/IssueDetail.tsx
+- [x] T130 [US2] Implement status change UI in packages/ui/src/organisms/IssueDetail.tsx
+- [x] T131 [US2] Create issue detail page route in apps/web/app/projects/[projectId]/issues/[issueKey]/page.tsx
 
 **Acceptance Criteria**:
 
@@ -362,12 +362,12 @@ Where:
 
 ### Markdown Rendering
 
-- [ ] T132 [US2] Create MarkdownRenderer component in packages/ui/src/molecules/MarkdownRenderer.tsx
-- [ ] T133 [US2] Integrate react-markdown in packages/ui/src/molecules/MarkdownRenderer.tsx
-- [ ] T134 [US2] Add GitHub Flavored Markdown support in packages/ui/src/molecules/MarkdownRenderer.tsx
-- [ ] T135 [US2] Implement code syntax highlighting in packages/ui/src/molecules/MarkdownRenderer.tsx
-- [ ] T136 [US2] Add table rendering in packages/ui/src/molecules/MarkdownRenderer.tsx
-- [ ] T137 [US2] Sanitize HTML output in packages/ui/src/molecules/MarkdownRenderer.tsx
+- [x] T132 [US2] Create MarkdownRenderer component in packages/ui/src/molecules/MarkdownRenderer.tsx
+- [x] T133 [US2] Integrate react-markdown in packages/ui/src/molecules/MarkdownRenderer.tsx
+- [x] T134 [US2] Add GitHub Flavored Markdown support in packages/ui/src/molecules/MarkdownRenderer.tsx
+- [x] T135 [US2] Implement code syntax highlighting in packages/ui/src/molecules/MarkdownRenderer.tsx
+- [x] T136 [US2] Add table rendering in packages/ui/src/molecules/MarkdownRenderer.tsx
+- [x] T137 [US2] Sanitize HTML output in packages/ui/src/molecules/MarkdownRenderer.tsx
 
 **Acceptance Criteria**:
 
@@ -378,12 +378,12 @@ Where:
 
 ### Mermaid Diagram Rendering
 
-- [ ] T138 [US2] Create MermaidDiagram component in packages/ui/src/molecules/MermaidDiagram.tsx
-- [ ] T139 [US2] Integrate mermaid.js in packages/ui/src/molecules/MermaidDiagram.tsx
-- [ ] T140 [US2] Parse Mermaid code blocks from markdown in packages/ui/src/molecules/MarkdownRenderer.tsx
-- [ ] T141 [US2] Render diagrams client-side in packages/ui/src/molecules/MermaidDiagram.tsx
-- [ ] T142 [US2] Add error handling for invalid diagrams in packages/ui/src/molecules/MermaidDiagram.tsx
-- [ ] T143 [US2] Implement lazy loading for performance in packages/ui/src/molecules/MermaidDiagram.tsx
+- [x] T138 [US2] Create MermaidDiagram component in packages/ui/src/molecules/MermaidDiagram.tsx
+- [x] T139 [US2] Integrate mermaid.js in packages/ui/src/molecules/MermaidDiagram.tsx
+- [x] T140 [US2] Parse Mermaid code blocks from markdown in packages/ui/src/molecules/MarkdownRenderer.tsx
+- [x] T141 [US2] Render diagrams client-side in packages/ui/src/molecules/MermaidDiagram.tsx
+- [x] T142 [US2] Add error handling for invalid diagrams in packages/ui/src/molecules/MermaidDiagram.tsx
+- [x] T143 [US2] Implement lazy loading for performance in packages/ui/src/molecules/MermaidDiagram.tsx
 
 **Acceptance Criteria**:
 
@@ -394,13 +394,13 @@ Where:
 
 ### Link Preview Integration
 
-- [ ] T144 [US2] Create link preview API endpoint in apps/web/app/api/preview-link/route.ts
-- [ ] T145 [US2] Implement oembed/og:meta parsing in apps/web/src/lib/integrations/link-preview.ts
-- [ ] T146 [US2] Create LinkPreview component in packages/ui/src/molecules/LinkPreview.tsx
-- [ ] T147 [US2] Add caching for previews in apps/web/src/lib/integrations/link-preview.ts
-- [ ] T148 [US2] Implement graceful degradation (show link if preview fails) in packages/ui/src/molecules/LinkPreview.tsx
-- [ ] T149 [US2] Support Notion, Google Drive, Confluence in apps/web/src/lib/integrations/link-preview.ts
-- [ ] T150 [US2] Parse links from markdown and render previews in packages/ui/src/molecules/MarkdownRenderer.tsx
+- [x] T144 [US2] Create link preview API endpoint in apps/web/app/api/preview-link/route.ts
+- [x] T145 [US2] Implement oembed/og:meta parsing in apps/web/src/lib/integrations/link-preview.ts
+- [x] T146 [US2] Create LinkPreview component in packages/ui/src/molecules/LinkPreview.tsx
+- [x] T147 [US2] Add caching for previews in apps/web/src/lib/integrations/link-preview.ts
+- [x] T148 [US2] Implement graceful degradation (show link if preview fails) in packages/ui/src/molecules/LinkPreview.tsx
+- [x] T149 [US2] Support Notion, Google Drive, Confluence in apps/web/src/lib/integrations/link-preview.ts
+- [x] T150 [US2] Parse links from markdown and render previews in packages/ui/src/molecules/MarkdownRenderer.tsx
 
 **Acceptance Criteria**:
 
@@ -411,16 +411,16 @@ Where:
 
 ### Kanban Board
 
-- [ ] T151 [US2] Create KanbanBoard component in packages/ui/src/organisms/KanbanBoard.tsx
-- [ ] T152 [US2] Integrate dnd-kit for drag-and-drop in packages/ui/src/organisms/KanbanBoard.tsx
-- [ ] T153 [US2] Generate columns from workflow statuses in packages/ui/src/organisms/KanbanBoard.tsx
-- [ ] T154 [US2] Create IssueCard component in packages/ui/src/molecules/IssueCard.tsx
-- [ ] T155 [US2] Implement drag-and-drop functionality in packages/ui/src/organisms/KanbanBoard.tsx
-- [ ] T156 [US2] Add keyboard navigation in packages/ui/src/organisms/KanbanBoard.tsx
-- [ ] T157 [US2] Implement column filtering in packages/ui/src/organisms/KanbanBoard.tsx
-- [ ] T158 [US2] Add issue count badges in packages/ui/src/organisms/KanbanBoard.tsx
-- [ ] T159 [US2] Optimize for performance (virtualization if needed) in packages/ui/src/organisms/KanbanBoard.tsx
-- [ ] T160 [US2] Create Kanban board page route in apps/web/app/projects/[projectId]/board/page.tsx
+- [x] T151 [US2] Create KanbanBoard component in packages/ui/src/organisms/KanbanBoard.tsx
+- [x] T152 [US2] Integrate dnd-kit for drag-and-drop in packages/ui/src/organisms/KanbanBoard.tsx
+- [x] T153 [US2] Generate columns from workflow statuses in packages/ui/src/organisms/KanbanBoard.tsx
+- [x] T154 [US2] Create IssueCard component in packages/ui/src/molecules/IssueCard.tsx
+- [x] T155 [US2] Implement drag-and-drop functionality in packages/ui/src/organisms/KanbanBoard.tsx
+- [x] T156 [US2] Add keyboard navigation in packages/ui/src/organisms/KanbanBoard.tsx
+- [x] T157 [US2] Implement column filtering in packages/ui/src/organisms/KanbanBoard.tsx
+- [x] T158 [US2] Add issue count badges in packages/ui/src/organisms/KanbanBoard.tsx
+- [x] T159 [US2] Optimize for performance (virtualization if needed) in packages/ui/src/organisms/KanbanBoard.tsx
+- [x] T160 [US2] Create Kanban board page route in apps/web/app/projects/[projectId]/board/page.tsx
 
 **Acceptance Criteria**:
 
@@ -432,11 +432,11 @@ Where:
 
 ### Workflow Validation
 
-- [ ] T161 [US2] Implement status transition validation in apps/web/src/lib/workflow/validation.ts
-- [ ] T162 [US2] Check workflow rules from config in apps/web/src/lib/workflow/validation.ts
-- [ ] T163 [US2] Validate required custom fields in apps/web/src/lib/workflow/validation.ts
-- [ ] T164 [US2] Show validation errors in UI in packages/ui/src/organisms/KanbanBoard.tsx
-- [ ] T165 [US2] Prevent invalid transitions in packages/ui/src/organisms/KanbanBoard.tsx
+- [x] T161 [US2] Implement status transition validation in apps/web/src/lib/workflow/validation.ts
+- [x] T162 [US2] Check workflow rules from config in apps/web/src/lib/workflow/validation.ts
+- [x] T163 [US2] Validate required custom fields in apps/web/src/lib/workflow/validation.ts
+- [x] T164 [US2] Show validation errors in UI in packages/ui/src/organisms/KanbanBoard.tsx
+- [x] T165 [US2] Prevent invalid transitions in packages/ui/src/organisms/KanbanBoard.tsx
 
 **Acceptance Criteria**:
 

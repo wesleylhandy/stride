@@ -22,9 +22,9 @@ export default function OnboardingLayout({
   const currentStep = currentStepIndex >= 0 ? currentStepIndex : 0;
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50">
+    <div className="flex min-h-screen flex-col bg-background-secondary dark:bg-background-dark">
       {/* Progress indicator */}
-      <div className="border-b border-gray-200 bg-white">
+      <div className="border-b border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
         <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
           <nav aria-label="Progress">
             <ol className="flex items-center">
@@ -38,11 +38,11 @@ export default function OnboardingLayout({
                   {stepIdx < currentStep ? (
                     <>
                       <div className="absolute inset-0 flex items-center">
-                        <div className="h-0.5 w-full bg-primary-600" />
+                        <div className="h-0.5 w-full bg-accent" />
                       </div>
                       <Link
                         href={step.path}
-                        className="relative flex h-8 w-8 items-center justify-center rounded-full bg-primary-600 hover:bg-primary-700"
+                        className="relative flex h-8 w-8 items-center justify-center rounded-full bg-accent hover:bg-accent-hover"
                       >
                         <svg
                           className="h-5 w-5 text-white"
@@ -62,15 +62,15 @@ export default function OnboardingLayout({
                     <>
                       {stepIdx !== steps.length - 1 && (
                         <div className="absolute inset-0 flex items-center">
-                          <div className="h-0.5 w-full bg-gray-200" />
+                          <div className="h-0.5 w-full bg-border dark:bg-border-dark" />
                         </div>
                       )}
                       <div
-                        className="relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-primary-600 bg-white"
+                        className="relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-accent bg-surface dark:bg-surface-dark"
                         aria-current="step"
                       >
                         <span
-                          className="h-2.5 w-2.5 rounded-full bg-primary-600"
+                          className="h-2.5 w-2.5 rounded-full bg-accent"
                           aria-hidden="true"
                         />
                         <span className="sr-only">{step.name}</span>
@@ -80,10 +80,10 @@ export default function OnboardingLayout({
                     <>
                       {stepIdx !== steps.length - 1 && (
                         <div className="absolute inset-0 flex items-center">
-                          <div className="h-0.5 w-full bg-gray-200" />
+                          <div className="h-0.5 w-full bg-border dark:bg-border-dark" />
                         </div>
                       )}
-                      <div className="relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-gray-300 bg-white hover:border-gray-400">
+                      <div className="relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-border dark:border-border-dark bg-surface dark:bg-surface-dark hover:border-border-hover dark:hover:border-border-dark-hover">
                         <span
                           className="h-2.5 w-2.5 rounded-full bg-transparent"
                           aria-hidden="true"
@@ -92,7 +92,7 @@ export default function OnboardingLayout({
                       </div>
                     </>
                   )}
-                  <div className="absolute top-10 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs text-gray-500">
+                  <div className="absolute top-10 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs text-foreground-secondary dark:text-foreground-dark-secondary">
                     {step.name}
                   </div>
                 </li>
