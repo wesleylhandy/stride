@@ -98,4 +98,6 @@ export interface IRepository<T, CreateInput, UpdateInput> {
 // Export repository implementations
 export * from "./project-repository";
 export * from "./issue-repository";
+export * from "./issue-branch-repository";
+export * from "./cycle-repository";
 

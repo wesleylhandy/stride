@@ -191,3 +191,39 @@ export function canViewIssue(role: UserRole): boolean {
   return hasPermission(role, Permission.VIEW_ISSUE);
 }
 
+/**
+ * Check if user can create cycles (Admin only)
+ * @param role - User role
+ * @returns True if user can create cycles
+ */
+export function canCreateCycle(role: UserRole): boolean {
+  return hasPermission(role, Permission.CREATE_CYCLE);
+}
+
+/**
+ * Check if user can update cycles (Admin only)
+ * @param role - User role
+ * @returns True if user can update cycles
+ */
+export function canUpdateCycle(role: UserRole): boolean {
+  return hasPermission(role, Permission.UPDATE_CYCLE);
+}
+
+/**
+ * Check if user can delete cycles (Admin only)
+ * @param role - User role
+ * @returns True if user can delete cycles
+ */
+export function canDeleteCycle(role: UserRole): boolean {
+  return hasPermission(role, Permission.DELETE_CYCLE);
+}
+
+/**
+ * Check if user can view cycles (all roles)
+ * @param role - User role
+ * @returns True if user can view cycles
+ */
+export function canViewCycle(role: UserRole): boolean {
+  return hasPermission(role, Permission.VIEW_CYCLE);
+}
+

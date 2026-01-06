@@ -15,12 +15,16 @@ export { MermaidDiagram, type MermaidDiagramProps } from './molecules/MermaidDia
 export { LinkPreview, type LinkPreviewProps, type LinkPreviewData } from './molecules/LinkPreview';
 export { MarkdownEditor, type MarkdownEditorProps } from './molecules/MarkdownEditor';
 export { IssueCard, type IssueCardProps } from './molecules/IssueCard';
+export { UserMenu, type UserMenuProps } from './molecules/UserMenu';
+export { BurndownChart, type BurndownChartProps } from './molecules/BurndownChart';
 
 // Organisms
 export { CommandPalette, type CommandPaletteProps, type Command } from './organisms/CommandPalette';
+export { ConfigEditor, type ConfigEditorProps } from './organisms/ConfigEditor';
 export { IssueForm, type IssueFormProps } from './organisms/IssueForm';
 export { KanbanBoard, type KanbanBoardProps } from './organisms/KanbanBoard';
 export { IssueDetail, type IssueDetailProps } from './organisms/IssueDetail';
+export { SprintPlanning, type SprintPlanningProps } from './organisms/SprintPlanning';
 
 // Utils
 export { cn } from './utils/cn';

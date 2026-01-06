@@ -66,13 +66,14 @@ export function MarkdownEditor({
           placeholder={placeholder}
           disabled={disabled}
           className={cn(
-            'flex w-full rounded-md border bg-background px-3 py-2 text-sm',
-            'transition-colors placeholder:text-foreground-muted',
+            'flex w-full rounded-md border bg-background dark:bg-background-dark px-3 py-2 text-sm',
+            'text-foreground dark:text-foreground-dark',
+            'transition-colors placeholder:text-foreground-muted dark:placeholder:text-foreground-dark-muted',
             'focus-ring disabled:cursor-not-allowed disabled:opacity-50',
             'resize-y font-mono',
             error
               ? 'border-error focus-visible:ring-error'
-              : 'border-border hover:border-border-hover focus-visible:border-border-focus'
+              : 'border-border dark:border-border-dark hover:border-border-hover dark:hover:border-border-dark-hover focus-visible:border-border-focus'
           )}
           style={{ minHeight: `${minHeight}px` }}
           aria-invalid={error ? 'true' : 'false'}
@@ -88,7 +89,7 @@ export function MarkdownEditor({
           {error}
         </p>
       )}
-      <div className="mt-2 text-xs text-foreground-secondary">
+      <div className="mt-2 text-xs text-foreground-secondary dark:text-foreground-dark-secondary">
         <p>Supports Markdown formatting. Use **bold**, *italic*, `code`, and more.</p>
       </div>
     </div>

@@ -457,12 +457,12 @@ Where:
 
 ### YAML Config Package
 
-- [ ] T166 [US3] Create YAML parsing with js-yaml in packages/yaml-config/src/parser.ts
-- [ ] T167 [US3] Create configuration schema with Zod in packages/yaml-config/src/schema.ts
-- [ ] T168 [US3] Implement validation logic in packages/yaml-config/src/validator.ts
-- [ ] T169 [US3] Add error reporting with line numbers in packages/yaml-config/src/validator.ts
-- [ ] T170 [US3] Create default configuration generator in packages/yaml-config/src/default-config.ts
-- [ ] T171 [US3] Export configuration types in packages/yaml-config/src/index.ts
+- [x] T166 [US3] Create YAML parsing with js-yaml in packages/yaml-config/src/parser.ts
+- [x] T167 [US3] Create configuration schema with Zod in packages/yaml-config/src/schema.ts
+- [x] T168 [US3] Implement validation logic in packages/yaml-config/src/validator.ts
+- [x] T169 [US3] Add error reporting with line numbers in packages/yaml-config/src/validator.ts
+- [x] T170 [US3] Create default configuration generator in packages/yaml-config/src/default-config.ts
+- [x] T171 [US3] Export configuration types in packages/yaml-config/src/index.ts
 
 **Acceptance Criteria**:
 
@@ -473,11 +473,11 @@ Where:
 
 ### Configuration Storage
 
-- [ ] T172 [US3] Store configYaml in database (Project.configYaml) in packages/database/src/repositories/project-repository.ts
-- [ ] T173 [US3] Store parsed config in JSONB (Project.config) in packages/database/src/repositories/project-repository.ts
-- [ ] T174 [US3] Implement config versioning in packages/database/src/repositories/project-repository.ts
-- [ ] T175 [US3] Create config sync from Git in apps/web/src/lib/integrations/config-sync.ts
-- [ ] T176 [US3] Add config history tracking in packages/database/src/repositories/project-repository.ts
+- [x] T172 [US3] Store configYaml in database (Project.configYaml) in packages/database/src/repositories/project-repository.ts
+- [x] T173 [US3] Store parsed config in JSONB (Project.config) in packages/database/src/repositories/project-repository.ts
+- [x] T174 [US3] Implement config versioning in packages/database/src/repositories/project-repository.ts
+- [x] T175 [US3] Create config sync from Git in apps/web/src/lib/integrations/config-sync.ts
+- [x] T176 [US3] Add config history tracking in packages/database/src/repositories/project-repository.ts
 
 **Acceptance Criteria**:
 
@@ -488,15 +488,15 @@ Where:
 
 ### Configuration Editor UI
 
-- [ ] T177 [US3] Create ConfigEditor component in packages/ui/src/organisms/ConfigEditor.tsx
-- [ ] T178 [US3] Integrate CodeMirror for YAML editing in packages/ui/src/organisms/ConfigEditor.tsx
-- [ ] T179 [US3] Implement real-time syntax validation in packages/ui/src/organisms/ConfigEditor.tsx
-- [ ] T180 [US3] Add schema validation display in packages/ui/src/organisms/ConfigEditor.tsx
-- [ ] T181 [US3] Create config preview in packages/ui/src/organisms/ConfigEditor.tsx
-- [ ] T182 [US3] Implement save functionality in packages/ui/src/organisms/ConfigEditor.tsx
-- [ ] T183 [US3] Add error display in packages/ui/src/organisms/ConfigEditor.tsx
-- [ ] T184 [US3] Create configuration settings page in apps/web/app/projects/[projectId]/settings/config/page.tsx
-- [ ] T185 [US3] Enforce Admin-only access in apps/web/app/projects/[projectId]/settings/config/page.tsx
+- [x] T177 [US3] Create ConfigEditor component in packages/ui/src/organisms/ConfigEditor.tsx
+- [x] T178 [US3] Integrate CodeMirror for YAML editing in packages/ui/src/organisms/ConfigEditor.tsx
+- [x] T179 [US3] Implement real-time syntax validation in packages/ui/src/organisms/ConfigEditor.tsx
+- [x] T180 [US3] Add schema validation display in packages/ui/src/organisms/ConfigEditor.tsx
+- [x] T181 [US3] Create config preview in packages/ui/src/organisms/ConfigEditor.tsx
+- [x] T182 [US3] Implement save functionality in packages/ui/src/organisms/ConfigEditor.tsx
+- [x] T183 [US3] Add error display in packages/ui/src/organisms/ConfigEditor.tsx
+- [x] T184 [US3] Create configuration settings page in apps/web/app/projects/[projectId]/settings/config/page.tsx
+- [x] T185 [US3] Enforce Admin-only access in apps/web/app/projects/[projectId]/settings/config/page.tsx
 
 **Acceptance Criteria**:
 
@@ -508,11 +508,11 @@ Where:
 
 ### Configuration API
 
-- [ ] T186 [US3] Create GET /api/projects/[projectId]/config endpoint in apps/web/app/api/projects/[projectId]/config/route.ts
-- [ ] T187 [US3] Create PUT /api/projects/[projectId]/config endpoint in apps/web/app/api/projects/[projectId]/config/route.ts
-- [ ] T188 [US3] Validate YAML syntax before saving in apps/web/app/api/projects/[projectId]/config/route.ts
-- [ ] T189 [US3] Validate schema before saving in apps/web/app/api/projects/[projectId]/config/route.ts
-- [ ] T190 [US3] Return validation errors in response in apps/web/app/api/projects/[projectId]/config/route.ts
+- [x] T186 [US3] Create GET /api/projects/[projectId]/config endpoint in apps/web/app/api/projects/[projectId]/config/route.ts
+- [x] T187 [US3] Create PUT /api/projects/[projectId]/config endpoint in apps/web/app/api/projects/[projectId]/config/route.ts
+- [x] T188 [US3] Validate YAML syntax before saving in apps/web/app/api/projects/[projectId]/config/route.ts
+- [x] T189 [US3] Validate schema before saving in apps/web/app/api/projects/[projectId]/config/route.ts
+- [x] T190 [US3] Return validation errors in response in apps/web/app/api/projects/[projectId]/config/route.ts
 
 **Acceptance Criteria**:
 
@@ -523,12 +523,12 @@ Where:
 
 ### Dynamic Workflow Updates
 
-- [ ] T191 [US3] Reload workflow on config change in apps/web/src/lib/workflow/reload.ts
-- [ ] T192 [US3] Update Kanban columns dynamically in packages/ui/src/organisms/KanbanBoard.tsx
-- [ ] T193 [US3] Update issue status options dynamically in packages/ui/src/organisms/IssueForm.tsx
-- [ ] T194 [US3] Update custom field forms dynamically in packages/ui/src/organisms/IssueForm.tsx
-- [ ] T195 [US3] Invalidate affected caches in apps/web/src/lib/cache/invalidation.ts
-- [ ] T196 [US3] Implement real-time config updates via WebSocket or polling in apps/web/src/lib/config/sync.ts
+- [x] T191 [US3] Reload workflow on config change in apps/web/src/lib/workflow/reload.ts
+- [x] T192 [US3] Update Kanban columns dynamically in packages/ui/src/organisms/KanbanBoard.tsx
+- [x] T193 [US3] Update issue status options dynamically in packages/ui/src/organisms/IssueForm.tsx
+- [x] T194 [US3] Update custom field forms dynamically in packages/ui/src/organisms/IssueForm.tsx
+- [x] T195 [US3] Invalidate affected caches in apps/web/src/lib/cache/invalidation.ts
+- [x] T196 [US3] Implement real-time config updates via WebSocket or polling in apps/web/src/lib/config/sync.ts
 
 **Acceptance Criteria**:
 
@@ -549,12 +549,12 @@ Where:
 
 ### Webhook Endpoints
 
-- [ ] T197 [US4] Create GitHub webhook endpoint in apps/web/app/api/webhooks/github/route.ts
-- [ ] T198 [US4] Create GitLab webhook endpoint in apps/web/app/api/webhooks/gitlab/route.ts
-- [ ] T199 [US4] Create Bitbucket webhook endpoint in apps/web/app/api/webhooks/bitbucket/route.ts
-- [ ] T200 [US4] Implement HMAC signature verification in apps/web/src/lib/webhooks/verification.ts
-- [ ] T201 [US4] Add webhook payload parsing in apps/web/src/lib/webhooks/parsers.ts
-- [ ] T202 [US4] Handle webhook errors gracefully in apps/web/src/lib/webhooks/handlers.ts
+- [x] T197 [US4] Create GitHub webhook endpoint in apps/web/app/api/webhooks/github/route.ts
+- [x] T198 [US4] Create GitLab webhook endpoint in apps/web/app/api/webhooks/gitlab/route.ts
+- [x] T199 [US4] Create Bitbucket webhook endpoint in apps/web/app/api/webhooks/bitbucket/route.ts
+- [x] T200 [US4] Implement HMAC signature verification in apps/web/src/lib/webhooks/verification.ts
+- [x] T201 [US4] Add webhook payload parsing in apps/web/src/lib/webhooks/parsers.ts
+- [x] T202 [US4] Handle webhook errors gracefully in apps/web/src/lib/webhooks/handlers.ts
 
 **Acceptance Criteria**:
 
@@ -565,11 +565,11 @@ Where:
 
 ### Branch Detection & Linking
 
-- [ ] T203 [US4] Parse branch names for issue keys in apps/web/src/lib/webhooks/branch-detection.ts
-- [ ] T204 [US4] Link branches to issues in packages/database/src/repositories/issue-branch-repository.ts
-- [ ] T205 [US4] Store branch information in IssueBranch table in packages/database/src/repositories/issue-branch-repository.ts
-- [ ] T206 [US4] Update issue status on branch creation in apps/web/src/lib/webhooks/branch-detection.ts
-- [ ] T207 [US4] Handle multiple branches per issue in apps/web/src/lib/webhooks/branch-detection.ts
+- [x] T203 [US4] Parse branch names for issue keys in apps/web/src/lib/webhooks/branch-detection.ts
+- [x] T204 [US4] Link branches to issues in packages/database/src/repositories/issue-branch-repository.ts
+- [x] T205 [US4] Store branch information in IssueBranch table in packages/database/src/repositories/issue-branch-repository.ts
+- [x] T206 [US4] Update issue status on branch creation in apps/web/src/lib/webhooks/branch-detection.ts
+- [x] T207 [US4] Handle multiple branches per issue in apps/web/src/lib/webhooks/branch-detection.ts
 
 **Acceptance Criteria**:
 
@@ -580,11 +580,11 @@ Where:
 
 ### Pull Request Integration
 
-- [ ] T208 [US4] Parse PR webhook payloads in apps/web/src/lib/webhooks/pr-parser.ts
-- [ ] T209 [US4] Link PRs to issues in packages/database/src/repositories/issue-branch-repository.ts
-- [ ] T210 [US4] Display PR status in issue view in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T211 [US4] Update issue status on PR merge in apps/web/src/lib/webhooks/pr-handler.ts
-- [ ] T212 [US4] Handle PR state changes (open, merged, closed) in apps/web/src/lib/webhooks/pr-handler.ts
+- [x] T208 [US4] Parse PR webhook payloads in apps/web/src/lib/webhooks/pr-parser.ts
+- [x] T209 [US4] Link PRs to issues in packages/database/src/repositories/issue-branch-repository.ts
+- [x] T210 [US4] Display PR status in issue view in packages/ui/src/organisms/IssueDetail.tsx
+- [x] T211 [US4] Update issue status on PR merge in apps/web/src/lib/webhooks/status-updates.ts
+- [x] T212 [US4] Handle PR state changes (open, merged, closed) in apps/web/src/lib/webhooks/pr-parser.ts
 
 **Acceptance Criteria**:
 
@@ -595,10 +595,10 @@ Where:
 
 ### Issue Branch Display
 
-- [ ] T213 [US4] Display linked branches in issue view in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T214 [US4] Show PR links in issue view in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T215 [US4] Display commit information in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T216 [US4] Add branch status indicators in packages/ui/src/organisms/IssueDetail.tsx
+- [x] T213 [US4] Display linked branches in issue view in packages/ui/src/organisms/IssueDetail.tsx
+- [x] T214 [US4] Show PR links in issue view in packages/ui/src/organisms/IssueDetail.tsx
+- [x] T215 [US4] Display commit information in packages/ui/src/organisms/IssueDetail.tsx
+- [x] T216 [US4] Add branch status indicators in packages/ui/src/organisms/IssueDetail.tsx
 
 **Acceptance Criteria**:
 
@@ -619,12 +619,12 @@ Where:
 
 ### Cycle Model & API
 
-- [ ] T217 [US5] Create cycle creation API route in apps/web/app/api/projects/[projectId]/cycles/route.ts
-- [ ] T218 [US5] Create cycle listing API route in apps/web/app/api/projects/[projectId]/cycles/route.ts
-- [ ] T219 [US5] Create cycle detail API route in apps/web/app/api/projects/[projectId]/cycles/[cycleId]/route.ts
-- [ ] T220 [US5] Implement issue assignment to cycles in apps/web/app/api/projects/[projectId]/cycles/[cycleId]/issues/route.ts
-- [ ] T221 [US5] Add cycle update API in apps/web/app/api/projects/[projectId]/cycles/[cycleId]/route.ts
-- [ ] T222 [US5] Create CycleRepository in packages/database/src/repositories/cycle-repository.ts
+- [x] T217 [US5] Create cycle creation API route in apps/web/app/api/projects/[projectId]/cycles/route.ts
+- [x] T218 [US5] Create cycle listing API route in apps/web/app/api/projects/[projectId]/cycles/route.ts
+- [x] T219 [US5] Create cycle detail API route in apps/web/app/api/projects/[projectId]/cycles/[cycleId]/route.ts
+- [x] T220 [US5] Implement issue assignment to cycles in apps/web/app/api/projects/[projectId]/cycles/[cycleId]/issues/route.ts
+- [x] T221 [US5] Add cycle update API in apps/web/app/api/projects/[projectId]/cycles/[cycleId]/route.ts
+- [x] T222 [US5] Create CycleRepository in packages/database/src/repositories/cycle-repository.ts
 
 **Acceptance Criteria**:
 
@@ -634,13 +634,13 @@ Where:
 
 ### Sprint Planning UI
 
-- [ ] T223 [US5] Create SprintPlanning component in packages/ui/src/organisms/SprintPlanning.tsx
-- [ ] T224 [US5] Implement drag-and-drop from backlog in packages/ui/src/organisms/SprintPlanning.tsx
-- [ ] T225 [US5] Display sprint capacity in packages/ui/src/organisms/SprintPlanning.tsx
-- [ ] T226 [US5] Show story points in packages/ui/src/organisms/SprintPlanning.tsx
-- [ ] T227 [US5] Add sprint goal input in packages/ui/src/organisms/SprintPlanning.tsx
-- [ ] T228 [US5] Implement issue assignment in packages/ui/src/organisms/SprintPlanning.tsx
-- [ ] T229 [US5] Create sprint planning page route in apps/web/app/projects/[projectId]/sprints/new/page.tsx
+- [x] T223 [US5] Create SprintPlanning component in packages/ui/src/organisms/SprintPlanning.tsx
+- [x] T224 [US5] Implement drag-and-drop from backlog in packages/ui/src/organisms/SprintPlanning.tsx
+- [x] T225 [US5] Display sprint capacity in packages/ui/src/organisms/SprintPlanning.tsx
+- [x] T226 [US5] Show story points in packages/ui/src/organisms/SprintPlanning.tsx
+- [x] T227 [US5] Add sprint goal input in packages/ui/src/organisms/SprintPlanning.tsx
+- [x] T228 [US5] Implement issue assignment in packages/ui/src/organisms/SprintPlanning.tsx
+- [x] T229 [US5] Create sprint planning page route in apps/web/app/projects/[projectId]/sprints/new/page.tsx
 
 **Acceptance Criteria**:
 
@@ -651,12 +651,12 @@ Where:
 
 ### Burndown Charts
 
-- [ ] T230 [US5] Create BurndownChart component in packages/ui/src/molecules/BurndownChart.tsx
-- [ ] T231 [US5] Calculate burndown data in apps/web/src/lib/metrics/burndown.ts
-- [ ] T232 [US5] Integrate chart library (recharts) in packages/ui/src/molecules/BurndownChart.tsx
-- [ ] T233 [US5] Display remaining story points over time in packages/ui/src/molecules/BurndownChart.tsx
-- [ ] T234 [US5] Add tooltips and legends in packages/ui/src/molecules/BurndownChart.tsx
-- [ ] T235 [US5] Create burndown API endpoint in apps/web/app/api/projects/[projectId]/cycles/[cycleId]/burndown/route.ts
+- [x] T230 [US5] Create BurndownChart component in packages/ui/src/molecules/BurndownChart.tsx
+- [x] T231 [US5] Calculate burndown data in apps/web/src/lib/metrics/burndown.ts
+- [x] T232 [US5] Integrate chart library (recharts) in packages/ui/src/molecules/BurndownChart.tsx
+- [x] T233 [US5] Display remaining story points over time in packages/ui/src/molecules/BurndownChart.tsx
+- [x] T234 [US5] Add tooltips and legends in packages/ui/src/molecules/BurndownChart.tsx
+- [x] T235 [US5] Create burndown API endpoint in apps/web/app/api/projects/[projectId]/cycles/[cycleId]/burndown/route.ts
 
 **Acceptance Criteria**:
 
@@ -667,11 +667,11 @@ Where:
 
 ### Cycle Time Metrics
 
-- [ ] T236 [US5] Calculate cycle time per issue in apps/web/src/lib/metrics/cycle-time.ts
-- [ ] T237 [US5] Compute average cycle time in apps/web/src/lib/metrics/cycle-time.ts
-- [ ] T238 [US5] Create metrics API endpoint in apps/web/app/api/projects/[projectId]/cycles/[cycleId]/metrics/route.ts
-- [ ] T239 [US5] Display metrics in UI in packages/ui/src/organisms/SprintPlanning.tsx
-- [ ] T240 [US5] Add time range filtering in apps/web/src/lib/metrics/cycle-time.ts
+- [x] T236 [US5] Calculate cycle time per issue in apps/web/src/lib/metrics/cycle-time.ts
+- [x] T237 [US5] Compute average cycle time in apps/web/src/lib/metrics/cycle-time.ts
+- [x] T238 [US5] Create metrics API endpoint in apps/web/app/api/projects/[projectId]/cycles/[cycleId]/metrics/route.ts
+- [x] T239 [US5] Display metrics in UI in packages/ui/src/organisms/SprintPlanning.tsx
+- [x] T240 [US5] Add time range filtering in apps/web/src/lib/metrics/cycle-time.ts
 
 **Acceptance Criteria**:
 

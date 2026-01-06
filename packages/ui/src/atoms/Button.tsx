@@ -30,9 +30,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       primary:
         'bg-primary text-white hover:bg-primary-hover active:bg-primary-active',
       secondary:
-        'bg-secondary text-foreground hover:bg-secondary-hover active:bg-secondary-active border border-border',
+        'bg-secondary text-foreground dark:text-foreground-dark hover:bg-secondary-hover active:bg-secondary-active border border-border dark:border-border-dark',
       ghost:
-        'bg-transparent text-foreground hover:bg-background-secondary active:bg-background-tertiary',
+        'bg-transparent text-foreground dark:text-foreground-dark hover:bg-background-secondary dark:hover:bg-background-dark-secondary active:bg-background-tertiary dark:active:bg-background-dark-tertiary',
       danger:
         'bg-error text-white hover:bg-error-dark active:bg-error-dark',
     };

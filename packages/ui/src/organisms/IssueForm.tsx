@@ -313,11 +313,12 @@ export function IssueForm({
           id="type"
           {...register('type')}
           className={cn(
-            'flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm',
+            'flex h-10 w-full rounded-md border bg-background dark:bg-background-dark px-3 py-2 text-sm',
+            'text-foreground dark:text-foreground-dark',
             'transition-colors focus-ring',
             errors.type
               ? 'border-error focus-visible:ring-error'
-              : 'border-border hover:border-border-hover focus-visible:border-border-focus'
+              : 'border-border dark:border-border-dark hover:border-border-hover dark:hover:border-border-dark-hover focus-visible:border-border-focus'
           )}
         >
           <option value="">Select type</option>

@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { IssueDetail } from '@stride/ui';
-import { projectRepository, issueRepository } from '@stride/database';
+import { projectRepository, issueRepository, issueBranchRepository } from '@stride/database';
 import { canUpdateIssue } from '@/lib/auth/permissions';
 import { requireAuth } from '@/middleware/auth';
 import { headers } from 'next/headers';
@@ -46,6 +46,9 @@ export default async function IssueDetailPage({ params }: PageParams) {
     notFound();
   }
 
+  // Fetch linked branches and PRs
+  const branches = await issueBranchRepository.findByIssueId(issue.id);
+
   // Check edit permissions
   const canEdit = canUpdateIssue(session.role);
 
@@ -57,6 +60,7 @@ export default async function IssueDetailPage({ params }: PageParams) {
       <IssueDetail
         issue={issue}
         projectConfig={project.config || undefined}
+        branches={branches}
         canEdit={canEdit}
       />
     </div>

@@ -130,7 +130,7 @@ export default function ProjectPage() {
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
               }
-              className="mt-1 block w-full rounded-md border border-border dark:border-border-dark bg-surface dark:bg-surface-dark px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-accent"
+              className="mt-1 block w-full rounded-md border border-border dark:border-border-dark bg-surface dark:bg-surface-dark px-3 py-2 text-sm text-foreground dark:text-foreground-dark placeholder:text-foreground-muted dark:placeholder:text-foreground-dark-muted focus:border-accent focus:outline-none focus:ring-accent"
               rows={3}
               placeholder="A brief description of your project"
               maxLength={500}

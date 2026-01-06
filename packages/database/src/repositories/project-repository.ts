@@ -205,7 +205,8 @@ export class ProjectRepository
   }
 
   /**
-   * Update project configuration
+   * Update project configuration with versioning
+   * If configVersion is not provided, generates a version based on timestamp
    */
   async updateConfig(
     id: string,
@@ -213,14 +214,39 @@ export class ProjectRepository
     config: Prisma.JsonValue,
     configVersion?: string,
   ): Promise<Project> {
+    // Generate version if not provided (using timestamp as version identifier)
+    const version = configVersion || `manual-${Date.now()}`;
+
     return prisma.project.update({
       where: { id },
       data: {
         configYaml,
         config,
-        configVersion,
+        configVersion: version,
+        updatedAt: new Date(), // Ensure updatedAt is refreshed
       },
     });
+  }
+
+  /**
+   * Get project configuration
+   * Returns both YAML and parsed JSON config
+   */
+  async getConfig(id: string): Promise<{
+    configYaml: string;
+    config: Prisma.JsonValue;
+    configVersion: string | null;
+  } | null> {
+    const project = await this.findById(id);
+    if (!project) {
+      return null;
+    }
+
+    return {
+      configYaml: project.configYaml,
+      config: project.config,
+      configVersion: project.configVersion,
+    };
   }
 }
 

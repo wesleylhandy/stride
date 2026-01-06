@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { UserMenu } from "@stride/ui";
 
 const steps = [
   { id: "admin", name: "Admin Account", path: "/onboarding/admin" },
@@ -23,26 +24,46 @@ export default function OnboardingLayout({
 
   return (
     <div className="flex min-h-screen flex-col bg-background-secondary dark:bg-background-dark">
+      {/* Header with user menu */}
+      <div className="border-b border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
+        <div className="mx-auto max-w-4xl px-4 py-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            <h1 className="text-lg font-semibold text-foreground dark:text-foreground-dark">
+              Stride Setup
+            </h1>
+            <UserMenu />
+          </div>
+        </div>
+      </div>
       {/* Progress indicator */}
       <div className="border-b border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
         <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
           <nav aria-label="Progress">
-            <ol className="flex items-center">
+            <ol className="flex items-start">
               {steps.map((step, stepIdx) => (
                 <li
                   key={step.id}
                   className={`${
-                    stepIdx !== steps.length - 1 ? "pr-8 sm:pr-20" : ""
-                  } relative`}
+                    stepIdx !== steps.length - 1 ? "flex-1" : ""
+                  } relative flex flex-col items-center`}
                 >
-                  {stepIdx < currentStep ? (
-                    <>
-                      <div className="absolute inset-0 flex items-center">
-                        <div className="h-0.5 w-full bg-accent" />
-                      </div>
+                  {/* Connecting line - only show between steps */}
+                  {stepIdx !== steps.length - 1 && (
+                    <div className="absolute top-4 left-[50%] right-0 h-0.5 -mr-4">
+                      {stepIdx < currentStep ? (
+                        <div className="h-full bg-accent" />
+                      ) : (
+                        <div className="h-full bg-border dark:bg-border-dark" />
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Step circle */}
+                  <div className="relative z-10 flex h-8 w-8 items-center justify-center">
+                    {stepIdx < currentStep ? (
                       <Link
                         href={step.path}
-                        className="relative flex h-8 w-8 items-center justify-center rounded-full bg-accent hover:bg-accent-hover"
+                        className="flex h-8 w-8 items-center justify-center rounded-full bg-accent hover:bg-accent-hover transition-colors"
                       >
                         <svg
                           className="h-5 w-5 text-white"
@@ -57,16 +78,9 @@ export default function OnboardingLayout({
                         </svg>
                         <span className="sr-only">{step.name}</span>
                       </Link>
-                    </>
-                  ) : stepIdx === currentStep ? (
-                    <>
-                      {stepIdx !== steps.length - 1 && (
-                        <div className="absolute inset-0 flex items-center">
-                          <div className="h-0.5 w-full bg-border dark:bg-border-dark" />
-                        </div>
-                      )}
+                    ) : stepIdx === currentStep ? (
                       <div
-                        className="relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-accent bg-surface dark:bg-surface-dark"
+                        className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-accent bg-surface dark:bg-surface-dark"
                         aria-current="step"
                       >
                         <span
@@ -75,25 +89,22 @@ export default function OnboardingLayout({
                         />
                         <span className="sr-only">{step.name}</span>
                       </div>
-                    </>
-                  ) : (
-                    <>
-                      {stepIdx !== steps.length - 1 && (
-                        <div className="absolute inset-0 flex items-center">
-                          <div className="h-0.5 w-full bg-border dark:bg-border-dark" />
-                        </div>
-                      )}
-                      <div className="relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-border dark:border-border-dark bg-surface dark:bg-surface-dark hover:border-border-hover dark:hover:border-border-dark-hover">
+                    ) : (
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
                         <span
                           className="h-2.5 w-2.5 rounded-full bg-transparent"
                           aria-hidden="true"
                         />
                         <span className="sr-only">{step.name}</span>
                       </div>
-                    </>
-                  )}
-                  <div className="absolute top-10 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs text-foreground-secondary dark:text-foreground-dark-secondary">
-                    {step.name}
+                    )}
+                  </div>
+                  
+                  {/* Step label */}
+                  <div className="mt-2 text-center">
+                    <p className="text-xs text-foreground-secondary dark:text-foreground-dark-secondary whitespace-nowrap">
+                      {step.name}
+                    </p>
                   </div>
                 </li>
               ))}

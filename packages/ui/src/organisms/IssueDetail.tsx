@@ -9,6 +9,17 @@ import { MarkdownRenderer } from '../molecules/MarkdownRenderer';
 import { IssueForm } from './IssueForm';
 import { cn } from '../utils/cn';
 
+export interface IssueBranch {
+  id: string;
+  branchName: string;
+  pullRequestUrl?: string | null;
+  pullRequestNumber?: number | null;
+  pullRequestStatus?: 'Open' | 'Merged' | 'Closed' | null;
+  lastCommitSha?: string | null;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
 export interface IssueDetailProps {
   /**
    * Issue data
@@ -18,6 +29,10 @@ export interface IssueDetailProps {
    * Project configuration (for custom fields and statuses)
    */
   projectConfig?: ProjectConfig;
+  /**
+   * Linked branches and PRs
+   */
+  branches?: IssueBranch[];
   /**
    * Whether user can edit
    */
@@ -121,6 +136,7 @@ function renderCustomFieldValue(
 export function IssueDetail({
   issue,
   projectConfig,
+  branches = [],
   canEdit = false,
   onUpdate,
   onStatusChange,
@@ -404,13 +420,76 @@ export function IssueDetail({
           </div>
         )}
 
-      {/* Linked Branches/PRs (T128) - Stubbed for now */}
-      <div>
-        <h3 className="text-lg font-semibold mb-4">Linked Items</h3>
-        <p className="text-sm text-foreground-secondary">
-          Branch and PR linking will be implemented in Phase 6.
-        </p>
-      </div>
+      {/* Linked Branches/PRs (T213-T216) */}
+      {branches.length > 0 && (
+        <div>
+          <h3 className="text-lg font-semibold mb-4">Linked Branches & Pull Requests</h3>
+          <div className="space-y-3">
+            {branches.map((branch) => (
+              <div
+                key={branch.id}
+                className="p-4 bg-background-secondary rounded-lg border border-border"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <code className="text-sm font-mono bg-background px-2 py-1 rounded border border-border">
+                        {branch.branchName}
+                      </code>
+                      {branch.pullRequestStatus && (
+                        <Badge
+                          variant={
+                            branch.pullRequestStatus === 'Merged'
+                              ? 'success'
+                              : branch.pullRequestStatus === 'Closed'
+                              ? 'error'
+                              : 'info'
+                          }
+                        >
+                          {branch.pullRequestStatus}
+                        </Badge>
+                      )}
+                    </div>
+                    {branch.pullRequestUrl && (
+                      <div className="mb-2">
+                        <a
+                          href={branch.pullRequestUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-primary hover:underline flex items-center gap-1"
+                        >
+                          <span>PR #{branch.pullRequestNumber}</span>
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                            />
+                          </svg>
+                        </a>
+                      </div>
+                    )}
+                    {branch.lastCommitSha && (
+                      <div className="text-xs text-foreground-secondary font-mono">
+                        Latest commit: {branch.lastCommitSha.substring(0, 7)}
+                      </div>
+                    )}
+                    <div className="text-xs text-foreground-secondary mt-1">
+                      Linked {formatDate(branch.createdAt)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
