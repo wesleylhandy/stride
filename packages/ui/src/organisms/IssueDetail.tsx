@@ -47,9 +47,42 @@ export interface IssueDetailProps {
    */
   onStatusChange?: (newStatus: string) => Promise<void>;
   /**
+   * Callback when issue is cloned
+   */
+  onClone?: () => void;
+  /**
    * Additional CSS classes
    */
   className?: string;
+}
+
+/**
+ * Component to display assignee name/username
+ */
+function AssigneeDisplay({ assigneeId }: { assigneeId: string }) {
+  const [user, setUser] = React.useState<{ name: string | null; username: string } | null>(null);
+
+  React.useEffect(() => {
+    fetch('/api/users')
+      .then((res) => res.json())
+      .then((data) => {
+        const foundUser = data.users?.find((u: { id: string }) => u.id === assigneeId);
+        if (foundUser) {
+          setUser({ name: foundUser.name, username: foundUser.username });
+        }
+      })
+      .catch(() => {
+        // Fallback to showing ID if fetch fails
+        setUser({ name: null, username: assigneeId });
+      });
+  }, [assigneeId]);
+
+  if (!user) {
+    return <span>{assigneeId}</span>;
+  }
+
+  // T412: Update IssueDetail display to show assignee name/username instead of ID
+  return <span>{user.name ? `${user.name} (${user.username})` : user.username}</span>;
 }
 
 /**
@@ -141,10 +174,41 @@ export function IssueDetail({
   canEdit = false,
   onUpdate,
   onStatusChange,
+  onClone,
   className,
 }: IssueDetailProps) {
   const [isEditing, setIsEditing] = React.useState(false);
   const [isUpdating, setIsUpdating] = React.useState(false);
+  // T410: Add user fetching in IssueDetail edit mode
+  const [users, setUsers] = React.useState<Array<{
+    id: string;
+    username: string;
+    name: string | null;
+    avatarUrl: string | null;
+  }>>([]);
+
+  // Fetch users when entering edit mode
+  React.useEffect(() => {
+    if (isEditing) {
+      fetch('/api/users')
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error('Failed to fetch users');
+          }
+          return res.json();
+        })
+        .then((data) => {
+          setUsers(data.users || []);
+        })
+        .catch((error) => {
+          console.error('Failed to fetch users:', error);
+          // Don't show error - assignment field just won't appear
+        });
+    } else {
+      // Clear users when exiting edit mode
+      setUsers([]);
+    }
+  }, [isEditing]);
 
   // Get status configuration
   const statusConfig = projectConfig?.workflow.statuses.find(
@@ -207,6 +271,7 @@ export function IssueDetail({
           onCancel={() => setIsEditing(false)}
           isSubmitting={isUpdating}
           mode="edit"
+          users={users}
         />
       </div>
     );
@@ -241,13 +306,25 @@ export function IssueDetail({
           </div>
         </div>
         {canEdit && (
-          <Button
-            variant="secondary"
-            onClick={() => setIsEditing(true)}
-            disabled={isUpdating}
-          >
-            Edit
-          </Button>
+          <div className="flex gap-2">
+            {/* T414: Add Clone button next to Edit button */}
+            {onClone && (
+              <Button
+                variant="ghost"
+                onClick={onClone}
+                disabled={isUpdating}
+              >
+                Clone
+              </Button>
+            )}
+            <Button
+              variant="secondary"
+              onClick={() => setIsEditing(true)}
+              disabled={isUpdating}
+            >
+              Edit
+            </Button>
+          </div>
         )}
       </div>
 
@@ -330,7 +407,7 @@ export function IssueDetail({
                 Assignee
               </label>
               <p className="mt-1 text-foreground">
-                {issue.assigneeId} {/* TODO: Fetch and display user name */}
+                <AssigneeDisplay assigneeId={issue.assigneeId} />
               </p>
             </div>
           )}
@@ -344,7 +421,7 @@ export function IssueDetail({
               Reporter
             </label>
             <p className="mt-1 text-foreground">
-              {issue.reporterId} {/* TODO: Fetch and display user name */}
+              <AssigneeDisplay assigneeId={issue.reporterId} />
             </p>
           </div>
 

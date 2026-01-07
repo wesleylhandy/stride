@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import { cn } from '../utils/cn';
 import { Badge, type BadgeProps } from '../atoms/Badge';
 import type { Issue, IssueType, Priority } from '@stride/types';
@@ -21,6 +22,16 @@ export interface IssueCardProps {
    * Additional CSS classes
    */
   className?: string;
+  /**
+   * Optional list of users for assignee display (to avoid per-card fetching)
+   * If provided, assignee will show initials/avatar with name on hover
+   */
+  users?: Array<{
+    id: string;
+    username: string;
+    name: string | null;
+    avatarUrl: string | null;
+  }>;
 }
 
 /**
@@ -29,11 +40,115 @@ export interface IssueCardProps {
  * Displays a single issue in a compact card format for use in Kanban boards.
  * Shows key information: title, key, type, priority, and assignee.
  */
+/**
+ * Component to display assignee avatar/initials with name on hover
+ */
+function AssigneeAvatar({
+  assigneeId,
+  users,
+}: {
+  assigneeId: string;
+  users?: Array<{
+    id: string;
+    username: string;
+    name: string | null;
+    avatarUrl: string | null;
+  }>;
+}) {
+  const [user, setUser] = React.useState<{
+    name: string | null;
+    username: string;
+    avatarUrl: string | null;
+  } | null>(null);
+
+  React.useEffect(() => {
+    // If users list is provided, use it (no fetch needed)
+    if (users) {
+      const foundUser = users.find((u) => u.id === assigneeId);
+      if (foundUser) {
+        setUser({
+          name: foundUser.name,
+          username: foundUser.username,
+          avatarUrl: foundUser.avatarUrl,
+        });
+      }
+      return;
+    }
+
+    // Otherwise, fetch user data (fallback for when users list not available)
+    fetch('/api/users')
+      .then((res) => res.json())
+      .then((data) => {
+        const foundUser = data.users?.find((u: { id: string }) => u.id === assigneeId);
+        if (foundUser) {
+          setUser({
+            name: foundUser.name,
+            username: foundUser.username,
+            avatarUrl: foundUser.avatarUrl,
+          });
+        }
+      })
+      .catch(() => {
+        // Silent fail - will show initials from ID as fallback
+      });
+  }, [assigneeId, users]);
+
+  // Generate initials from name or username
+  const getInitials = (): string => {
+    if (user?.name) {
+      const parts = user.name.trim().split(/\s+/);
+      const firstPart = parts[0];
+      const lastPart = parts[parts.length - 1];
+      const firstChar = firstPart?.[0];
+      const lastChar = lastPart?.[0];
+      if (parts.length >= 2 && firstChar && lastChar) {
+        return (firstChar + lastChar).toUpperCase();
+      }
+      return user.name.slice(0, 2).toUpperCase();
+    }
+    if (user?.username) {
+      return user.username.slice(0, 2).toUpperCase();
+    }
+    // Fallback to first 2 chars of ID
+    return assigneeId.slice(0, 2).toUpperCase();
+  };
+
+  // Generate tooltip text
+  const getTooltip = (): string => {
+    if (user?.name) {
+      return `${user.name} (${user.username})`;
+    }
+    if (user?.username) {
+      return user.username;
+    }
+    return 'Assigned';
+  };
+
+  return (
+    <div
+      className="flex-shrink-0 w-6 h-6 rounded-full bg-accent/10 text-accent text-xs font-medium flex items-center justify-center border border-accent/20 overflow-hidden"
+      title={getTooltip()}
+      aria-label={`Assigned to ${getTooltip()}`}
+    >
+      {user?.avatarUrl ? (
+        <img
+          src={user.avatarUrl}
+          alt={getTooltip()}
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <span>{getInitials()}</span>
+      )}
+    </div>
+  );
+}
+
 export function IssueCard({
   issue,
   isDragging = false,
   onClick,
   className,
+  users,
 }: IssueCardProps) {
   const getTypeVariant = (type: IssueType): BadgeProps['variant'] => {
     switch (type) {
@@ -106,13 +221,7 @@ export function IssueCard({
           )}
         </div>
         {issue.assigneeId && (
-          <div
-            className="flex-shrink-0 w-6 h-6 rounded-full bg-accent/10 text-accent text-xs font-medium flex items-center justify-center border border-accent/20"
-            title="Assigned"
-            aria-label="Assigned"
-          >
-            {issue.assigneeId.slice(0, 2).toUpperCase()}
-          </div>
+          <AssigneeAvatar assigneeId={issue.assigneeId} users={users} />
         )}
       </div>
     </div>

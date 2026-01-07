@@ -9,7 +9,7 @@
 
 This document provides an actionable, dependency-ordered task breakdown for implementing the Stride Core Application. Tasks are organized by user story priority (P1, P2, P3) to enable independent implementation and testing.
 
-**Total Tasks**: 421  
+**Total Tasks**: 427  
 **MVP Scope**: Phase 1-4 (User Story 1 & 2)  
 **Full Implementation**: All phases
 
@@ -1189,47 +1189,47 @@ Where:
 
 ### User Assignment Feature
 
-- [ ] T400 [P] [US2] Create GET /api/users endpoint in apps/web/app/api/users/route.ts
-- [ ] T401 [US2] Implement authentication check in apps/web/app/api/users/route.ts
-- [ ] T402 [US2] Implement user list query (select id, username, name, avatarUrl, role) in apps/web/app/api/users/route.ts
-- [ ] T403 [US2] Add error handling (401, 500) and response formatting in apps/web/app/api/users/route.ts
-- [ ] T404 [P] [US2] Add users prop to IssueFormProps interface in packages/ui/src/organisms/IssueForm.tsx
-- [ ] T405 [US2] Add assignee dropdown field after Priority field in packages/ui/src/organisms/IssueForm.tsx
-- [ ] T406 [US2] Implement user display format (name (username) or username) in assignee dropdown in packages/ui/src/organisms/IssueForm.tsx
-- [ ] T407 [US2] Add "Unassigned" option to assignee dropdown in packages/ui/src/organisms/IssueForm.tsx
-- [ ] T408 [P] [US2] Add user fetching in CreateIssueModal component in apps/web/src/components/CreateIssueModal.tsx
-- [ ] T409 [US2] Pass users prop to IssueForm in CreateIssueModal in apps/web/src/components/CreateIssueModal.tsx
-- [ ] T410 [US2] Add user fetching in IssueDetail edit mode in apps/web/app/projects/[projectId]/issues/[issueKey]/page.tsx
-- [ ] T411 [US2] Pass users prop to IssueForm when editing in apps/web/app/projects/[projectId]/issues/[issueKey]/page.tsx
-- [ ] T412 [US2] Update IssueDetail display to show assignee name/username instead of ID in packages/ui/src/organisms/IssueDetail.tsx
+- [x] T400 [P] [US2] Create GET /api/users endpoint in apps/web/app/api/users/route.ts
+- [x] T401 [US2] Implement authentication check in apps/web/app/api/users/route.ts
+- [x] T402 [US2] Implement user list query (select id, username, name, avatarUrl, role) in apps/web/app/api/users/route.ts
+- [x] T403 [US2] Add error handling (401, 500) and response formatting in apps/web/app/api/users/route.ts
+- [x] T404 [P] [US2] Add users prop to IssueFormProps interface in packages/ui/src/organisms/IssueForm.tsx
+- [x] T405 [US2] Add assignee dropdown field after Priority field in packages/ui/src/organisms/IssueForm.tsx
+- [x] T406 [US2] Implement user display format (name (username) or username) in assignee dropdown in packages/ui/src/organisms/IssueForm.tsx
+- [x] T407 [US2] Add "Unassigned" option to assignee dropdown in packages/ui/src/organisms/IssueForm.tsx
+- [x] T408 [P] [US2] Add user fetching in CreateIssueModal component in apps/web/src/components/CreateIssueModal.tsx
+- [x] T409 [US2] Pass users prop to IssueForm in CreateIssueModal in apps/web/src/components/CreateIssueModal.tsx
+- [x] T410 [US2] Add user fetching in IssueDetail edit mode in apps/web/app/projects/[projectId]/issues/[issueKey]/page.tsx
+- [x] T411 [US2] Pass users prop to IssueForm when editing in apps/web/app/projects/[projectId]/issues/[issueKey]/page.tsx
+- [x] T412 [US2] Update IssueDetail display to show assignee name/username instead of ID in packages/ui/src/organisms/IssueDetail.tsx
 
 **Checkpoint**: User assignment feature complete - users can assign issues from create/edit forms
 
 ### Issue Clone Feature
 
-- [ ] T413 [P] [US2] Add onClone callback prop to IssueDetailProps interface in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T414 [US2] Add Clone button next to Edit button in IssueDetail header in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T415 [US2] Style Clone button as ghost variant in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T416 [P] [US2] Create clone handler function in apps/web/app/projects/[projectId]/issues/[issueKey]/page.tsx
-- [ ] T417 [US2] Map issue data to CreateIssueInput excluding metadata (id, key, createdAt, updatedAt, closedAt, reporterId) in apps/web/app/projects/[projectId]/issues/[issueKey]/page.tsx
-- [ ] T418 [US2] Open CreateIssueModal with prefilled initialValues in apps/web/app/projects/[projectId]/issues/[issueKey]/page.tsx
-- [ ] T419 [US2] Pass clone handler to IssueDetail component via onClone prop in apps/web/app/projects/[projectId]/issues/[issueKey]/page.tsx
-- [ ] T420 [US2] Support initialValues prop in CreateIssueModal for prefilling form in apps/web/src/components/CreateIssueModal.tsx
-- [ ] T421 [US2] Pass initialValues to IssueForm when provided in CreateIssueModal in apps/web/src/components/CreateIssueModal.tsx
+- [x] T413 [P] [US2] Add onClone callback prop to IssueDetailProps interface in packages/ui/src/organisms/IssueDetail.tsx
+- [x] T414 [US2] Add Clone button next to Edit button in IssueDetail header in packages/ui/src/organisms/IssueDetail.tsx
+- [x] T415 [US2] Style Clone button as ghost variant in packages/ui/src/organisms/IssueDetail.tsx
+- [x] T416 [P] [US2] Create clone handler function in apps/web/app/projects/[projectId]/issues/[issueKey]/page.tsx
+- [x] T417 [US2] Map issue data to CreateIssueInput excluding metadata (id, key, createdAt, updatedAt, closedAt, reporterId) in apps/web/app/projects/[projectId]/issues/[issueKey]/page.tsx
+- [x] T418 [US2] Open CreateIssueModal with prefilled initialValues in apps/web/app/projects/[projectId]/issues/[issueKey]/page.tsx
+- [x] T419 [US2] Pass clone handler to IssueDetail component via onClone prop in apps/web/app/projects/[projectId]/issues/[issueKey]/page.tsx
+- [x] T420 [US2] Support initialValues prop in CreateIssueModal for prefilling form in apps/web/src/components/CreateIssueModal.tsx
+- [x] T421 [US2] Pass initialValues to IssueForm when provided in CreateIssueModal in apps/web/src/components/CreateIssueModal.tsx
 
 **Checkpoint**: Issue clone feature complete - users can clone issues with prefilled data
 
 ### User Assignment Configuration
 
-- [ ] T422 [US2] Add UserAssignmentConfigSchema to packages/yaml-config/src/schema.ts with fields: default_assignee (enum: 'none' | 'reporter'), assignee_required (boolean), clone_preserve_assignee (boolean), require_assignee_for_statuses (array of status keys)
-- [ ] T423 [US2] Update ProjectConfigSchema to include optional user_assignment field in packages/yaml-config/src/schema.ts
-- [ ] T424 [US2] Add default values to UserAssignmentConfigSchema (default_assignee: 'none', assignee_required: false, clone_preserve_assignee: true, require_assignee_for_statuses: []) in packages/yaml-config/src/schema.ts
-- [ ] T425 [US2] Update default config generator to include user_assignment defaults in packages/yaml-config/src/default-config.ts
-- [ ] T426 [US2] Implement default assignee logic (auto-assign to reporter if default_assignee: 'reporter') in issue creation in apps/web/app/api/projects/[projectId]/issues/route.ts
-- [ ] T427 [US2] Implement clone assignment preservation logic based on user_assignment.clone_preserve_assignee config in clone handler in apps/web/app/projects/[projectId]/issues/[issueKey]/page.tsx
-- [ ] T428 [US2] Add assignee requirement validation for status transitions in apps/web/src/lib/workflow/validation.ts checking require_assignee_for_statuses array
-- [ ] T429 [US2] Add user assignment configuration section to apps/web/content/docs/configuration-reference.md documenting all user_assignment fields with examples
-- [ ] T430 [US2] Update configuration examples to include user_assignment examples in apps/web/content/docs/configuration-examples.md
+- [x] T422 [US2] Add UserAssignmentConfigSchema to packages/yaml-config/src/schema.ts with fields: default_assignee (enum: 'none' | 'reporter'), assignee_required (boolean), clone_preserve_assignee (boolean), require_assignee_for_statuses (array of status keys)
+- [x] T423 [US2] Update ProjectConfigSchema to include optional user_assignment field in packages/yaml-config/src/schema.ts
+- [x] T424 [US2] Add default values to UserAssignmentConfigSchema (default_assignee: 'none', assignee_required: false, clone_preserve_assignee: true, require_assignee_for_statuses: []) in packages/yaml-config/src/schema.ts
+- [x] T425 [US2] Update default config generator to include user_assignment defaults in packages/yaml-config/src/default-config.ts
+- [x] T426 [US2] Implement default assignee logic (auto-assign to reporter if default_assignee: 'reporter') in issue creation in apps/web/app/api/projects/[projectId]/issues/route.ts
+- [x] T427 [US2] Implement clone assignment preservation logic based on user_assignment.clone_preserve_assignee config in clone handler in apps/web/app/projects/[projectId]/issues/[issueKey]/page.tsx
+- [x] T428 [US2] Add assignee requirement validation for status transitions in apps/web/src/lib/workflow/validation.ts checking require_assignee_for_statuses array
+- [x] T429 [US2] Add user assignment configuration section to apps/web/content/docs/configuration-reference.md documenting all user_assignment fields with examples
+- [x] T430 [US2] Update configuration examples to include user_assignment examples in apps/web/content/docs/configuration-examples.md
 
 **Checkpoint**: User assignment configuration complete - configurable defaults and requirements
 
@@ -1292,6 +1292,86 @@ Where:
 - Suggestions are displayed clearly
 - Users can accept/modify suggestions
 - Graceful degradation works (shows error, issue remains functional)
+
+---
+
+## Phase 8.8: Troubleshooting Documentation & Permissive Default Configuration (P2 Enhancement)
+
+**Goal**: Enhance default configuration to be maximally permissive and expand troubleshooting documentation to help users resolve common board status configuration errors.
+
+**Independent Test**: Create a new project, verify the default configuration includes "reopened" status allowing closed issues to be reopened, move issues between all default status columns without errors, and verify troubleshooting documentation covers common board/status errors with actionable solutions. Test succeeds when new users can start using the board immediately without configuration barriers and troubleshooting guide helps resolve configuration issues.
+
+**Dependencies**: Phase 5 complete (Configuration as Code must exist), Phase 4 complete (Kanban board must exist)
+
+### Default Configuration Enhancement
+
+- [ ] T415 [P] [US3] Add "reopened" status to default configuration in packages/yaml-config/src/default-config.ts
+- [ ] T416 [US3] Add documentation comments explaining permissive design philosophy in packages/yaml-config/src/default-config.ts
+- [ ] T417 [US3] Update generateDefaultConfig function documentation in packages/yaml-config/src/default-config.ts
+- [ ] T418 [US3] Verify priority field is optional (required: false) in packages/yaml-config/src/default-config.ts
+- [ ] T419 [US3] Verify default config passes Zod validation in packages/yaml-config/src/validator.ts
+
+**Acceptance Criteria**:
+
+- Default configuration includes "reopened" status
+- Default configuration allows reopening closed issues
+- All custom fields are optional by default
+- Configuration passes all validation rules
+- Function documentation explains permissive design
+
+### Troubleshooting Documentation Expansion
+
+- [ ] T420 [P] [US3] Add "Quick Fixes" section at top of troubleshooting guide in apps/web/content/docs/configuration-troubleshooting.md
+- [ ] T421 [P] [US3] Add "Board Status Issues" section with common board errors in apps/web/content/docs/configuration-troubleshooting.md
+- [ ] T422 [US3] Add "Cannot move issue between status blocks" troubleshooting in apps/web/content/docs/configuration-troubleshooting.md
+- [ ] T423 [US3] Add "Status 'X' is not defined" error troubleshooting in apps/web/content/docs/configuration-troubleshooting.md
+- [ ] T424 [US3] Add "Cannot transition from closed status" troubleshooting in apps/web/content/docs/configuration-troubleshooting.md
+- [ ] T425 [US3] Add diagnostic steps for each error type in apps/web/content/docs/configuration-troubleshooting.md
+- [ ] T426 [US3] Add "Configuration Migration" section for existing projects in apps/web/content/docs/configuration-troubleshooting.md
+- [ ] T427 [US3] Add cross-reference links to board status configuration guide in apps/web/content/docs/configuration-troubleshooting.md
+- [ ] T428 [US3] Add diagnostic checklist in "Getting Help" section in apps/web/content/docs/configuration-troubleshooting.md
+
+**Acceptance Criteria**:
+
+- Quick fixes section provides immediate solutions
+- Board status issues are comprehensively documented
+- Each error type has diagnostic steps
+- Migration guidance for existing projects included
+- Links to related documentation work correctly
+
+### Validation Message Improvements
+
+- [ ] T429 [US3] Review validation error messages for helpful hints in packages/ui/src/organisms/KanbanBoard.tsx
+- [ ] T430 [US3] Ensure error messages suggest missing statuses when applicable in packages/ui/src/organisms/KanbanBoard.tsx
+- [ ] T431 [US3] Update validation messages to reference permissive defaults in packages/ui/src/organisms/KanbanBoard.tsx
+- [ ] T432 [US3] Review API validation error messages in apps/web/app/api/projects/[projectId]/issues/[issueKey]/status/route.ts
+- [ ] T433 [US3] Ensure API errors reference troubleshooting documentation in apps/web/app/api/projects/[projectId]/issues/[issueKey]/status/route.ts
+
+**Acceptance Criteria**:
+
+- Error messages are helpful and actionable
+- Error messages suggest solutions
+- Error messages reference relevant documentation
+- Validation errors guide users to fixes
+
+### Testing
+
+- [ ] T434 [P] [US3] Create unit test for default config generation with reopened status in packages/yaml-config/src/**tests**/default-config.test.ts
+- [ ] T435 [P] [US3] Test default config allows closed → reopened transition in packages/yaml-config/src/**tests**/default-config.test.ts
+- [ ] T436 [US3] Verify default config has no required custom fields in packages/yaml-config/src/**tests**/default-config.test.ts
+- [ ] T437 [US3] Create integration test for board with new default config in apps/web/src/**tests**/integration/board-default-config.test.ts
+- [ ] T438 [US3] Test all default status transitions work correctly in apps/web/src/**tests**/integration/board-default-config.test.ts
+- [ ] T439 [US3] Verify backward compatibility with existing projects in apps/web/src/**tests**/integration/config-compatibility.test.ts
+- [ ] T440 [US3] Test documentation links resolve correctly in apps/web/src/**tests**/docs/links.test.ts
+- [ ] T441 [US3] Manual test: Create new project and verify default config works in TESTING_GUIDE.md
+
+**Acceptance Criteria**:
+
+- Default config generation tests pass
+- Board integration tests pass with new defaults
+- Backward compatibility verified
+- Documentation links work correctly
+- Manual testing confirms permissive defaults work
 
 ---
 
@@ -1402,6 +1482,7 @@ Phase 1: Setup
         └─> Phase 3: User Story 1 (Deployment & Onboarding)
               └─> Phase 4: User Story 2 (Issue Management)
                     ├─> Phase 5: User Story 3 (Configuration)
+                    │     └─> Phase 8.8: Troubleshooting & Permissive Config (Enhancement)
                     ├─> Phase 6: User Story 4 (Git Integration)
                     └─> Phase 7: User Story 5 (Sprint Planning)
                           └─> Phase 7.5: Authenticated Layouts Infrastructure
@@ -1417,6 +1498,7 @@ Phase 1: Setup
 - **US1** (Deployment): Blocks all other stories (foundational)
 - **US2** (Issues): Blocks US3, US4, US5, US6, US7 (core functionality)
 - **US3** (Configuration): Depends on US2 (needs issues to configure)
+- **Phase 8.8** (Troubleshooting & Permissive Config): Depends on US3 (Configuration as Code must exist), US2 (Kanban board must exist)
 - **US4** (Git Integration): Depends on US2 (needs issues to link)
 - **US5** (Sprints): Depends on US2 (needs issues to assign)
 - **Phase 7.5** (Authenticated Layouts): Depends on US1 (needs authentication infrastructure)
@@ -1554,7 +1636,7 @@ Phase 1: Setup
 
 ## Task Summary
 
-**Total Tasks**: 388  
+**Total Tasks**: 427  
 **Phase 1 (Setup)**: 14 tasks  
 **Phase 2 (Foundational)**: 44 tasks  
 **Phase 3 (US1)**: 38 tasks  
@@ -1565,10 +1647,11 @@ Phase 1: Setup
 **Phase 7.5 (Authenticated Layouts)**: 37 tasks  
 **Phase 7.6 (Settings Pages Fixes)**: 22 tasks  
 **Phase 8 (US6)**: 18 tasks  
+**Phase 8.8 (Troubleshooting & Permissive Config)**: 27 tasks  
 **Phase 9 (US7)**: 15 tasks  
 **Phase 10 (Polish)**: 40 tasks
 
-**Parallel Opportunities**: ~95 tasks marked with [P]
+**Parallel Opportunities**: ~102 tasks marked with [P]
 
 **Estimated Timeline**:
 

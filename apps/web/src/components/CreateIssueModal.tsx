@@ -23,6 +23,10 @@ export interface CreateIssueModalProps {
    * Project configuration
    */
   projectConfig?: ProjectConfig;
+  /**
+   * Initial values for prefilling the form (for clone functionality)
+   */
+  initialValues?: Partial<CreateIssueInput>;
 }
 
 /**
@@ -35,10 +39,44 @@ export function CreateIssueModal({
   onClose,
   projectId,
   projectConfig,
+  initialValues,
 }: CreateIssueModalProps) {
   const router = useRouter();
   const toast = useToast();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  // T408: Add user fetching in CreateIssueModal component
+  const [users, setUsers] = React.useState<Array<{
+    id: string;
+    username: string;
+    name: string | null;
+    avatarUrl: string | null;
+    role?: string;
+  }>>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = React.useState(false);
+
+  // Fetch users when modal opens
+  React.useEffect(() => {
+    if (open) {
+      setIsLoadingUsers(true);
+      fetch('/api/users')
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error('Failed to fetch users');
+          }
+          return res.json();
+        })
+        .then((data) => {
+          setUsers(data.users || []);
+        })
+        .catch((error) => {
+          console.error('Failed to fetch users:', error);
+          // Don't show error toast - assignment field just won't appear
+        })
+        .finally(() => {
+          setIsLoadingUsers(false);
+        });
+    }
+  }, [open]);
 
   const handleSubmit = async (data: CreateIssueInput) => {
     setIsSubmitting(true);
@@ -91,9 +129,11 @@ export function CreateIssueModal({
       <IssueForm
         projectId={projectId}
         projectConfig={projectConfig}
+        initialValues={initialValues}
         onSubmit={handleSubmit}
         onCancel={onClose}
         isSubmitting={isSubmitting}
+        users={users}
       />
     </Modal>
   );

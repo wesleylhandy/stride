@@ -2,6 +2,52 @@
 
 Common configuration errors and how to resolve them.
 
+> **Quick Tip**: The default configuration is designed to be permissive and allow all common operations. If you're getting errors when moving issues, check that your configuration includes all statuses that your issues use. See the [Board Status Configuration Guide](/docs/board-status-configuration-guide) for detailed help.
+
+## Quick Fixes
+
+### "Cannot move issue between status blocks"
+
+**Most Common Cause**: The issue's current or target status doesn't exist in your `workflow.statuses` configuration.
+
+**Quick Fix**:
+1. Check what status your issue currently has
+2. Check what status you're trying to move it to
+3. Ensure both statuses exist in your configuration's `workflow.statuses` array
+4. Status keys must match exactly (case-sensitive)
+
+**Example**: If your issue has status "Backlog" but your config only has "todo", add "Backlog" to your statuses:
+
+```yaml
+workflow:
+  statuses:
+    - key: backlog  # Add this if your issues use "backlog"
+      name: Backlog
+      type: open
+    - key: todo
+      name: To Do
+      type: open
+```
+
+### "Status 'X' is not defined in your project workflow configuration"
+
+**Quick Fix**: Add the missing status to your `workflow.statuses` array. The error message will show you which status is missing and what statuses are currently available.
+
+See [Status Not Found](#status-x-is-not-defined-in-workflow) below for detailed steps.
+
+### "Cannot transition from closed status"
+
+**Quick Fix**: Add a "reopened" status with type `in_progress` to allow reopening closed issues:
+
+```yaml
+workflow:
+  statuses:
+    # ... your existing statuses ...
+    - key: reopened
+      name: Reopened
+      type: in_progress  # This allows moving from closed to reopened
+```
+
 ## Validation Errors
 
 ### "Project key must be 2-10 uppercase alphanumeric characters"
@@ -28,11 +74,19 @@ project_key: API123
 
 ### "Status 'X' is not defined in workflow"
 
-**Problem**: The `default_status` references a status key that doesn't exist in `workflow.statuses`.
+**Problem**: Either:
+1. The `default_status` references a status key that doesn't exist in `workflow.statuses`, OR
+2. An issue has a status value that doesn't match any status key in your configuration
 
 **Solution**: 
-- Ensure `default_status` matches one of the `key` values in `workflow.statuses`
-- Check for typos in status keys
+- **For default_status errors**: Ensure `default_status` matches one of the `key` values in `workflow.statuses` (check for typos)
+- **For issue status errors**: Add the missing status to your `workflow.statuses` array. Check your issues to see what status values they currently have
+
+**Diagnostic Steps**:
+1. Look at your Kanban board - what status columns are showing?
+2. Check your issues - what status values do they have?
+3. Compare these to your `workflow.statuses` array
+4. Add any missing statuses
 
 **Example Fix**:
 ```yaml
@@ -50,6 +104,16 @@ workflow:
   statuses:
     - key: open
       name: Open
+      type: open
+
+# If your issues have status "backlog" but config doesn't:
+workflow:
+  statuses:
+    - key: backlog  # Add missing status
+      name: Backlog
+      type: open
+    - key: todo
+      name: To Do
       type: open
 ```
 
@@ -195,16 +259,79 @@ custom_fields:
     name: Priority
 ```
 
-## Workflow Issues
+## Board Status Issues
+
+### "Cannot move issue between status blocks on the board"
+
+**Problem**: Validation is blocking the status change. Common causes:
+1. Status not defined in configuration (see above)
+2. Trying to transition from closed to open/in_progress
+3. Required custom fields not set
+4. Status keys don't match (case sensitivity)
+
+**Diagnostic Steps**:
+1. Check the error message - it will tell you which status is missing or what rule is violated
+2. Verify both the source and target statuses exist in your config
+3. Check if you're trying to reopen a closed issue (needs "reopened" status)
+4. Verify custom fields if you see "Required field" errors
+
+**Solution**: See specific error sections above for targeted fixes.
 
 ### "Status transition not allowed"
 
 **Problem**: Trying to move an issue to a status that violates transition rules.
 
+**Common Cases**:
+- Moving from `closed` to `open` or `in_progress` (not allowed)
+- Missing intermediate statuses in workflow
+
 **Solution**: 
-- Review status types and transition rules
-- Ensure you're not trying to move from `closed` to `open`/`in_progress`
+- **To reopen closed issues**: Add a "reopened" status with type `in_progress` to your configuration (this is included in the default config)
+- Review status types and transition rules - closed statuses can only transition to other closed statuses or reopened
 - Check that both statuses exist in the configuration
+
+**Example - Allowing Reopened Issues**:
+```yaml
+workflow:
+  statuses:
+    - key: done
+      name: Done
+      type: closed
+    - key: reopened
+      name: Reopened
+      type: in_progress  # Allows: done → reopened
+```
+
+### "Current status 'X' is not defined in your project workflow configuration"
+
+**Problem**: An issue in your database has a status value that doesn't exist in your current configuration. This can happen if:
+- You removed a status from the config but issues still have that status
+- You imported issues with different status values
+- Status keys were renamed
+
+**Solution**:
+1. Check your issues to see what status values they have
+2. Add all missing statuses to your `workflow.statuses` array
+3. Consider migrating issues to use status keys from your config if needed
+
+**Example**:
+```yaml
+# Your issues have "Backlog" but config doesn't
+workflow:
+  statuses:
+    - key: backlog  # Add the missing status
+      name: Backlog
+      type: open
+    # ... other statuses ...
+```
+
+### "Target status 'Y' is not defined in your project workflow configuration"
+
+**Problem**: You're trying to move an issue to a status that doesn't exist in your config.
+
+**Solution**: Add the target status to your `workflow.statuses` array, or choose a different target status that exists in your config.
+
+## Workflow Issues
 
 ### "Default status not found"
 
@@ -235,12 +362,46 @@ custom_fields:
 - Fix each error one by one
 - Use the configuration editor's real-time validation to catch errors early
 
+## Configuration Migration
+
+### Migrating from Old Default Configuration
+
+If you created your project before the default configuration was updated to include the "reopened" status, you can add it manually:
+
+```yaml
+workflow:
+  statuses:
+    # ... your existing statuses ...
+    - key: reopened
+      name: Reopened
+      type: in_progress
+```
+
+### Syncing Issues with Configuration
+
+If you have issues with status values that don't match your configuration:
+
+1. **Option 1 - Add Missing Statuses** (Recommended): Add all status values from your issues to your configuration
+2. **Option 2 - Update Issues**: Manually update issue statuses to match your configuration
+3. **Option 3 - Use Default Config**: Reset to the default permissive configuration
+
 ## Getting Help
 
 If you're still experiencing issues:
 
-1. **Check the error message**: Error messages include the field path and specific issue
-2. **Validate your YAML**: Use an online YAML validator to check syntax
-3. **Review examples**: See the [Configuration Examples](/docs/configuration?section=examples) for working examples
-4. **Check the reference**: See the [Configuration Reference](/docs/configuration?section=reference) for complete schema details
+1. **Check the error message**: Error messages include the field path and specific issue, and often show available statuses
+2. **Review the Board Status Configuration Guide**: See [Board Status Configuration Guide](/docs/board-status-configuration-guide) for comprehensive help with board and status issues
+3. **Validate your YAML**: Use an online YAML validator to check syntax
+4. **Review examples**: See the [Configuration Examples](/docs/configuration?section=examples) for working examples
+5. **Check the reference**: See the [Configuration Reference](/docs/configuration?section=reference) for complete schema details
+
+### Diagnostic Checklist
+
+Before asking for help, check:
+- [ ] All issue status values exist in `workflow.statuses`
+- [ ] `default_status` matches a status key
+- [ ] No required custom fields are blocking transitions
+- [ ] YAML syntax is valid (check indentation, colons, etc.)
+- [ ] Status keys match exactly (case-sensitive)
+- [ ] Configuration is saved and page is refreshed
 

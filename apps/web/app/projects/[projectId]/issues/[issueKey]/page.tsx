@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { IssueDetail } from '@stride/ui';
+import { IssueDetailClient } from '@/components/IssueDetailClient';
 import { projectRepository, issueRepository, issueBranchRepository } from '@stride/database';
 import type { Issue, ProjectConfig, IssueType, Priority } from '@stride/types';
 import { parseYamlConfig } from '@stride/yaml-config';
@@ -84,8 +84,9 @@ export default async function IssueDetailPage({ params }: PageParams) {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <IssueDetail
+      <IssueDetailClient
         issue={typedIssue}
+        projectId={projectId}
         projectConfig={projectConfig}
         branches={branches}
         canEdit={canEdit}

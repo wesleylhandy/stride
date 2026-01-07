@@ -209,6 +209,53 @@ function validateCustomFieldType(
 }
 
 /**
+ * Validate assignee requirements for status transitions
+ * 
+ * T428: Add assignee requirement validation for status transitions
+ * Checks if assignee is required for the target status based on config
+ * 
+ * @param issue - Current issue data
+ * @param newStatus - Desired new status
+ * @param config - Project configuration
+ * @returns Validation result
+ */
+export function validateAssigneeRequirements(
+  issue: Issue,
+  newStatus: string,
+  config: ProjectConfig,
+): ValidationResult {
+  const errors: ValidationError[] = [];
+
+  // Check if assignee is required for this status
+  const userAssignment = config.user_assignment;
+  if (userAssignment) {
+    const requireForStatuses = userAssignment.require_assignee_for_statuses || [];
+    
+    // If this status requires an assignee and issue doesn't have one
+    if (requireForStatuses.includes(newStatus) && !issue.assigneeId) {
+      const statusConfig = config.workflow.statuses.find(s => s.key === newStatus);
+      errors.push({
+        field: 'assigneeId',
+        message: `Assignee is required before changing status to "${statusConfig?.name || newStatus}"`,
+      });
+    }
+
+    // Global assignee requirement
+    if (userAssignment.assignee_required && !issue.assigneeId) {
+      errors.push({
+        field: 'assigneeId',
+        message: 'Assignee is required for this issue',
+      });
+    }
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+}
+
+/**
  * Validate complete status change (combines all validations)
  * 
  * @param issue - Current issue data
@@ -234,6 +281,10 @@ export function validateStatusChange(
   // Validate required custom fields
   const fieldsResult = validateRequiredCustomFields(issue, newStatus, config);
   errors.push(...fieldsResult.errors);
+
+  // T428: Validate assignee requirements
+  const assigneeResult = validateAssigneeRequirements(issue, newStatus, config);
+  errors.push(...assigneeResult.errors);
 
   return {
     isValid: errors.length === 0,

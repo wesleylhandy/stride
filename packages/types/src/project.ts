@@ -24,6 +24,14 @@ export interface ProjectConfig {
   workflow: WorkflowConfig;
   custom_fields: CustomFieldConfig[];
   automation_rules: AutomationRule[];
+  user_assignment?: UserAssignmentConfig;
+}
+
+export interface UserAssignmentConfig {
+  default_assignee: 'none' | 'reporter';
+  assignee_required: boolean;
+  clone_preserve_assignee: boolean;
+  require_assignee_for_statuses: string[];
 }
 
 export interface WorkflowConfig {

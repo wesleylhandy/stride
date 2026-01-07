@@ -10,6 +10,8 @@ import {
   canCreateIssue,
   canViewIssue,
 } from "@/lib/auth/permissions";
+import { parseYamlConfig } from "@stride/yaml-config";
+import type { ProjectConfig } from "@stride/yaml-config";
 import { z } from "zod";
 
 interface RouteParams {
@@ -165,10 +167,28 @@ export async function POST(
       projectId,
     });
 
+    // T426: Implement default assignee logic (auto-assign to reporter if default_assignee: 'reporter')
+    let assigneeId = validated.assigneeId ?? undefined;
+    
+    // Get project config to check for default assignee
+    const projectConfigData = await projectRepository.getConfig(projectId);
+    if (projectConfigData?.config) {
+      const parseResult = parseYamlConfig(projectConfigData.config as unknown as string);
+      if (parseResult.success && parseResult.data) {
+        const config = parseResult.data as ProjectConfig;
+        const userAssignment = config.user_assignment;
+        
+        // If no assignee is set and config says to default to reporter
+        if (!assigneeId && userAssignment?.default_assignee === 'reporter') {
+          assigneeId = session.userId;
+        }
+      }
+    }
+
     // Convert null to undefined for repository
     const createData = {
       ...validated,
-      assigneeId: validated.assigneeId ?? undefined,
+      assigneeId,
       cycleId: validated.cycleId ?? undefined,
     };
 

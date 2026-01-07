@@ -28,7 +28,7 @@ export { CommandPalette, type CommandPaletteProps, type Command } from './organi
 export { ConfigEditor, type ConfigEditorProps } from './organisms/ConfigEditor';
 export { IssueForm, type IssueFormProps } from './organisms/IssueForm';
 export { KanbanBoard, type KanbanBoardProps } from './organisms/KanbanBoard';
-export { IssueDetail, type IssueDetailProps } from './organisms/IssueDetail';
+export { IssueDetail, type IssueDetailProps, type IssueBranch } from './organisms/IssueDetail';
 export { SprintPlanning, type SprintPlanningProps, type CycleMetrics } from './organisms/SprintPlanning';
 export { TopBar, type TopBarProps } from './organisms/TopBar';
 export { Sidebar, type SidebarProps } from './organisms/Sidebar';

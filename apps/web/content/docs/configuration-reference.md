@@ -215,6 +215,63 @@ automation_rules:
       target_status: "done"
 ```
 
+## User Assignment Configuration
+
+### `user_assignment` (optional)
+
+- **Type**: User Assignment Configuration object
+- **Default**: See defaults below
+- **Description**: Configures default assignment behavior and requirements for issues
+
+### User Assignment Configuration
+
+#### `default_assignee` (optional)
+
+- **Type**: Enum (`none`, `reporter`)
+- **Default**: `none`
+- **Description**: Default assignee when creating new issues
+  - `none`: Issue starts unassigned (default behavior)
+  - `reporter`: Automatically assign to issue reporter
+
+```yaml
+user_assignment:
+  default_assignee: reporter  # Auto-assign to reporter
+```
+
+#### `assignee_required` (optional)
+
+- **Type**: Boolean
+- **Default**: `false`
+- **Description**: Whether assignee is required for all issues (global requirement)
+
+#### `clone_preserve_assignee` (optional)
+
+- **Type**: Boolean
+- **Default**: `true`
+- **Description**: Whether to preserve assignee when cloning issues
+  - `true`: Cloned issue keeps original assignee (default)
+  - `false`: Cloned issue starts unassigned
+
+#### `require_assignee_for_statuses` (optional)
+
+- **Type**: Array of status keys
+- **Default**: `[]`
+- **Description**: Status keys that require an assignee before transitioning
+- **Example**: `["in_progress", "in_review"]` - Issues must be assigned before moving to these statuses
+
+```yaml
+user_assignment:
+  default_assignee: reporter
+  assignee_required: false
+  clone_preserve_assignee: true
+  require_assignee_for_statuses: [in_progress, in_review]
+```
+
+**Notes**:
+- When `require_assignee_for_statuses` is configured, status transitions to those statuses will be blocked if no assignee is set
+- Status keys in `require_assignee_for_statuses` must match keys defined in `workflow.statuses`
+- The `default_assignee` setting applies only when creating new issues, not when updating existing ones
+
 ## Complete Example
 
 ```yaml
@@ -258,6 +315,12 @@ automation_rules:
     conditions:
       branch_pattern: "feature/*"
       target_status: "in_progress"
+
+user_assignment:
+  default_assignee: reporter
+  assignee_required: false
+  clone_preserve_assignee: true
+  require_assignee_for_statuses: [in_progress, in_review]
 ```
 
 ## Validation Rules

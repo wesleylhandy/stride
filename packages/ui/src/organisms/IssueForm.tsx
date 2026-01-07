@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import type { CreateIssueInput } from '@stride/types';
@@ -45,6 +45,16 @@ export interface IssueFormProps {
    * Additional CSS classes
    */
   className?: string;
+  /**
+   * List of users for assignment dropdown
+   */
+  users?: Array<{
+    id: string;
+    username: string;
+    name: string | null;
+    avatarUrl: string | null;
+    role?: string;
+  }>;
 }
 
 /**
@@ -248,6 +258,7 @@ export function IssueForm({
   isSubmitting = false,
   mode,
   className,
+  users,
 }: IssueFormProps) {
   // Determine mode: use prop if provided, otherwise infer from initialValues
   const formMode = mode || (initialValues && Object.keys(initialValues).length > 0 ? 'edit' : 'create');
@@ -260,6 +271,7 @@ export function IssueForm({
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
     watch,
     setValue,
@@ -271,6 +283,26 @@ export function IssueForm({
       customFields: initialValues?.customFields || {},
     },
   });
+
+  // When users load and we have an assigneeId, ensure the form value is set
+  // This handles the case where users haven't loaded yet when form initializes
+  // The select dropdown needs matching options to display the selected value
+  React.useEffect(() => {
+    if (users && users.length > 0) {
+      const assigneeId = initialValues?.assigneeId;
+      if (assigneeId) {
+        // Check if the assigneeId exists in the users list
+        const assigneeExists = users.some(u => u.id === assigneeId);
+        if (assigneeExists) {
+          // Set the value explicitly - this ensures the select shows the correct selection
+          setValue('assigneeId', assigneeId, { shouldValidate: false, shouldDirty: false });
+        }
+      } else {
+        // Explicitly set to empty string if no assignee
+        setValue('assigneeId', '', { shouldValidate: false, shouldDirty: false });
+      }
+    }
+  }, [users, initialValues?.assigneeId, setValue]);
 
   const customFields = watch('customFields') || {};
 
@@ -403,6 +435,53 @@ export function IssueForm({
           </p>
         )}
       </div>
+
+      {/* Assignee */}
+      {users && (
+        <div>
+          <label htmlFor="assignee" className="block text-sm font-medium mb-1">
+            Assignee
+          </label>
+          <Controller
+            name="assigneeId"
+            control={control}
+            defaultValue={initialValues?.assigneeId || ''}
+            render={({ field }) => (
+              <select
+                id="assignee"
+                {...field}
+                value={field.value || ''}
+                onChange={(e) => field.onChange(e.target.value || undefined)}
+                className={cn(
+                  'flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm',
+                  'transition-colors focus-ring',
+                  errors.assigneeId
+                    ? 'border-error focus-visible:ring-error'
+                    : 'border-border hover:border-border-hover focus-visible:border-border-focus'
+                )}
+              >
+                <option value="">Unassigned</option>
+                {users.map((user) => {
+                  // T406: Implement user display format (name (username) or username)
+                  const displayName = user.name
+                    ? `${user.name} (${user.username})`
+                    : user.username;
+                  return (
+                    <option key={user.id} value={user.id}>
+                      {displayName}
+                    </option>
+                  );
+                })}
+              </select>
+            )}
+          />
+          {errors.assigneeId && (
+            <p className="mt-1 text-sm text-error" role="alert">
+              {errors.assigneeId.message}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Story Points */}
       <div>

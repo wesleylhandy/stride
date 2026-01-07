@@ -55,6 +55,15 @@ export interface KanbanBoardProps {
    */
   statusFilter?: string[];
   /**
+   * Optional list of users for assignee display on cards
+   */
+  users?: Array<{
+    id: string;
+    username: string;
+    name: string | null;
+    avatarUrl: string | null;
+  }>;
+  /**
    * Additional CSS classes
    */
   className?: string;
@@ -66,12 +75,18 @@ interface ColumnProps {
   onIssueClick?: (issue: Issue) => void;
   isFiltered?: boolean;
   isValidDrop?: boolean;
+  users?: Array<{
+    id: string;
+    username: string;
+    name: string | null;
+    avatarUrl: string | null;
+  }>;
 }
 
 /**
  * Kanban column component (droppable)
  */
-function KanbanColumn({ status, issues, onIssueClick, isFiltered: _isFiltered, isValidDrop }: ColumnProps) {
+function KanbanColumn({ status, issues, onIssueClick, isFiltered: _isFiltered, isValidDrop, users }: ColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: status.key,
   });
@@ -118,6 +133,7 @@ function KanbanColumn({ status, issues, onIssueClick, isFiltered: _isFiltered, i
               key={issue.id}
               issue={issue}
               onClick={() => onIssueClick?.(issue)}
+              users={users}
             />
           ))}
         </SortableContext>
@@ -137,9 +153,16 @@ function KanbanColumn({ status, issues, onIssueClick, isFiltered: _isFiltered, i
 function SortableIssueCard({
   issue,
   onClick,
+  users,
 }: {
   issue: Issue;
   onClick?: () => void;
+  users?: Array<{
+    id: string;
+    username: string;
+    name: string | null;
+    avatarUrl: string | null;
+  }>;
 }) {
   const {
     attributes,
@@ -224,6 +247,7 @@ function SortableIssueCard({
           issue={issue}
           isDragging={isDragging}
           onClick={handleClick}
+          users={users}
         />
       </div>
     </div>
@@ -432,6 +456,7 @@ export function KanbanBoard({
   onIssueMove,
   onIssueClick,
   statusFilter,
+  users,
   className,
 }: KanbanBoardProps) {
   const [activeId, setActiveId] = React.useState<string | null>(null);
@@ -639,6 +664,7 @@ export function KanbanBoard({
               issues={issuesByStatus[status.key] || []}
               onIssueClick={onIssueClick}
               isValidDrop={getIsValidDrop(status.key)}
+              users={users}
             />
           ))}
         </div>

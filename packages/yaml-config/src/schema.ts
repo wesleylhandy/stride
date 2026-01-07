@@ -37,6 +37,19 @@ export const AutomationRuleSchema = z.strictObject({
   conditions: z.record(z.string(), z.unknown()).optional(),
 });
 
+// User assignment configuration schema
+export const UserAssignmentConfigSchema = z.strictObject({
+  default_assignee: z.enum(['none', 'reporter']).default('none'),
+  assignee_required: z.boolean().default(false),
+  clone_preserve_assignee: z.boolean().default(true),
+  require_assignee_for_statuses: z.array(z.string()).default([]),
+}).default({
+  default_assignee: 'none',
+  assignee_required: false,
+  clone_preserve_assignee: true,
+  require_assignee_for_statuses: [],
+});
+
 // Project configuration schema
 export const ProjectConfigSchema = z.strictObject({
   project_key: z.string().regex(/^[A-Z0-9]{2,10}$/, 'Project key must be 2-10 uppercase alphanumeric characters'),
@@ -44,6 +57,7 @@ export const ProjectConfigSchema = z.strictObject({
   workflow: WorkflowConfigSchema,
   custom_fields: z.array(CustomFieldConfigSchema).default([]),
   automation_rules: z.array(AutomationRuleSchema).default([]),
+  user_assignment: UserAssignmentConfigSchema.optional(),
 });
 
 // Export inferred types
@@ -51,5 +65,6 @@ export type StatusConfig = z.infer<typeof StatusConfigSchema>;
 export type CustomFieldConfig = z.infer<typeof CustomFieldConfigSchema>;
 export type WorkflowConfig = z.infer<typeof WorkflowConfigSchema>;
 export type AutomationRule = z.infer<typeof AutomationRuleSchema>;
+export type UserAssignmentConfig = z.infer<typeof UserAssignmentConfigSchema>;
 export type ProjectConfig = z.infer<typeof ProjectConfigSchema>;
 

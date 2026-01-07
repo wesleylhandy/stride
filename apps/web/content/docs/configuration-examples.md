@@ -261,6 +261,46 @@ custom_fields:
 automation_rules: []
 ```
 
+## With User Assignment Configuration
+
+Configuration with user assignment defaults and requirements:
+
+```yaml
+project_key: TEAM
+project_name: Team Project
+
+workflow:
+  default_status: todo
+  statuses:
+    - key: todo
+      name: To Do
+      type: open
+    - key: in_progress
+      name: In Progress
+      type: in_progress
+    - key: in_review
+      name: In Review
+      type: in_progress
+    - key: done
+      name: Done
+      type: closed
+
+custom_fields:
+  - key: priority
+    name: Priority
+    type: dropdown
+    options: [Low, Medium, High, Critical]
+    required: false
+
+automation_rules: []
+
+user_assignment:
+  default_assignee: reporter  # Auto-assign new issues to reporter
+  assignee_required: false
+  clone_preserve_assignee: true  # Keep assignee when cloning
+  require_assignee_for_statuses: [in_progress, in_review]  # Require assignee before moving to these statuses
+```
+
 ## Validation Notes
 
 All examples above:

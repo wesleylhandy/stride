@@ -46,6 +46,30 @@ export function KanbanBoardClient({
   const [issues, setIssues] = React.useState<Issue[]>(initialIssues);
   const [isUpdating, setIsUpdating] = React.useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
+  // Fetch users once for assignee display on cards
+  const [users, setUsers] = React.useState<Array<{
+    id: string;
+    username: string;
+    name: string | null;
+    avatarUrl: string | null;
+  }>>([]);
+
+  // Fetch users on mount for assignee avatars
+  React.useEffect(() => {
+    fetch('/api/users')
+      .then((res) => {
+        if (!res.ok) return;
+        return res.json();
+      })
+      .then((data) => {
+        if (data?.users) {
+          setUsers(data.users);
+        }
+      })
+      .catch(() => {
+        // Silent fail - cards will fall back to ID-based display
+      });
+  }, []);
 
   // Update issues when initialIssues change
   React.useEffect(() => {
@@ -214,6 +238,7 @@ export function KanbanBoardClient({
           projectConfig={projectConfig}
           onIssueMove={canEdit ? handleIssueMove : undefined}
           onIssueClick={handleIssueClick}
+          users={users}
         />
         {isUpdating && (
           <div className="fixed bottom-4 left-4 bg-background-secondary dark:bg-background-dark-secondary border border-border dark:border-border-dark rounded-lg p-3 shadow-lg">
