@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { yaml } from "@codemirror/lang-yaml";
+import { json } from "@codemirror/lang-json";
 import { parseYamlConfig, type ValidationError } from "@stride/yaml-config";
 import type { ProjectConfig } from "@stride/yaml-config";
 import { DocumentationLink } from "../molecules/DocumentationLink";
@@ -150,7 +151,7 @@ export function ConfigEditor({
         </div>
 
         {/* CodeMirror Editor */}
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-hidden">
           <CodeMirror
             value={yamlContent}
             onChange={(value) => setYamlContent(value)}
@@ -203,16 +204,26 @@ export function ConfigEditor({
 
       {/* Config Preview */}
       {showPreview && parsedConfig && !hasErrors && (
-        <div className="mt-4 border border-gray-300 dark:border-gray-700 rounded-lg">
+        <div className="mt-4 border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
           <div className="px-4 py-2 bg-gray-50 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700">
             <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">
               Configuration Preview
             </h4>
           </div>
-          <div className="px-4 py-2 bg-white dark:bg-gray-900">
-            <pre className="text-xs overflow-auto max-h-64">
-              {JSON.stringify(parsedConfig, null, 2)}
-            </pre>
+          <div className="h-64 overflow-hidden">
+            <CodeMirror
+              value={JSON.stringify(parsedConfig, null, 2)}
+              extensions={[json()]}
+              readOnly={true}
+              basicSetup={{
+                lineNumbers: true,
+                foldGutter: true,
+                dropCursor: false,
+                allowMultipleSelections: false,
+              }}
+              theme="dark"
+              className="h-full"
+            />
           </div>
         </div>
       )}

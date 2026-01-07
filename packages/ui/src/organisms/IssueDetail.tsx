@@ -78,11 +78,11 @@ function AssigneeDisplay({ assigneeId }: { assigneeId: string }) {
   }, [assigneeId]);
 
   if (!user) {
-    return <span>{assigneeId}</span>;
+    return <span className="text-foreground dark:text-foreground-dark">{assigneeId}</span>;
   }
 
   // T412: Update IssueDetail display to show assignee name/username instead of ID
-  return <span>{user.name ? `${user.name} (${user.username})` : user.username}</span>;
+  return <span className="text-foreground dark:text-foreground-dark">{user.name ? `${user.name} (${user.username})` : user.username}</span>;
 }
 
 /**
@@ -146,7 +146,7 @@ function renderCustomFieldValue(
   value: unknown,
 ): React.ReactNode {
   if (value === undefined || value === null || value === '') {
-    return <span className="text-foreground-secondary">Not set</span>;
+    return <span className="text-foreground-secondary dark:text-foreground-dark-secondary">Not set</span>;
   }
 
   switch (field.type) {
@@ -251,7 +251,7 @@ export function IssueDetail({
     return (
       <div className={cn('space-y-6', className)}>
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Edit Issue</h2>
+          <h2 className="text-2xl font-bold text-foreground dark:text-foreground-dark">Edit Issue</h2>
         </div>
         <IssueForm
           projectId={issue.projectId}
@@ -283,7 +283,7 @@ export function IssueDetail({
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-bold">{issue.title}</h1>
+            <h1 className="text-3xl font-bold text-foreground dark:text-foreground-dark">{issue.title}</h1>
             <Badge variant={getStatusVariant(statusConfig?.type || 'open')}>
               {statusConfig?.name || issue.status}
             </Badge>
@@ -293,7 +293,7 @@ export function IssueDetail({
               </Badge>
             )}
           </div>
-          <div className="text-sm text-foreground-secondary">
+          <div className="text-sm text-foreground-secondary dark:text-foreground-dark-secondary">
             <span className="font-medium">{issue.key}</span>
             {' • '}
             <span>Created {formatDate(issue.createdAt)}</span>
@@ -330,10 +330,10 @@ export function IssueDetail({
 
       {/* Status Change UI (T130) */}
       {canEdit && onStatusChange && availableStatuses.length > 0 && (
-        <div className="p-4 bg-background-secondary rounded-lg border border-border">
+        <div className="p-4 bg-background-secondary dark:bg-background-dark-secondary rounded-lg border border-border dark:border-border-dark">
           <label
             htmlFor="status-change"
-            className="block text-sm font-medium mb-2"
+            className="block text-sm font-medium mb-2 text-foreground dark:text-foreground-dark"
           >
             Change Status
           </label>
@@ -344,9 +344,10 @@ export function IssueDetail({
               onChange={(e) => handleStatusChange(e.target.value)}
               disabled={isUpdating}
               className={cn(
-                'flex h-10 rounded-md border bg-background px-3 py-2 text-sm',
+                'flex h-10 rounded-md border bg-background dark:bg-background-dark px-3 py-2 text-sm',
+                'text-foreground dark:text-foreground-dark',
                 'transition-colors focus-ring',
-                'border-border hover:border-border-hover focus-visible:border-border-focus'
+                'border-border dark:border-border-dark hover:border-border-hover dark:hover:border-border-dark-hover focus-visible:border-border-focus'
               )}
             >
               {availableStatuses.map((status) => (
@@ -356,7 +357,7 @@ export function IssueDetail({
               ))}
             </select>
             {isUpdating && (
-              <span className="text-sm text-foreground-secondary">
+              <span className="text-sm text-foreground-secondary dark:text-foreground-dark-secondary">
                 Updating...
               </span>
             )}
@@ -370,16 +371,16 @@ export function IssueDetail({
         <div className="space-y-4">
           {/* Type */}
           <div>
-            <label className="text-sm font-medium text-foreground-secondary">
+            <label className="text-sm font-medium text-foreground-secondary dark:text-foreground-dark-secondary">
               Type
             </label>
-            <p className="mt-1 text-foreground">{issue.type}</p>
+            <p className="mt-1 text-foreground dark:text-foreground-dark">{issue.type}</p>
           </div>
 
           {/* Priority */}
           {issue.priority && (
             <div>
-              <label className="text-sm font-medium text-foreground-secondary">
+              <label className="text-sm font-medium text-foreground-secondary dark:text-foreground-dark-secondary">
                 Priority
               </label>
               <p className="mt-1">
@@ -393,20 +394,20 @@ export function IssueDetail({
           {/* Story Points */}
           {issue.storyPoints !== undefined && (
             <div>
-              <label className="text-sm font-medium text-foreground-secondary">
+              <label className="text-sm font-medium text-foreground-secondary dark:text-foreground-dark-secondary">
                 Story Points
               </label>
-              <p className="mt-1 text-foreground">{issue.storyPoints}</p>
+              <p className="mt-1 text-foreground dark:text-foreground-dark">{issue.storyPoints}</p>
             </div>
           )}
 
           {/* Assignee */}
           {issue.assigneeId && (
             <div>
-              <label className="text-sm font-medium text-foreground-secondary">
+              <label className="text-sm font-medium text-foreground-secondary dark:text-foreground-dark-secondary">
                 Assignee
               </label>
-              <p className="mt-1 text-foreground">
+              <p className="mt-1 text-foreground dark:text-foreground-dark">
                 <AssigneeDisplay assigneeId={issue.assigneeId} />
               </p>
             </div>
@@ -417,29 +418,29 @@ export function IssueDetail({
         <div className="space-y-4">
           {/* Reporter */}
           <div>
-            <label className="text-sm font-medium text-foreground-secondary">
+            <label className="text-sm font-medium text-foreground-secondary dark:text-foreground-dark-secondary">
               Reporter
             </label>
-            <p className="mt-1 text-foreground">
+            <p className="mt-1 text-foreground dark:text-foreground-dark">
               <AssigneeDisplay assigneeId={issue.reporterId} />
             </p>
           </div>
 
           {/* Created At */}
           <div>
-            <label className="text-sm font-medium text-foreground-secondary">
+            <label className="text-sm font-medium text-foreground-secondary dark:text-foreground-dark-secondary">
               Created
             </label>
-            <p className="mt-1 text-foreground">{formatDate(issue.createdAt)}</p>
+            <p className="mt-1 text-foreground dark:text-foreground-dark">{formatDate(issue.createdAt)}</p>
           </div>
 
           {/* Updated At */}
           {issue.updatedAt && (
             <div>
-              <label className="text-sm font-medium text-foreground-secondary">
+              <label className="text-sm font-medium text-foreground-secondary dark:text-foreground-dark-secondary">
                 Last Updated
               </label>
-              <p className="mt-1 text-foreground">
+              <p className="mt-1 text-foreground dark:text-foreground-dark">
                 {formatDate(issue.updatedAt)}
               </p>
             </div>
@@ -448,10 +449,10 @@ export function IssueDetail({
           {/* Closed At */}
           {issue.closedAt && (
             <div>
-              <label className="text-sm font-medium text-foreground-secondary">
+              <label className="text-sm font-medium text-foreground-secondary dark:text-foreground-dark-secondary">
                 Closed
               </label>
-              <p className="mt-1 text-foreground">{formatDate(issue.closedAt)}</p>
+              <p className="mt-1 text-foreground dark:text-foreground-dark">{formatDate(issue.closedAt)}</p>
             </div>
           )}
         </div>
@@ -460,7 +461,7 @@ export function IssueDetail({
       {/* Description */}
       {issue.description && (
         <div>
-          <label className="text-sm font-medium text-foreground-secondary mb-2 block">
+          <label className="text-sm font-medium text-foreground-secondary dark:text-foreground-dark-secondary mb-2 block">
             Description
           </label>
           <div className="mt-2">
@@ -473,16 +474,16 @@ export function IssueDetail({
       {projectConfig?.custom_fields &&
         projectConfig.custom_fields.length > 0 && (
           <div>
-            <h3 className="text-lg font-semibold mb-4">Custom Fields</h3>
+            <h3 className="text-lg font-semibold mb-4 text-foreground dark:text-foreground-dark">Custom Fields</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {projectConfig.custom_fields.map((field) => {
                 const value = issue.customFields[field.key];
                 return (
                   <div key={field.key}>
-                    <label className="text-sm font-medium text-foreground-secondary">
+                    <label className="text-sm font-medium text-foreground-secondary dark:text-foreground-dark-secondary">
                       {field.name}
                     </label>
-                    <p className="mt-1 text-foreground">
+                    <p className="mt-1 text-foreground dark:text-foreground-dark">
                       {renderCustomFieldValue(field, value)}
                     </p>
                   </div>
@@ -495,17 +496,17 @@ export function IssueDetail({
       {/* Linked Branches/PRs (T213-T216) */}
       {branches.length > 0 && (
         <div>
-          <h3 className="text-lg font-semibold mb-4">Linked Branches & Pull Requests</h3>
+          <h3 className="text-lg font-semibold mb-4 text-foreground dark:text-foreground-dark">Linked Branches & Pull Requests</h3>
           <div className="space-y-3">
             {branches.map((branch) => (
               <div
                 key={branch.id}
-                className="p-4 bg-background-secondary rounded-lg border border-border"
+                className="p-4 bg-background-secondary dark:bg-background-dark-secondary rounded-lg border border-border dark:border-border-dark"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <code className="text-sm font-mono bg-background px-2 py-1 rounded border border-border">
+                      <code className="text-sm font-mono bg-background dark:bg-background-dark text-foreground dark:text-foreground-dark px-2 py-1 rounded border border-border dark:border-border-dark">
                         {branch.branchName}
                       </code>
                       {branch.pullRequestStatus && (
@@ -548,11 +549,11 @@ export function IssueDetail({
                       </div>
                     )}
                     {branch.lastCommitSha && (
-                      <div className="text-xs text-foreground-secondary font-mono">
+                      <div className="text-xs text-foreground-secondary dark:text-foreground-dark-secondary font-mono">
                         Latest commit: {branch.lastCommitSha.substring(0, 7)}
                       </div>
                     )}
-                    <div className="text-xs text-foreground-secondary mt-1">
+                    <div className="text-xs text-foreground-secondary dark:text-foreground-dark-secondary mt-1">
                       Linked {formatDate(branch.createdAt)}
                     </div>
                   </div>
