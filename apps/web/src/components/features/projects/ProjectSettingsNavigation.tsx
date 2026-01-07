@@ -27,18 +27,18 @@ export function ProjectSettingsNavigation({
       href: `/projects/${projectId}/settings/config`,
       description: 'Edit workflow, statuses, and custom fields',
     },
+    {
+      id: 'integrations',
+      label: 'Integrations',
+      href: `/projects/${projectId}/settings/integrations`,
+      description: 'Configure Git and monitoring integrations',
+    },
     // Future settings sections can be added here:
     // {
     //   id: 'members',
     //   label: 'Members',
     //   href: `/projects/${projectId}/settings/members`,
     //   description: 'Manage project members and permissions',
-    // },
-    // {
-    //   id: 'integrations',
-    //   label: 'Integrations',
-    //   href: `/projects/${projectId}/settings/integrations`,
-    //   description: 'Configure Git and monitoring integrations',
     // },
   ];
 

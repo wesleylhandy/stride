@@ -4,6 +4,7 @@ import type { Issue } from '@stride/types';
 export interface ValidationError {
   field?: string;
   message: string;
+  helpUrl?: string;
 }
 
 export interface ValidationResult {

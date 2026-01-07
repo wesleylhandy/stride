@@ -9,6 +9,7 @@ import rehypeRaw from 'rehype-raw';
 import { cn } from '../utils/cn';
 import { MermaidDiagram } from './MermaidDiagram';
 import { LinkPreview, type LinkPreviewData } from './LinkPreview';
+import { CodeBlock } from './CodeBlock';
 
 // Import highlight.js styles (you can customize this)
 // Note: highlight.js styles should be imported where the component is used
@@ -118,13 +119,19 @@ export function MarkdownRenderer({
     <div
       className={cn(
         'prose prose-slate dark:prose-invert',
-        'prose-headings:font-semibold',
-        'prose-code:text-sm prose-code:bg-background-secondary prose-code:px-1 prose-code:py-0.5 prose-code:rounded',
-        'prose-pre:bg-background-secondary prose-pre:border prose-pre:border-border',
-        'prose-blockquote:border-l-4 prose-blockquote:border-primary',
-        'prose-a:text-primary prose-a:no-underline hover:prose-a:underline',
-        'prose-table:border-collapse prose-th:border prose-th:border-border prose-th:p-2',
-        'prose-td:border prose-td:border-border prose-td:p-2',
+        'prose-headings:font-semibold prose-headings:text-foreground dark:prose-headings:text-foreground-dark',
+        'prose-p:text-foreground-secondary dark:prose-p:text-foreground-dark-secondary',
+        'prose-code:text-sm prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:text-gray-900 dark:prose-code:text-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-mono',
+        // Remove prose-pre styles - CodeBlock component handles all pre styling
+        'prose-pre:p-0 prose-pre:border-0 prose-pre:m-0',
+        'prose-blockquote:border-l-4 prose-blockquote:border-primary dark:prose-blockquote:border-primary-dark prose-blockquote:text-foreground-secondary dark:prose-blockquote:text-foreground-dark-secondary',
+        'prose-a:text-primary dark:prose-a:text-primary-dark prose-a:no-underline hover:prose-a:underline',
+        'prose-strong:text-foreground dark:prose-strong:text-foreground-dark prose-strong:font-semibold',
+        'prose-ul:text-foreground-secondary dark:prose-ul:text-foreground-dark-secondary',
+        'prose-ol:text-foreground-secondary dark:prose-ol:text-foreground-dark-secondary',
+        'prose-li:text-foreground-secondary dark:prose-li:text-foreground-dark-secondary',
+        'prose-table:border-collapse prose-th:border prose-th:border-border dark:prose-th:border-border-dark prose-th:p-2 prose-th:bg-gray-50 dark:prose-th:bg-gray-900',
+        'prose-td:border prose-td:border-border dark:prose-td:border-border-dark prose-td:p-2',
         'max-w-none',
         className
       )}
@@ -210,10 +217,10 @@ export function MarkdownRenderer({
               </code>
             );
           },
-          // Customize pre blocks to handle Mermaid
-          pre({ children, ...props }) {
+          // Customize pre blocks to handle Mermaid and use CodeBlock
+          pre({ children }) {
             // Check if this pre contains a Mermaid code block
-            const child = React.Children.only(children) as React.ReactElement<{ className?: string }>;
+            const child = React.Children.only(children) as React.ReactElement<{ className?: string; children?: React.ReactNode }>;
             if (
               child?.props?.className?.includes('language-mermaid') &&
               enableMermaid
@@ -222,7 +229,69 @@ export function MarkdownRenderer({
               return <>{children}</>;
             }
 
-            return <pre {...props}>{children}</pre>;
+            // Extract language and content from code element
+            const codeElement = child as React.ReactElement<{ className?: string; children?: React.ReactNode; dangerouslySetInnerHTML?: { __html: string } }>;
+            const className = codeElement?.props?.className || '';
+            const match = /language-(\w+)/.exec(className);
+            const language = match ? match[1] : undefined;
+            
+            // Helper function to extract plain text for copy functionality
+            const extractText = (node: React.ReactNode): string => {
+              if (typeof node === 'string') {
+                return node;
+              }
+              if (typeof node === 'number') {
+                return String(node);
+              }
+              if (Array.isArray(node)) {
+                return node.map(extractText).join('');
+              }
+              if (React.isValidElement(node)) {
+                const element = node as React.ReactElement<{ children?: React.ReactNode; dangerouslySetInnerHTML?: { __html: string } }>;
+                if (element.props?.dangerouslySetInnerHTML?.__html) {
+                  // Strip HTML tags using regex (works in SSR)
+                  return element.props.dangerouslySetInnerHTML.__html
+                    .replace(/<[^>]*>/g, '')
+                    .replace(/&nbsp;/g, ' ')
+                    .replace(/&lt;/g, '<')
+                    .replace(/&gt;/g, '>')
+                    .replace(/&amp;/g, '&')
+                    .replace(/&quot;/g, '"')
+                    .replace(/&#39;/g, "'");
+                }
+                if (element.props?.children) {
+                  return extractText(element.props.children);
+                }
+              }
+              return '';
+            };
+            
+            // Get code content - preserve HTML structure for syntax highlighting
+            const codeContent = codeElement?.props?.children;
+            const codeHtml = codeElement?.props?.dangerouslySetInnerHTML?.__html;
+            const plainText = codeHtml 
+              ? codeHtml
+                  .replace(/<[^>]*>/g, '')
+                  .replace(/&nbsp;/g, ' ')
+                  .replace(/&lt;/g, '<')
+                  .replace(/&gt;/g, '>')
+                  .replace(/&amp;/g, '&')
+                  .replace(/&quot;/g, '"')
+                  .replace(/&#39;/g, "'")
+                  .trim()
+              : extractText(codeContent).trim();
+
+            // Use CodeBlock component for better styling and copy functionality
+            // Preserve the HTML structure from rehype-highlight for syntax highlighting
+            return (
+              <CodeBlock language={language} codeText={plainText}>
+                {codeHtml ? (
+                  <span dangerouslySetInnerHTML={{ __html: codeHtml }} />
+                ) : (
+                  codeContent
+                )}
+              </CodeBlock>
+            );
           },
           // Customize links - render link previews (T150)
           a({ node, href, children, ...props }) {

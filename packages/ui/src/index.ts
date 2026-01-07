@@ -20,6 +20,8 @@ export { BurndownChart, type BurndownChartProps } from './molecules/BurndownChar
 export { ProjectSelector, type ProjectSelectorProps, type Project } from './molecules/ProjectSelector';
 export { Breadcrumbs, type BreadcrumbsProps, type BreadcrumbItem } from './molecules/Breadcrumbs';
 export { Modal, type ModalProps } from './molecules/Modal';
+export { DocumentationLink, type DocumentationLinkProps } from './molecules/DocumentationLink';
+export { CodeBlock, type CodeBlockProps } from './molecules/CodeBlock';
 
 // Organisms
 export { CommandPalette, type CommandPaletteProps, type Command } from './organisms/CommandPalette';
@@ -31,6 +33,9 @@ export { SprintPlanning, type SprintPlanningProps, type CycleMetrics } from './o
 export { TopBar, type TopBarProps } from './organisms/TopBar';
 export { Sidebar, type SidebarProps } from './organisms/Sidebar';
 export { ProjectTabs, type ProjectTabsProps, type ProjectTab } from './organisms/ProjectTabs';
+
+// Hooks
+export { useToast } from './hooks/useToast';
 
 // Utils
 export { cn } from './utils/cn';

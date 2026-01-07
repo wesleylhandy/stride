@@ -35,3 +35,4 @@ SOFTWARE.
 - **Year**: Update year if needed (currently 2026)
 - **File Location**: Save as `LICENSE` (no extension) in repository root
 - **Format**: Plain text file, no markdown formatting
+

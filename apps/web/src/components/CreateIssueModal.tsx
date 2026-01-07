@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { Modal, IssueForm } from '@stride/ui';
+import { Modal, IssueForm, useToast } from '@stride/ui';
 import type { CreateIssueInput } from '@stride/types';
 import type { ProjectConfig } from '@stride/yaml-config';
 
@@ -37,6 +37,7 @@ export function CreateIssueModal({
   projectConfig,
 }: CreateIssueModalProps) {
   const router = useRouter();
+  const toast = useToast();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const handleSubmit = async (data: CreateIssueInput) => {
@@ -57,6 +58,9 @@ export function CreateIssueModal({
 
       const issue = await response.json();
 
+      // Show success toast
+      toast.success('Issue created successfully');
+
       // Close modal
       onClose();
 
@@ -64,11 +68,14 @@ export function CreateIssueModal({
       router.refresh();
     } catch (error) {
       console.error('Failed to create issue:', error);
-      alert(
-        error instanceof Error
-          ? error.message
-          : 'Failed to create issue. Please try again.'
-      );
+      
+      const errorMessage = error instanceof Error
+        ? error.message
+        : 'Failed to create issue. Please try again.';
+
+      toast.error('Failed to create issue', {
+        description: errorMessage,
+      });
     } finally {
       setIsSubmitting(false);
     }

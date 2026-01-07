@@ -5,6 +5,7 @@ import CodeMirror from "@uiw/react-codemirror";
 import { yaml } from "@codemirror/lang-yaml";
 import { parseYamlConfig, type ValidationError } from "@stride/yaml-config";
 import type { ProjectConfig } from "@stride/yaml-config";
+import { DocumentationLink } from "../molecules/DocumentationLink";
 
 export interface ConfigEditorProps {
   /** Initial YAML content */
@@ -100,9 +101,14 @@ export function ConfigEditor({
       {/* Editor Section */}
       <div className="flex-1 flex flex-col border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
         <div className="flex items-center justify-between px-4 py-2 bg-gray-50 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700">
-          <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
-            Configuration (YAML)
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+              Configuration (YAML)
+            </h3>
+            <DocumentationLink section="reference" className="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+              Help
+            </DocumentationLink>
+          </div>
           {!readOnly && (
             <button
               onClick={handleSave}

@@ -59,7 +59,11 @@ export async function GET(
     // If requesting OAuth URL
     if (action === "oauth" && repositoryType) {
       const state = crypto.randomUUID();
-      const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/projects/${projectId}/repositories/callback`;
+      const returnTo = searchParams.get("returnTo");
+      let redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/projects/${projectId}/repositories/callback`;
+      if (returnTo) {
+        redirectUri += `?returnTo=${encodeURIComponent(returnTo)}`;
+      }
 
       let authUrl: string;
 

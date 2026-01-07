@@ -919,7 +919,7 @@ Where:
 
 ### Settings Navigation
 
-- [ ] T259 [P] Enable Integrations link in ProjectSettingsNavigation component in apps/web/src/components/features/projects/ProjectSettingsNavigation.tsx
+- [x] T259 [P] Enable Integrations link in ProjectSettingsNavigation component in apps/web/src/components/features/projects/ProjectSettingsNavigation.tsx
 
 **Acceptance Criteria**:
 
@@ -929,10 +929,10 @@ Where:
 
 ### Integrations Settings Page
 
-- [ ] T260 Create integrations settings page route in apps/web/app/projects/[projectId]/settings/integrations/page.tsx
-- [ ] T261 [P] Implement server-side authentication check in apps/web/app/projects/[projectId]/settings/integrations/page.tsx
-- [ ] T262 [P] Fetch project data in apps/web/app/projects/[projectId]/settings/integrations/page.tsx
-- [ ] T263 Create RepositoryConnectionSettings client component in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [x] T260 Create integrations settings page route in apps/web/app/projects/[projectId]/settings/integrations/page.tsx
+- [x] T261 [P] Implement server-side authentication check in apps/web/app/projects/[projectId]/settings/integrations/page.tsx
+- [x] T262 [P] Fetch project data in apps/web/app/projects/[projectId]/settings/integrations/page.tsx
+- [x] T263 Create RepositoryConnectionSettings client component in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
 
 **Acceptance Criteria**:
 
@@ -943,11 +943,11 @@ Where:
 
 ### Reusable Connection Form Component
 
-- [ ] T264 Extract RepositoryConnectionForm component from onboarding flow in apps/web/src/components/features/projects/RepositoryConnectionForm.tsx
-- [ ] T265 [P] Implement OAuth connection buttons (GitHub/GitLab) in apps/web/src/components/features/projects/RepositoryConnectionForm.tsx
-- [ ] T266 [P] Implement manual token form fields in apps/web/src/components/features/projects/RepositoryConnectionForm.tsx
-- [ ] T267 [P] Add form validation with Zod schemas in apps/web/src/components/features/projects/RepositoryConnectionForm.tsx
-- [ ] T268 [P] Implement token show/hide toggle in apps/web/src/components/features/projects/RepositoryConnectionForm.tsx
+- [x] T264 Extract RepositoryConnectionForm component from onboarding flow in apps/web/src/components/features/projects/RepositoryConnectionForm.tsx
+- [x] T265 [P] Implement OAuth connection buttons (GitHub/GitLab) in apps/web/src/components/features/projects/RepositoryConnectionForm.tsx
+- [x] T266 [P] Implement manual token form fields in apps/web/src/components/features/projects/RepositoryConnectionForm.tsx
+- [x] T267 [P] Add form validation with Zod schemas in apps/web/src/components/features/projects/RepositoryConnectionForm.tsx
+- [x] T268 [P] Implement token show/hide toggle in apps/web/src/components/features/projects/RepositoryConnectionForm.tsx
 
 **Acceptance Criteria**:
 
@@ -959,11 +959,11 @@ Where:
 
 ### Connection Status Display
 
-- [ ] T269 Implement connection status display in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
-- [ ] T270 [P] Fetch existing connection using TanStack Query in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
-- [ ] T271 [P] Display repository URL and service type in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
-- [ ] T272 [P] Display last sync timestamp in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
-- [ ] T273 [P] Show connection status badge (Connected/Not Connected) in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [x] T269 Implement connection status display in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [x] T270 [P] Fetch existing connection using TanStack Query in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [x] T271 [P] Display repository URL and service type in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [x] T272 [P] Display last sync timestamp in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [x] T273 [P] Show connection status badge (Connected/Not Connected) in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
 
 **Acceptance Criteria**:
 
@@ -974,10 +974,10 @@ Where:
 
 ### OAuth Connection Flow
 
-- [ ] T274 Implement OAuth URL fetching in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
-- [ ] T275 [P] Handle OAuth redirect with returnTo parameter in apps/web/app/api/projects/[projectId]/repositories/callback/route.ts
-- [ ] T276 [P] Store returnTo URL in sessionStorage for OAuth callback in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
-- [ ] T277 [P] Redirect to settings page after OAuth success in apps/web/app/api/projects/[projectId]/repositories/callback/route.ts
+- [x] T274 Implement OAuth URL fetching in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [x] T275 [P] Handle OAuth redirect with returnTo parameter in apps/web/app/api/projects/[projectId]/repositories/callback/route.ts
+- [x] T276 [P] Store returnTo URL in sessionStorage for OAuth callback in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [x] T277 [P] Redirect to settings page after OAuth success in apps/web/app/api/projects/[projectId]/repositories/callback/route.ts
 
 **Acceptance Criteria**:
 
@@ -988,10 +988,10 @@ Where:
 
 ### Manual Token Connection Flow
 
-- [ ] T278 Implement manual token connection submission in apps/web/src/components/features/projects/RepositoryConnectionForm.tsx
-- [ ] T279 [P] Create connection mutation using TanStack Query in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
-- [ ] T280 [P] Handle connection success response in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
-- [ ] T281 [P] Refetch connection status after successful connection in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [x] T278 Implement manual token connection submission in apps/web/src/components/features/projects/RepositoryConnectionForm.tsx
+- [x] T279 [P] Create connection mutation using TanStack Query in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [x] T280 [P] Handle connection success response in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [x] T281 [P] Refetch connection status after successful connection in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
 
 **Acceptance Criteria**:
 
@@ -1002,12 +1002,12 @@ Where:
 
 ### Error Handling and Loading States
 
-- [ ] T282 [P] Add loading states for connection fetch in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
-- [ ] T283 [P] Add loading states for OAuth flow in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
-- [ ] T284 [P] Add loading states for manual connection in apps/web/src/components/features/projects/RepositoryConnectionForm.tsx
-- [ ] T285 [P] Display API error messages in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
-- [ ] T286 [P] Display validation errors in form in apps/web/src/components/features/projects/RepositoryConnectionForm.tsx
-- [ ] T287 [P] Handle 404 when no connection exists gracefully in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [x] T282 [P] Add loading states for connection fetch in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [x] T283 [P] Add loading states for OAuth flow in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [x] T284 [P] Add loading states for manual connection in apps/web/src/components/features/projects/RepositoryConnectionForm.tsx
+- [x] T285 [P] Display API error messages in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [x] T286 [P] Display validation errors in form in apps/web/src/components/features/projects/RepositoryConnectionForm.tsx
+- [x] T287 [P] Handle 404 when no connection exists gracefully in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
 
 **Acceptance Criteria**:
 
@@ -1018,9 +1018,9 @@ Where:
 
 ### Success Notifications
 
-- [ ] T288 [P] Add success notification after OAuth connection in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
-- [ ] T289 [P] Add success notification after manual connection in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
-- [ ] T290 [P] Add success notification after connection update in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [x] T288 [P] Add success notification after OAuth connection in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [x] T289 [P] Add success notification after manual connection in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [x] T290 [P] Add success notification after connection update in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
 
 **Acceptance Criteria**:
 
@@ -1055,11 +1055,11 @@ Where:
 
 ### Toast System Setup
 
-- [ ] T351 [P] Install sonner toast library in root package.json
-- [ ] T352 [P] Add Toaster component to root layout in apps/web/app/layout.tsx
-- [ ] T353 [P] Create useToast hook wrapper in packages/ui/src/hooks/useToast.ts
-- [ ] T354 [P] Export useToast hook from packages/ui/src/index.ts
-- [ ] T355 Configure Toaster styling to match design system in apps/web/app/layout.tsx
+- [x] T351 [P] Install sonner toast library in root package.json
+- [x] T352 [P] Add Toaster component to root layout in apps/web/app/layout.tsx
+- [x] T353 [P] Create useToast hook wrapper in packages/ui/src/hooks/useToast.ts
+- [x] T354 [P] Export useToast hook from packages/ui/src/index.ts
+- [x] T355 Configure Toaster styling to match design system in apps/web/app/layout.tsx
 
 **Acceptance Criteria**:
 
@@ -1070,13 +1070,13 @@ Where:
 
 ### Replace Alert Calls with Toasts
 
-- [ ] T356 Replace alert() in KanbanBoardClient error handling in apps/web/src/components/KanbanBoardClient.tsx
-- [ ] T357 Replace alert() in CreateIssueModal error handling in apps/web/src/components/CreateIssueModal.tsx
-- [ ] T358 [P] Replace alert() in API error handlers in apps/web/app/api/projects/[projectId]/issues/[issueKey]/status/route.ts
-- [ ] T359 [P] Replace alert() in webhook error handlers in apps/web/src/lib/webhooks/error-handlers.ts
-- [ ] T360 [P] Replace alert() in configuration validation errors in apps/web/src/components/features/projects/ConfigEditor.tsx
-- [ ] T361 Add toast.error() for network failures in apps/web/src/components/KanbanBoardClient.tsx
-- [ ] T362 Add toast.success() for successful operations in apps/web/src/components/CreateIssueModal.tsx
+- [x] T356 Replace alert() in KanbanBoardClient error handling in apps/web/src/components/KanbanBoardClient.tsx
+- [x] T357 Replace alert() in CreateIssueModal error handling in apps/web/src/components/CreateIssueModal.tsx
+- [x] T358 [P] Replace alert() in API error handlers in apps/web/app/api/projects/[projectId]/issues/[issueKey]/status/route.ts
+- [x] T359 [P] Replace alert() in webhook error handlers in apps/web/src/lib/webhooks/error-handlers.ts
+- [x] T360 [P] Replace alert() in configuration validation errors in apps/web/src/components/features/projects/ConfigEditor.tsx
+- [x] T361 Add toast.error() for network failures in apps/web/src/components/KanbanBoardClient.tsx
+- [x] T362 Add toast.success() for successful operations in apps/web/src/components/CreateIssueModal.tsx
 
 **Acceptance Criteria**:
 
@@ -1087,12 +1087,12 @@ Where:
 
 ### Enhanced Error Messages
 
-- [ ] T363 Enhance error messages with configuration context in apps/web/src/components/KanbanBoardClient.tsx
-- [ ] T364 Add helpUrl to error responses in apps/web/app/api/projects/[projectId]/issues/[issueKey]/status/route.ts
-- [ ] T365 [P] Add helpUrl to validation error responses in apps/web/src/lib/workflow/validation.ts
-- [ ] T366 [P] Add action buttons (Retry, View Help) to error toasts in apps/web/src/components/KanbanBoardClient.tsx
-- [ ] T367 Format validation errors for toast display in apps/web/src/components/KanbanBoardClient.tsx
-- [ ] T368 Add undo action for reversible operations in apps/web/src/components/KanbanBoardClient.tsx
+- [x] T363 Enhance error messages with configuration context in apps/web/src/components/KanbanBoardClient.tsx
+- [x] T364 Add helpUrl to error responses in apps/web/app/api/projects/[projectId]/issues/[issueKey]/status/route.ts
+- [x] T365 [P] Add helpUrl to validation error responses in apps/web/src/lib/workflow/validation.ts
+- [x] T366 [P] Add action buttons (Retry, View Help) to error toasts in apps/web/src/components/KanbanBoardClient.tsx
+- [x] T367 Format validation errors for toast display in apps/web/src/components/KanbanBoardClient.tsx
+- [x] T368 Add undo action for reversible operations in apps/web/src/components/KanbanBoardClient.tsx
 
 **Acceptance Criteria**:
 
@@ -1103,13 +1103,13 @@ Where:
 
 ### Marketing Site Documentation
 
-- [ ] T369 [P] Create docs route structure in apps/site/app/docs/configuration/page.tsx
-- [ ] T370 [P] Create configuration overview content in apps/site/content/docs/configuration.md
-- [ ] T371 [P] Add quick start guide with minimal example in apps/site/content/docs/configuration.md
-- [ ] T372 [P] Add common patterns section (workflow setup, custom fields) in apps/site/content/docs/configuration.md
-- [ ] T373 [P] Add link to full documentation in apps/site/content/docs/configuration.md
-- [ ] T374 [P] Style documentation page to match marketing site in apps/site/app/docs/configuration/page.tsx
-- [ ] T375 [P] Add navigation link to docs in apps/site/app/components/
+- [x] T369 [P] Create docs route structure in apps/site/app/docs/configuration/page.tsx
+- [x] T370 [P] Create configuration overview content in apps/site/content/docs/configuration.md
+- [x] T371 [P] Add quick start guide with minimal example in apps/site/content/docs/configuration.md
+- [x] T372 [P] Add common patterns section (workflow setup, custom fields) in apps/site/content/docs/configuration.md
+- [x] T373 [P] Add link to full documentation in apps/site/content/docs/configuration.md
+- [x] T374 [P] Style documentation page to match marketing site in apps/site/app/docs/configuration/page.tsx
+- [x] T375 [P] Add navigation link to docs in apps/site/app/components/
 
 **Acceptance Criteria**:
 
@@ -1120,19 +1120,19 @@ Where:
 
 ### Internal Application Documentation
 
-- [ ] T376 [P] Create docs route in apps/web/app/docs/configuration/page.tsx
-- [ ] T377 [P] Create comprehensive configuration reference in apps/web/content/docs/configuration-reference.md
-- [ ] T378 [P] Document project_key and project_name fields in apps/web/content/docs/configuration-reference.md
-- [ ] T379 [P] Document workflow configuration section in apps/web/content/docs/configuration-reference.md
-- [ ] T380 [P] Document status configuration (key, name, type) in apps/web/content/docs/configuration-reference.md
-- [ ] T381 [P] Document custom fields configuration in apps/web/content/docs/configuration-reference.md
-- [ ] T382 [P] Document automation rules configuration in apps/web/content/docs/configuration-reference.md
-- [ ] T383 [P] Add validation rules documentation in apps/web/content/docs/configuration-reference.md
-- [ ] T384 [P] Create troubleshooting guide in apps/web/content/docs/configuration-troubleshooting.md
-- [ ] T385 [P] Document common error messages and solutions in apps/web/content/docs/configuration-troubleshooting.md
-- [ ] T386 [P] Add examples section with validated YAML snippets in apps/web/content/docs/configuration-examples.md
-- [ ] T387 [P] Style documentation pages to match internal app design in apps/web/app/docs/configuration/page.tsx
-- [ ] T388 [P] Add navigation link to docs in apps/web/app/components/
+- [x] T376 [P] Create docs route in apps/web/app/docs/configuration/page.tsx
+- [x] T377 [P] Create comprehensive configuration reference in apps/web/content/docs/configuration-reference.md
+- [x] T378 [P] Document project_key and project_name fields in apps/web/content/docs/configuration-reference.md
+- [x] T379 [P] Document workflow configuration section in apps/web/content/docs/configuration-reference.md
+- [x] T380 [P] Document status configuration (key, name, type) in apps/web/content/docs/configuration-reference.md
+- [x] T381 [P] Document custom fields configuration in apps/web/content/docs/configuration-reference.md
+- [x] T382 [P] Document automation rules configuration in apps/web/content/docs/configuration-reference.md
+- [x] T383 [P] Add validation rules documentation in apps/web/content/docs/configuration-reference.md
+- [x] T384 [P] Create troubleshooting guide in apps/web/content/docs/configuration-troubleshooting.md
+- [x] T385 [P] Document common error messages and solutions in apps/web/content/docs/configuration-troubleshooting.md
+- [x] T386 [P] Add examples section with validated YAML snippets in apps/web/content/docs/configuration-examples.md
+- [x] T387 [P] Style documentation pages to match internal app design in apps/web/app/docs/configuration/page.tsx
+- [x] T388 [P] Add navigation link to docs in apps/web/app/components/
 
 **Acceptance Criteria**:
 
@@ -1144,10 +1144,10 @@ Where:
 
 ### Documentation Integration
 
-- [ ] T389 Link documentation from error toasts in apps/web/src/components/KanbanBoardClient.tsx
-- [ ] T390 [P] Add help tooltips in configuration editor in apps/web/src/components/features/projects/ConfigEditor.tsx
-- [ ] T391 [P] Add contextual help links in validation error messages in packages/ui/src/organisms/KanbanBoard.tsx
-- [ ] T392 [P] Create documentation link component in packages/ui/src/molecules/DocumentationLink.tsx
+- [x] T389 Link documentation from error toasts in apps/web/src/components/KanbanBoardClient.tsx
+- [x] T390 [P] Add help tooltips in configuration editor in apps/web/src/components/features/projects/ConfigEditor.tsx
+- [x] T391 [P] Add contextual help links in validation error messages in packages/ui/src/organisms/KanbanBoard.tsx
+- [x] T392 [P] Create documentation link component in packages/ui/src/molecules/DocumentationLink.tsx
 - [ ] T393 Validate all documentation examples against schema in apps/web/scripts/validate-docs.ts
 
 **Acceptance Criteria**:
@@ -1219,6 +1219,20 @@ Where:
 
 **Checkpoint**: Issue clone feature complete - users can clone issues with prefilled data
 
+### User Assignment Configuration
+
+- [ ] T422 [US2] Add UserAssignmentConfigSchema to packages/yaml-config/src/schema.ts with fields: default_assignee (enum: 'none' | 'reporter'), assignee_required (boolean), clone_preserve_assignee (boolean), require_assignee_for_statuses (array of status keys)
+- [ ] T423 [US2] Update ProjectConfigSchema to include optional user_assignment field in packages/yaml-config/src/schema.ts
+- [ ] T424 [US2] Add default values to UserAssignmentConfigSchema (default_assignee: 'none', assignee_required: false, clone_preserve_assignee: true, require_assignee_for_statuses: []) in packages/yaml-config/src/schema.ts
+- [ ] T425 [US2] Update default config generator to include user_assignment defaults in packages/yaml-config/src/default-config.ts
+- [ ] T426 [US2] Implement default assignee logic (auto-assign to reporter if default_assignee: 'reporter') in issue creation in apps/web/app/api/projects/[projectId]/issues/route.ts
+- [ ] T427 [US2] Implement clone assignment preservation logic based on user_assignment.clone_preserve_assignee config in clone handler in apps/web/app/projects/[projectId]/issues/[issueKey]/page.tsx
+- [ ] T428 [US2] Add assignee requirement validation for status transitions in apps/web/src/lib/workflow/validation.ts checking require_assignee_for_statuses array
+- [ ] T429 [US2] Add user assignment configuration section to apps/web/content/docs/configuration-reference.md documenting all user_assignment fields with examples
+- [ ] T430 [US2] Update configuration examples to include user_assignment examples in apps/web/content/docs/configuration-examples.md
+
+**Checkpoint**: User assignment configuration complete - configurable defaults and requirements
+
 **Acceptance Criteria**:
 
 - Users can select assignee from dropdown in create/edit forms
@@ -1227,6 +1241,11 @@ Where:
 - Clone opens create modal with all relevant fields prefilled
 - Cloned issues get new key and have current user as reporter
 - User list endpoint returns data in <200ms for typical team sizes
+- Configuration-driven default assignee works (reporter vs none based on config)
+- Configuration-driven clone assignment preservation works (preserve vs clear based on config)
+- Status transition validation enforces assignee requirements when configured
+- User assignment configuration is documented with examples
+- All configuration options are backward compatible (defaults maintain current behavior)
 - All existing functionality continues to work
 
 ---

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 import "@stride/ui/styles";
 import { CommandPaletteProvider } from "@/components/CommandPaletteProvider";
@@ -34,6 +35,20 @@ export default function RootLayout({
       >
         <ErrorSuppressor />
         <CommandPaletteProvider>{children}</CommandPaletteProvider>
+        <Toaster
+          position="bottom-right"
+          toastOptions={{
+            classNames: {
+              toast: 'bg-background-secondary dark:bg-background-dark-secondary border border-border dark:border-border-dark text-foreground dark:text-foreground-dark',
+              title: 'text-foreground dark:text-foreground-dark font-medium',
+              description: 'text-foreground-secondary dark:text-foreground-dark-secondary text-sm',
+              success: 'border-success dark:border-success-dark',
+              error: 'border-error dark:border-error-dark',
+              warning: 'border-warning dark:border-warning-dark',
+              info: 'border-info dark:border-info-dark',
+            },
+          }}
+        />
       </body>
     </html>
   );

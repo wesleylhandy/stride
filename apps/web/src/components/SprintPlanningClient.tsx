@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { SprintPlanning, type CycleMetrics } from '@stride/ui';
+import { SprintPlanning, type CycleMetrics, useToast } from '@stride/ui';
 import type { Issue, Cycle } from '@stride/types';
 import { useRouter } from 'next/navigation';
 
@@ -31,6 +31,7 @@ export function SprintPlanningClient({
   canEdit = false,
 }: SprintPlanningClientProps) {
   const router = useRouter();
+  const toast = useToast();
   const [sprintIssues, setSprintIssues] = React.useState<Issue[]>(initialSprintIssues);
   const [backlogIssues, setBacklogIssues] = React.useState<Issue[]>(initialBacklogIssues);
   const [metrics, setMetrics] = React.useState<CycleMetrics | undefined>(initialMetrics);
@@ -93,15 +94,21 @@ export function SprintPlanningClient({
       setSprintIssues((prev) => [...prev, ...assignedIssues]);
       setBacklogIssues((prev) => prev.filter((i) => !issueIds.includes(i.id)));
 
+      // Show success toast
+      toast.success(`Assigned ${issueIds.length} issue${issueIds.length !== 1 ? 's' : ''} to sprint`);
+
       // Refresh the page to get updated data
       router.refresh();
     } catch (error) {
       console.error('Failed to assign issues:', error);
-      alert(
-        error instanceof Error
-          ? error.message
-          : 'Failed to assign issues to sprint'
-      );
+      
+      const errorMessage = error instanceof Error
+        ? error.message
+        : 'Failed to assign issues to sprint';
+
+      toast.error('Failed to assign issues', {
+        description: errorMessage,
+      });
     } finally {
       setIsAssigning(false);
     }
@@ -143,15 +150,21 @@ export function SprintPlanningClient({
       setSprintIssues((prev) => prev.filter((i) => !issueIds.includes(i.id)));
       setBacklogIssues((prev) => [...prev, ...removedIssues]);
 
+      // Show success toast
+      toast.success(`Removed ${issueIds.length} issue${issueIds.length !== 1 ? 's' : ''} from sprint`);
+
       // Refresh the page to get updated data
       router.refresh();
     } catch (error) {
       console.error('Failed to remove issues:', error);
-      alert(
-        error instanceof Error
-          ? error.message
-          : 'Failed to remove issues from sprint'
-      );
+      
+      const errorMessage = error instanceof Error
+        ? error.message
+        : 'Failed to remove issues from sprint';
+
+      toast.error('Failed to remove issues', {
+        description: errorMessage,
+      });
     } finally {
       setIsAssigning(false);
     }
@@ -179,15 +192,21 @@ export function SprintPlanningClient({
         throw new Error(error.error || 'Failed to update goal');
       }
 
+      // Show success toast
+      toast.success('Sprint goal updated successfully');
+
       // Refresh the page to get updated data
       router.refresh();
     } catch (error) {
       console.error('Failed to update goal:', error);
-      alert(
-        error instanceof Error
-          ? error.message
-          : 'Failed to update sprint goal'
-      );
+      
+      const errorMessage = error instanceof Error
+        ? error.message
+        : 'Failed to update sprint goal';
+
+      toast.error('Failed to update sprint goal', {
+        description: errorMessage,
+      });
       throw error;
     }
   };

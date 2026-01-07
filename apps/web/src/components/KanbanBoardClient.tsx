@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { KanbanBoard, Button } from '@stride/ui';
+import { KanbanBoard, Button, useToast } from '@stride/ui';
 import type { Issue } from '@stride/types';
 import type { ProjectConfig } from '@stride/yaml-config';
 import { addRecentItem } from '@/lib/commands/recent';
@@ -42,6 +42,7 @@ export function KanbanBoardClient({
   canEdit = false,
 }: KanbanBoardClientProps) {
   const router = useRouter();
+  const toast = useToast();
   const [issues, setIssues] = React.useState<Issue[]>(initialIssues);
   const [isUpdating, setIsUpdating] = React.useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
@@ -87,7 +88,8 @@ export function KanbanBoardClient({
         const errorData = await response.json();
         
         // Parse validation errors for user-friendly messages
-        let errorMessage = errorData.error || 'Failed to update issue status';
+        let errorMessage = errorData.error || errorData.message || 'Failed to update issue status';
+        let helpUrl: string | undefined = errorData.helpUrl;
         
         if (errorData.details && Array.isArray(errorData.details)) {
           // Format validation errors nicely
@@ -102,11 +104,14 @@ export function KanbanBoardClient({
           });
           
           if (errorMessages.length > 0) {
-            errorMessage = errorMessages.join('\n\n');
+            errorMessage = errorMessages.join('. ');
           }
         }
         
-        throw new Error(errorMessage);
+        // Create error with helpUrl
+        const error = new Error(errorMessage);
+        (error as any).helpUrl = helpUrl;
+        throw error;
       }
 
       const updatedIssue = await response.json();
@@ -115,6 +120,9 @@ export function KanbanBoardClient({
       setIssues((prev) =>
         prev.map((i) => (i.id === issueId ? updatedIssue : i))
       );
+
+      // Show success toast
+      toast.success('Issue status updated successfully');
     } catch (error) {
       // Revert optimistic update on error
       setIssues((prev) =>
@@ -125,18 +133,42 @@ export function KanbanBoardClient({
 
       console.error('Failed to update issue status:', error);
       
-      // Show user-friendly error message
-      const errorMessage = error instanceof Error
-        ? error.message
-        : 'Failed to update issue status. Please check that all required fields are filled and the status transition is allowed.';
+      // Parse error response for detailed messages
+      let errorMessage = 'Failed to update issue status. Please check that all required fields are filled and the status transition is allowed.';
+      let helpUrl: string | undefined;
       
-      // Use a more graceful error display (could be replaced with a toast component)
-      const userMessage = errorMessage
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        helpUrl = (error as any).helpUrl;
+      }
+
+      // Format error message for toast
+      const formattedMessage = errorMessage
         .split('\n\n')
-        .map((msg, idx) => `• ${msg}`)
-        .join('\n');
-      
-      alert(`Cannot move issue to this status:\n\n${userMessage}\n\nThe issue has been returned to its previous status.`);
+        .map((msg) => msg.trim())
+        .filter((msg) => msg.length > 0)
+        .join('. ');
+
+      // Show error toast with action button
+      toast.error(
+        `Cannot move issue to this status`,
+        {
+          description: formattedMessage + '. The issue has been returned to its previous status.',
+          action: helpUrl
+            ? {
+                label: 'View Help',
+                onClick: () => {
+                  window.open(helpUrl, '_blank');
+                },
+              }
+            : {
+                label: 'View Docs',
+                onClick: () => {
+                  window.open('/docs/configuration', '_blank');
+                },
+              },
+        }
+      );
     } finally {
       setIsUpdating(null);
     }

@@ -1,3 +1,89 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Syntax highlighting for code blocks - base styles (dark mode default) */
+/* Note: Background is set on pre element in CodeBlock component */
+/* This ensures background fills entire container including padding */
+.hljs {
+  background: transparent !important; /* Let pre element handle background */
+  color: rgb(243 244 246) !important; /* gray-100 */
+  /* Ensure hljs fills the container */
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: rgb(156 163 175) !important; /* gray-400 */
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-type {
+  color: rgb(147 197 253) !important; /* blue-300 */
+}
+
+.hljs-string,
+.hljs-literal {
+  color: rgb(134 239 172) !important; /* green-300 */
+}
+
+.hljs-number {
+  color: rgb(250 204 21) !important; /* yellow-400 */
+}
+
+.hljs-title,
+.hljs-section {
+  color: rgb(251 146 60) !important; /* orange-400 */
+}
+
+.hljs-attr {
+  color: rgb(196 181 253) !important; /* purple-300 */
+}
+
+.hljs-property {
+  color: rgb(94 234 212) !important; /* cyan-300 */
+}
+
+/* Light mode overrides */
+/* Note: Background is set on pre element in CodeBlock component */
+[data-theme='light'] .hljs {
+  background: transparent !important; /* Let pre element handle background */
+  color: rgb(15 23 42) !important; /* slate-900 - darker for better contrast */
+}
+
+[data-theme='light'] .hljs-comment,
+[data-theme='light'] .hljs-quote {
+  color: rgb(107 114 128) !important; /* gray-500 */
+}
+
+[data-theme='light'] .hljs-keyword,
+[data-theme='light'] .hljs-selector-tag,
+[data-theme='light'] .hljs-type {
+  color: rgb(37 99 235) !important; /* blue-600 */
+}
+
+[data-theme='light'] .hljs-string,
+[data-theme='light'] .hljs-literal {
+  color: rgb(22 163 74) !important; /* green-600 */
+}
+
+[data-theme='light'] .hljs-number {
+  color: rgb(202 138 4) !important; /* yellow-600 */
+}
+
+[data-theme='light'] .hljs-title,
+[data-theme='light'] .hljs-section {
+  color: rgb(234 88 12) !important; /* orange-600 */
+}
+
+[data-theme='light'] .hljs-attr {
+  color: rgb(124 58 237) !important; /* purple-600 */
+}
+
+[data-theme='light'] .hljs-property {
+  color: rgb(8 145 178) !important; /* cyan-600 */
+}

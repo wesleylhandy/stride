@@ -119,6 +119,7 @@ export async function PATCH(
             error: 'Status transition validation failed',
             details: enhancedErrors,
             message: 'Cannot move issue to this status. See details for specific requirements from your project configuration.',
+            helpUrl: '/docs/configuration',
           },
           { status: 400 },
         );

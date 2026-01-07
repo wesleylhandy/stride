@@ -329,3 +329,4 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - Use consistent sizing
 - Store in `docs/images/` or `public/` directory
 
+
