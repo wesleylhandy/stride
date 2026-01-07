@@ -101,10 +101,24 @@ export async function PATCH(
       );
 
       if (!validationResult.isValid) {
+        // Enhance error messages with configuration context
+        const enhancedErrors = validationResult.errors.map((err) => {
+          // If error already has good context, keep it
+          if (err.message && (err.message.includes('configuration') || err.message.includes('workflow') || err.message.includes('Required field'))) {
+            return err;
+          }
+          // Otherwise add context about checking configuration
+          return {
+            ...err,
+            message: err.message || `Validation failed for ${err.field || 'status'}. Please check your project configuration.`,
+          };
+        });
+        
         return NextResponse.json(
           {
             error: 'Status transition validation failed',
-            details: validationResult.errors,
+            details: enhancedErrors,
+            message: 'Cannot move issue to this status. See details for specific requirements from your project configuration.',
           },
           { status: 400 },
         );

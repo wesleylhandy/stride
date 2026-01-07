@@ -19,6 +19,7 @@ export { UserMenu, type UserMenuProps } from './molecules/UserMenu';
 export { BurndownChart, type BurndownChartProps } from './molecules/BurndownChart';
 export { ProjectSelector, type ProjectSelectorProps, type Project } from './molecules/ProjectSelector';
 export { Breadcrumbs, type BreadcrumbsProps, type BreadcrumbItem } from './molecules/Breadcrumbs';
+export { Modal, type ModalProps } from './molecules/Modal';
 
 // Organisms
 export { CommandPalette, type CommandPaletteProps, type Command } from './organisms/CommandPalette';

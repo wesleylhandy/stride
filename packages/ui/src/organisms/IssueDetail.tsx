@@ -7,6 +7,7 @@ import { Button } from '../atoms/Button';
 import { Badge } from '../atoms/Badge';
 import { MarkdownRenderer } from '../molecules/MarkdownRenderer';
 import { IssueForm } from './IssueForm';
+import { RootCauseDashboard, type ErrorTraceData } from './RootCauseDashboard';
 import { cn } from '../utils/cn';
 
 export interface IssueBranch {
@@ -187,13 +188,6 @@ export function IssueDetail({
       <div className={cn('space-y-6', className)}>
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold">Edit Issue</h2>
-          <Button
-            variant="ghost"
-            onClick={() => setIsEditing(false)}
-            disabled={isUpdating}
-          >
-            Cancel
-          </Button>
         </div>
         <IssueForm
           projectId={issue.projectId}
@@ -212,6 +206,7 @@ export function IssueDetail({
           onSubmit={handleUpdate}
           onCancel={() => setIsEditing(false)}
           isSubmitting={isUpdating}
+          mode="edit"
         />
       </div>
     );
@@ -490,6 +485,23 @@ export function IssueDetail({
           </div>
         </div>
       )}
+
+      {/* Root Cause Dashboard (T258) */}
+      {(() => {
+        const customFields = issue.customFields as Record<string, unknown> | undefined;
+        const errorTrace = customFields?.errorTrace as ErrorTraceData | undefined;
+        const errorTraces = customFields?.errorTraces as Array<Omit<ErrorTraceData, 'occurrenceCount'>> | undefined;
+        
+        if (errorTrace || (errorTraces && errorTraces.length > 0)) {
+          return (
+            <RootCauseDashboard
+              errorTrace={errorTrace}
+              errorTraces={errorTraces}
+            />
+          );
+        }
+        return null;
+      })()}
     </div>
   );
 }

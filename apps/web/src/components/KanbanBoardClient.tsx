@@ -2,10 +2,11 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { KanbanBoard } from '@stride/ui';
+import { KanbanBoard, Button } from '@stride/ui';
 import type { Issue } from '@stride/types';
 import type { ProjectConfig } from '@stride/yaml-config';
 import { addRecentItem } from '@/lib/commands/recent';
+import { CreateIssueModal } from './CreateIssueModal';
 
 export interface KanbanBoardClientProps {
   /**
@@ -43,6 +44,7 @@ export function KanbanBoardClient({
   const router = useRouter();
   const [issues, setIssues] = React.useState<Issue[]>(initialIssues);
   const [isUpdating, setIsUpdating] = React.useState<string | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
 
   // Update issues when initialIssues change
   React.useEffect(() => {
@@ -82,8 +84,29 @@ export function KanbanBoardClient({
       );
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to update issue status');
+        const errorData = await response.json();
+        
+        // Parse validation errors for user-friendly messages
+        let errorMessage = errorData.error || 'Failed to update issue status';
+        
+        if (errorData.details && Array.isArray(errorData.details)) {
+          // Format validation errors nicely
+          const errorMessages = errorData.details.map((err: any) => {
+            if (err.message) {
+              return err.message;
+            }
+            if (err.field) {
+              return `Validation error in ${err.field}`;
+            }
+            return 'Validation error';
+          });
+          
+          if (errorMessages.length > 0) {
+            errorMessage = errorMessages.join('\n\n');
+          }
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const updatedIssue = await response.json();
@@ -101,12 +124,19 @@ export function KanbanBoardClient({
       );
 
       console.error('Failed to update issue status:', error);
-      // Show error to user (could use a toast here)
-      alert(
-        error instanceof Error
-          ? error.message
-          : 'Failed to update issue status',
-      );
+      
+      // Show user-friendly error message
+      const errorMessage = error instanceof Error
+        ? error.message
+        : 'Failed to update issue status. Please check that all required fields are filled and the status transition is allowed.';
+      
+      // Use a more graceful error display (could be replaced with a toast component)
+      const userMessage = errorMessage
+        .split('\n\n')
+        .map((msg, idx) => `• ${msg}`)
+        .join('\n');
+      
+      alert(`Cannot move issue to this status:\n\n${userMessage}\n\nThe issue has been returned to its previous status.`);
     } finally {
       setIsUpdating(null);
     }
@@ -137,21 +167,37 @@ export function KanbanBoardClient({
   }
 
   return (
-    <div className="h-[calc(100vh-12rem)]">
-      <KanbanBoard
-        issues={issues}
+    <>
+      <div className="mb-4 flex items-center justify-between">
+        <p className="text-sm text-foreground-secondary dark:text-foreground-dark-secondary">
+          Drag and drop issues to change their status
+        </p>
+        <Button onClick={() => setIsCreateModalOpen(true)}>
+          Create New Issue
+        </Button>
+      </div>
+      <div className="h-[calc(100vh-12rem)]">
+        <KanbanBoard
+          issues={issues}
+          projectConfig={projectConfig}
+          onIssueMove={canEdit ? handleIssueMove : undefined}
+          onIssueClick={handleIssueClick}
+        />
+        {isUpdating && (
+          <div className="fixed bottom-4 left-4 bg-background-secondary dark:bg-background-dark-secondary border border-border dark:border-border-dark rounded-lg p-3 shadow-lg">
+            <p className="text-sm text-foreground-secondary dark:text-foreground-dark-secondary">
+              Updating issue status...
+            </p>
+          </div>
+        )}
+      </div>
+      <CreateIssueModal
+        open={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        projectId={projectId}
         projectConfig={projectConfig}
-        onIssueMove={canEdit ? handleIssueMove : undefined}
-        onIssueClick={handleIssueClick}
       />
-      {isUpdating && (
-        <div className="fixed bottom-4 left-4 bg-background-secondary dark:bg-background-dark-secondary border border-border dark:border-border-dark rounded-lg p-3 shadow-lg">
-          <p className="text-sm text-foreground-secondary dark:text-foreground-dark-secondary">
-            Updating issue status...
-          </p>
-        </div>
-      )}
-    </div>
+    </>
   );
 }
 

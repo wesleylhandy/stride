@@ -9,7 +9,7 @@
 
 This document provides an actionable, dependency-ordered task breakdown for implementing the Stride Core Application. Tasks are organized by user story priority (P1, P2, P3) to enable independent implementation and testing.
 
-**Total Tasks**: 313  
+**Total Tasks**: 421  
 **MVP Scope**: Phase 1-4 (User Story 1 & 2)  
 **Full Implementation**: All phases
 
@@ -861,12 +861,12 @@ Where:
 
 ### Monitoring Webhook Endpoints
 
-- [ ] T241 [US6] Create Sentry webhook endpoint in apps/web/app/api/webhooks/sentry/route.ts
-- [ ] T242 [US6] Create Datadog webhook endpoint in apps/web/app/api/webhooks/datadog/route.ts
-- [ ] T243 [US6] Create New Relic webhook endpoint in apps/web/app/api/webhooks/newrelic/route.ts
-- [ ] T244 [US6] Parse error payloads in apps/web/src/lib/webhooks/error-parsers.ts
-- [ ] T245 [US6] Extract stack traces in apps/web/src/lib/webhooks/error-parsers.ts
-- [ ] T246 [US6] Handle webhook errors gracefully in apps/web/src/lib/webhooks/error-handlers.ts
+- [x] T241 [US6] Create Sentry webhook endpoint in apps/web/app/api/webhooks/sentry/route.ts
+- [x] T242 [US6] Create Datadog webhook endpoint in apps/web/app/api/webhooks/datadog/route.ts
+- [x] T243 [US6] Create New Relic webhook endpoint in apps/web/app/api/webhooks/newrelic/route.ts
+- [x] T244 [US6] Parse error payloads in apps/web/src/lib/webhooks/error-parsers.ts
+- [x] T245 [US6] Extract stack traces in apps/web/src/lib/webhooks/error-parsers.ts
+- [x] T246 [US6] Handle webhook errors gracefully in apps/web/src/lib/webhooks/error-handlers.ts
 
 **Acceptance Criteria**:
 
@@ -877,11 +877,11 @@ Where:
 
 ### Automatic Issue Creation
 
-- [ ] T247 [US6] Create issues from error webhooks in apps/web/src/lib/webhooks/error-handlers.ts
-- [ ] T248 [US6] Extract error details (title, severity, timestamp) in apps/web/src/lib/webhooks/error-parsers.ts
-- [ ] T249 [US6] Set issue type to Bug automatically in apps/web/src/lib/webhooks/error-handlers.ts
-- [ ] T250 [US6] Link error traces to issues in packages/database/src/repositories/issue-repository.ts
-- [ ] T251 [US6] Group similar errors in apps/web/src/lib/webhooks/error-grouping.ts
+- [x] T247 [US6] Create issues from error webhooks in apps/web/src/lib/webhooks/error-handlers.ts
+- [x] T248 [US6] Extract error details (title, severity, timestamp) in apps/web/src/lib/webhooks/error-parsers.ts
+- [x] T249 [US6] Set issue type to Bug automatically in apps/web/src/lib/webhooks/error-handlers.ts
+- [x] T250 [US6] Link error traces to issues in packages/database/src/repositories/issue-repository.ts
+- [x] T251 [US6] Group similar errors in apps/web/src/lib/webhooks/error-grouping.ts
 
 **Acceptance Criteria**:
 
@@ -892,13 +892,13 @@ Where:
 
 ### Root Cause Dashboard
 
-- [ ] T252 [US6] Create RootCauseDashboard component in packages/ui/src/organisms/RootCauseDashboard.tsx
-- [ ] T253 [US6] Display error traces in packages/ui/src/organisms/RootCauseDashboard.tsx
-- [ ] T254 [US6] Show stack traces with syntax highlighting in packages/ui/src/organisms/RootCauseDashboard.tsx
-- [ ] T255 [US6] Display error frequency in packages/ui/src/organisms/RootCauseDashboard.tsx
-- [ ] T256 [US6] Show last occurrence time in packages/ui/src/organisms/RootCauseDashboard.tsx
-- [ ] T257 [US6] Add error aggregation in packages/ui/src/organisms/RootCauseDashboard.tsx
-- [ ] T258 [US6] Integrate RootCauseDashboard in issue detail view in packages/ui/src/organisms/IssueDetail.tsx
+- [x] T252 [US6] Create RootCauseDashboard component in packages/ui/src/organisms/RootCauseDashboard.tsx
+- [x] T253 [US6] Display error traces in packages/ui/src/organisms/RootCauseDashboard.tsx
+- [x] T254 [US6] Show stack traces with syntax highlighting in packages/ui/src/organisms/RootCauseDashboard.tsx
+- [x] T255 [US6] Display error frequency in packages/ui/src/organisms/RootCauseDashboard.tsx
+- [x] T256 [US6] Show last occurrence time in packages/ui/src/organisms/RootCauseDashboard.tsx
+- [x] T257 [US6] Add error aggregation in packages/ui/src/organisms/RootCauseDashboard.tsx
+- [x] T258 [US6] Integrate RootCauseDashboard in issue detail view in packages/ui/src/organisms/IssueDetail.tsx
 
 **Acceptance Criteria**:
 
@@ -906,6 +906,328 @@ Where:
 - Stack traces are readable with syntax highlighting
 - Metrics are shown (frequency, last occurrence)
 - Dashboard appears in issue view when error data exists
+
+---
+
+## Phase 8.5: Repository Connection Management in Project Settings
+
+**Goal**: Enable Admin users to configure GitHub/GitLab repository connections for projects after onboarding is complete through Project Settings → Integrations.
+
+**Independent Test**: Navigate to Project Settings → Integrations, view existing connection (if any), connect a new repository via OAuth or manual token, and verify the connection is displayed and functional. Test succeeds when users can manage repository connections without going through onboarding again.
+
+**Dependencies**: Phase 7.6 complete (project settings pages must exist), Phase 3 complete (repository connection API endpoints must exist)
+
+### Settings Navigation
+
+- [ ] T259 [P] Enable Integrations link in ProjectSettingsNavigation component in apps/web/src/components/features/projects/ProjectSettingsNavigation.tsx
+
+**Acceptance Criteria**:
+
+- Integrations link appears in project settings navigation
+- Link is only visible to Admin users
+- Link navigates to `/projects/[projectId]/settings/integrations`
+
+### Integrations Settings Page
+
+- [ ] T260 Create integrations settings page route in apps/web/app/projects/[projectId]/settings/integrations/page.tsx
+- [ ] T261 [P] Implement server-side authentication check in apps/web/app/projects/[projectId]/settings/integrations/page.tsx
+- [ ] T262 [P] Fetch project data in apps/web/app/projects/[projectId]/settings/integrations/page.tsx
+- [ ] T263 Create RepositoryConnectionSettings client component in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+
+**Acceptance Criteria**:
+
+- Page requires Admin authentication
+- Page displays project information
+- Page renders RepositoryConnectionSettings component
+- 403 error shown for non-admin users
+
+### Reusable Connection Form Component
+
+- [ ] T264 Extract RepositoryConnectionForm component from onboarding flow in apps/web/src/components/features/projects/RepositoryConnectionForm.tsx
+- [ ] T265 [P] Implement OAuth connection buttons (GitHub/GitLab) in apps/web/src/components/features/projects/RepositoryConnectionForm.tsx
+- [ ] T266 [P] Implement manual token form fields in apps/web/src/components/features/projects/RepositoryConnectionForm.tsx
+- [ ] T267 [P] Add form validation with Zod schemas in apps/web/src/components/features/projects/RepositoryConnectionForm.tsx
+- [ ] T268 [P] Implement token show/hide toggle in apps/web/src/components/features/projects/RepositoryConnectionForm.tsx
+
+**Acceptance Criteria**:
+
+- Component is reusable for both onboarding and settings
+- OAuth buttons trigger OAuth flow
+- Manual form validates inputs
+- Token field has show/hide functionality
+- Component accepts props for projectId and onSuccess callback
+
+### Connection Status Display
+
+- [ ] T269 Implement connection status display in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [ ] T270 [P] Fetch existing connection using TanStack Query in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [ ] T271 [P] Display repository URL and service type in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [ ] T272 [P] Display last sync timestamp in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [ ] T273 [P] Show connection status badge (Connected/Not Connected) in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+
+**Acceptance Criteria**:
+
+- Connection info displays when connection exists
+- "Not Connected" state displays when no connection
+- Last sync timestamp formats correctly
+- Service type displays with appropriate icon/badge
+
+### OAuth Connection Flow
+
+- [ ] T274 Implement OAuth URL fetching in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [ ] T275 [P] Handle OAuth redirect with returnTo parameter in apps/web/app/api/projects/[projectId]/repositories/callback/route.ts
+- [ ] T276 [P] Store returnTo URL in sessionStorage for OAuth callback in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [ ] T277 [P] Redirect to settings page after OAuth success in apps/web/app/api/projects/[projectId]/repositories/callback/route.ts
+
+**Acceptance Criteria**:
+
+- OAuth flow redirects to Git service
+- Callback redirects back to settings page
+- Connection is created/updated after OAuth
+- Success message displays after redirect
+
+### Manual Token Connection Flow
+
+- [ ] T278 Implement manual token connection submission in apps/web/src/components/features/projects/RepositoryConnectionForm.tsx
+- [ ] T279 [P] Create connection mutation using TanStack Query in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [ ] T280 [P] Handle connection success response in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [ ] T281 [P] Refetch connection status after successful connection in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+
+**Acceptance Criteria**:
+
+- Manual form submits connection data
+- API call creates/updates connection
+- Connection status updates after submission
+- Form clears on success
+
+### Error Handling and Loading States
+
+- [ ] T282 [P] Add loading states for connection fetch in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [ ] T283 [P] Add loading states for OAuth flow in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [ ] T284 [P] Add loading states for manual connection in apps/web/src/components/features/projects/RepositoryConnectionForm.tsx
+- [ ] T285 [P] Display API error messages in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [ ] T286 [P] Display validation errors in form in apps/web/src/components/features/projects/RepositoryConnectionForm.tsx
+- [ ] T287 [P] Handle 404 when no connection exists gracefully in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+
+**Acceptance Criteria**:
+
+- Loading indicators show during async operations
+- Error messages display clearly
+- Validation errors show inline
+- 404 errors handled without breaking UI
+
+### Success Notifications
+
+- [ ] T288 [P] Add success notification after OAuth connection in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [ ] T289 [P] Add success notification after manual connection in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+- [ ] T290 [P] Add success notification after connection update in apps/web/src/components/features/projects/RepositoryConnectionSettings.tsx
+
+**Acceptance Criteria**:
+
+- Success messages display after connection operations
+- Messages are dismissible
+- Messages don't block UI interaction
+
+### Testing
+
+- [ ] T291 Write unit tests for RepositoryConnectionForm component in apps/web/src/components/features/projects/**tests**/RepositoryConnectionForm.test.tsx
+- [ ] T292 Write unit tests for RepositoryConnectionSettings component in apps/web/src/components/features/projects/**tests**/RepositoryConnectionSettings.test.tsx
+- [ ] T293 Write integration tests for settings page API calls in apps/web/app/projects/[projectId]/settings/integrations/**tests**/page.test.ts
+- [ ] T294 Write E2E test for OAuth connection flow in apps/web/**e2e**/repository-connection-oauth.spec.ts
+- [ ] T295 Write E2E test for manual token connection flow in apps/web/**e2e**/repository-connection-manual.spec.ts
+
+**Acceptance Criteria**:
+
+- Unit tests cover form validation and component behavior
+- Integration tests verify API interactions
+- E2E tests verify complete user flows
+- All tests pass
+
+---
+
+## Phase 8.6: Toast Notifications & YAML Configuration Documentation (P2)
+
+**Goal**: Replace window alerts with accessible toast notifications and add comprehensive YAML configuration documentation to both marketing site and internal application.
+
+**Independent Test**: Trigger an error (e.g., invalid status transition), verify a toast notification appears instead of an alert dialog, check that error message includes configuration context and help link. Navigate to configuration documentation from both marketing site and internal app, verify all schema options are documented with examples. Test succeeds when all alerts are replaced with toasts and documentation is comprehensive and accessible.
+
+**Dependencies**: Phase 4 complete (error handling patterns exist), Phase 5 complete (configuration system exists)
+
+### Toast System Setup
+
+- [ ] T351 [P] Install sonner toast library in root package.json
+- [ ] T352 [P] Add Toaster component to root layout in apps/web/app/layout.tsx
+- [ ] T353 [P] Create useToast hook wrapper in packages/ui/src/hooks/useToast.ts
+- [ ] T354 [P] Export useToast hook from packages/ui/src/index.ts
+- [ ] T355 Configure Toaster styling to match design system in apps/web/app/layout.tsx
+
+**Acceptance Criteria**:
+
+- sonner library installed and configured
+- Toaster component renders in app
+- useToast hook available throughout app
+- Toast styling matches design system
+
+### Replace Alert Calls with Toasts
+
+- [ ] T356 Replace alert() in KanbanBoardClient error handling in apps/web/src/components/KanbanBoardClient.tsx
+- [ ] T357 Replace alert() in CreateIssueModal error handling in apps/web/src/components/CreateIssueModal.tsx
+- [ ] T358 [P] Replace alert() in API error handlers in apps/web/app/api/projects/[projectId]/issues/[issueKey]/status/route.ts
+- [ ] T359 [P] Replace alert() in webhook error handlers in apps/web/src/lib/webhooks/error-handlers.ts
+- [ ] T360 [P] Replace alert() in configuration validation errors in apps/web/src/components/features/projects/ConfigEditor.tsx
+- [ ] T361 Add toast.error() for network failures in apps/web/src/components/KanbanBoardClient.tsx
+- [ ] T362 Add toast.success() for successful operations in apps/web/src/components/CreateIssueModal.tsx
+
+**Acceptance Criteria**:
+
+- All alert() calls replaced with toast notifications
+- Error toasts show detailed messages with configuration context
+- Success toasts provide feedback for user actions
+- Toast positioning and styling consistent
+
+### Enhanced Error Messages
+
+- [ ] T363 Enhance error messages with configuration context in apps/web/src/components/KanbanBoardClient.tsx
+- [ ] T364 Add helpUrl to error responses in apps/web/app/api/projects/[projectId]/issues/[issueKey]/status/route.ts
+- [ ] T365 [P] Add helpUrl to validation error responses in apps/web/src/lib/workflow/validation.ts
+- [ ] T366 [P] Add action buttons (Retry, View Help) to error toasts in apps/web/src/components/KanbanBoardClient.tsx
+- [ ] T367 Format validation errors for toast display in apps/web/src/components/KanbanBoardClient.tsx
+- [ ] T368 Add undo action for reversible operations in apps/web/src/components/KanbanBoardClient.tsx
+
+**Acceptance Criteria**:
+
+- Error messages explain configuration issues clearly
+- Help links navigate to relevant documentation
+- Action buttons work correctly (retry, undo, view help)
+- Error formatting is user-friendly
+
+### Marketing Site Documentation
+
+- [ ] T369 [P] Create docs route structure in apps/site/app/docs/configuration/page.tsx
+- [ ] T370 [P] Create configuration overview content in apps/site/content/docs/configuration.md
+- [ ] T371 [P] Add quick start guide with minimal example in apps/site/content/docs/configuration.md
+- [ ] T372 [P] Add common patterns section (workflow setup, custom fields) in apps/site/content/docs/configuration.md
+- [ ] T373 [P] Add link to full documentation in apps/site/content/docs/configuration.md
+- [ ] T374 [P] Style documentation page to match marketing site in apps/site/app/docs/configuration/page.tsx
+- [ ] T375 [P] Add navigation link to docs in apps/site/app/components/
+
+**Acceptance Criteria**:
+
+- Documentation accessible at /docs/configuration on marketing site
+- Quick start guide provides working example
+- Common patterns section helpful for new users
+- Navigation links work correctly
+
+### Internal Application Documentation
+
+- [ ] T376 [P] Create docs route in apps/web/app/docs/configuration/page.tsx
+- [ ] T377 [P] Create comprehensive configuration reference in apps/web/content/docs/configuration-reference.md
+- [ ] T378 [P] Document project_key and project_name fields in apps/web/content/docs/configuration-reference.md
+- [ ] T379 [P] Document workflow configuration section in apps/web/content/docs/configuration-reference.md
+- [ ] T380 [P] Document status configuration (key, name, type) in apps/web/content/docs/configuration-reference.md
+- [ ] T381 [P] Document custom fields configuration in apps/web/content/docs/configuration-reference.md
+- [ ] T382 [P] Document automation rules configuration in apps/web/content/docs/configuration-reference.md
+- [ ] T383 [P] Add validation rules documentation in apps/web/content/docs/configuration-reference.md
+- [ ] T384 [P] Create troubleshooting guide in apps/web/content/docs/configuration-troubleshooting.md
+- [ ] T385 [P] Document common error messages and solutions in apps/web/content/docs/configuration-troubleshooting.md
+- [ ] T386 [P] Add examples section with validated YAML snippets in apps/web/content/docs/configuration-examples.md
+- [ ] T387 [P] Style documentation pages to match internal app design in apps/web/app/docs/configuration/page.tsx
+- [ ] T388 [P] Add navigation link to docs in apps/web/app/components/
+
+**Acceptance Criteria**:
+
+- Documentation accessible at /docs/configuration in internal app
+- All schema options documented with examples
+- Validation rules clearly explained
+- Troubleshooting guide helps resolve common issues
+- All examples validate against schema
+
+### Documentation Integration
+
+- [ ] T389 Link documentation from error toasts in apps/web/src/components/KanbanBoardClient.tsx
+- [ ] T390 [P] Add help tooltips in configuration editor in apps/web/src/components/features/projects/ConfigEditor.tsx
+- [ ] T391 [P] Add contextual help links in validation error messages in packages/ui/src/organisms/KanbanBoard.tsx
+- [ ] T392 [P] Create documentation link component in packages/ui/src/molecules/DocumentationLink.tsx
+- [ ] T393 Validate all documentation examples against schema in apps/web/scripts/validate-docs.ts
+
+**Acceptance Criteria**:
+
+- Error messages link to relevant documentation
+- Help tooltips provide quick reference
+- Documentation examples are all valid YAML
+- Links work correctly from all locations
+
+### Testing
+
+- [ ] T394 Write unit tests for useToast hook in packages/ui/src/hooks/**tests**/useToast.test.ts
+- [ ] T395 Write integration tests for toast notifications in apps/web/src/**tests**/integration/toast.test.ts
+- [ ] T396 Write accessibility tests for toast system in apps/web/src/**tests**/accessibility/toast.test.ts
+- [ ] T397 Write tests for documentation example validation in apps/web/scripts/**tests**/validate-docs.test.ts
+- [ ] T398 Write E2E test for toast notifications in apps/web/e2e/toast-notifications.spec.ts
+- [ ] T399 Write E2E test for documentation access in apps/web/e2e/documentation.spec.ts
+
+**Acceptance Criteria**:
+
+- Unit tests cover toast hook functionality
+- Integration tests verify toast integration
+- Accessibility tests confirm WCAG 2.1 AA compliance
+- Documentation examples validated
+- E2E tests verify user flows
+
+---
+
+## Phase 8.7: User Assignment & Issue Clone Enhancements (P1 Enhancement)
+
+**Goal**: Enhance issue management with user assignment dropdown and issue clone functionality.
+
+**Independent Test**:
+
+1. **User Assignment**: Create or edit an issue, select a user from the assignee dropdown, save the issue, and verify the assignee is correctly stored and displayed. Test succeeds when assignee dropdown appears, user can select from list, selection persists, and displays correctly.
+2. **Issue Clone**: Open an existing issue detail page, click "Clone" button, verify create modal opens with all relevant fields prefilled (excluding metadata), edit if desired, save new issue. Test succeeds when clone button appears, modal opens prefilled, new issue gets new key, and metadata is excluded.
+
+**Dependencies**: Phase 4 complete (User Story 2 - Issue Creation and Management)
+
+### User Assignment Feature
+
+- [ ] T400 [P] [US2] Create GET /api/users endpoint in apps/web/app/api/users/route.ts
+- [ ] T401 [US2] Implement authentication check in apps/web/app/api/users/route.ts
+- [ ] T402 [US2] Implement user list query (select id, username, name, avatarUrl, role) in apps/web/app/api/users/route.ts
+- [ ] T403 [US2] Add error handling (401, 500) and response formatting in apps/web/app/api/users/route.ts
+- [ ] T404 [P] [US2] Add users prop to IssueFormProps interface in packages/ui/src/organisms/IssueForm.tsx
+- [ ] T405 [US2] Add assignee dropdown field after Priority field in packages/ui/src/organisms/IssueForm.tsx
+- [ ] T406 [US2] Implement user display format (name (username) or username) in assignee dropdown in packages/ui/src/organisms/IssueForm.tsx
+- [ ] T407 [US2] Add "Unassigned" option to assignee dropdown in packages/ui/src/organisms/IssueForm.tsx
+- [ ] T408 [P] [US2] Add user fetching in CreateIssueModal component in apps/web/src/components/CreateIssueModal.tsx
+- [ ] T409 [US2] Pass users prop to IssueForm in CreateIssueModal in apps/web/src/components/CreateIssueModal.tsx
+- [ ] T410 [US2] Add user fetching in IssueDetail edit mode in apps/web/app/projects/[projectId]/issues/[issueKey]/page.tsx
+- [ ] T411 [US2] Pass users prop to IssueForm when editing in apps/web/app/projects/[projectId]/issues/[issueKey]/page.tsx
+- [ ] T412 [US2] Update IssueDetail display to show assignee name/username instead of ID in packages/ui/src/organisms/IssueDetail.tsx
+
+**Checkpoint**: User assignment feature complete - users can assign issues from create/edit forms
+
+### Issue Clone Feature
+
+- [ ] T413 [P] [US2] Add onClone callback prop to IssueDetailProps interface in packages/ui/src/organisms/IssueDetail.tsx
+- [ ] T414 [US2] Add Clone button next to Edit button in IssueDetail header in packages/ui/src/organisms/IssueDetail.tsx
+- [ ] T415 [US2] Style Clone button as ghost variant in packages/ui/src/organisms/IssueDetail.tsx
+- [ ] T416 [P] [US2] Create clone handler function in apps/web/app/projects/[projectId]/issues/[issueKey]/page.tsx
+- [ ] T417 [US2] Map issue data to CreateIssueInput excluding metadata (id, key, createdAt, updatedAt, closedAt, reporterId) in apps/web/app/projects/[projectId]/issues/[issueKey]/page.tsx
+- [ ] T418 [US2] Open CreateIssueModal with prefilled initialValues in apps/web/app/projects/[projectId]/issues/[issueKey]/page.tsx
+- [ ] T419 [US2] Pass clone handler to IssueDetail component via onClone prop in apps/web/app/projects/[projectId]/issues/[issueKey]/page.tsx
+- [ ] T420 [US2] Support initialValues prop in CreateIssueModal for prefilling form in apps/web/src/components/CreateIssueModal.tsx
+- [ ] T421 [US2] Pass initialValues to IssueForm when provided in CreateIssueModal in apps/web/src/components/CreateIssueModal.tsx
+
+**Checkpoint**: Issue clone feature complete - users can clone issues with prefilled data
+
+**Acceptance Criteria**:
+
+- Users can select assignee from dropdown in create/edit forms
+- Assignee selection persists correctly (create and update)
+- Clone button appears on issue detail pages for users with edit permission
+- Clone opens create modal with all relevant fields prefilled
+- Cloned issues get new key and have current user as reporter
+- User list endpoint returns data in <200ms for typical team sizes
+- All existing functionality continues to work
 
 ---
 
@@ -919,13 +1241,13 @@ Where:
 
 ### AI Gateway Service
 
-- [ ] T259 [US7] Create AI Gateway package structure in packages/ai-gateway/
-- [ ] T260 [US7] Implement API endpoints in packages/ai-gateway/src/routes.ts
-- [ ] T261 [US7] Support commercial APIs (OpenAI, Anthropic) in packages/ai-gateway/src/providers/commercial.ts
-- [ ] T262 [US7] Support self-hosted LLMs in packages/ai-gateway/src/providers/self-hosted.ts
-- [ ] T263 [US7] Add request/response logging in packages/ai-gateway/src/middleware/logging.ts
-- [ ] T264 [US7] Implement rate limiting in packages/ai-gateway/src/middleware/rate-limit.ts
-- [ ] T265 [US7] Add mock mode for development in packages/ai-gateway/src/providers/mock.ts
+- [ ] T400 [US7] Create AI Gateway package structure in packages/ai-gateway/
+- [ ] T401 [US7] Implement API endpoints in packages/ai-gateway/src/routes.ts
+- [ ] T402 [US7] Support commercial APIs (OpenAI, Anthropic) in packages/ai-gateway/src/providers/commercial.ts
+- [ ] T403 [US7] Support self-hosted LLMs in packages/ai-gateway/src/providers/self-hosted.ts
+- [ ] T404 [US7] Add request/response logging in packages/ai-gateway/src/middleware/logging.ts
+- [ ] T405 [US7] Implement rate limiting in packages/ai-gateway/src/middleware/rate-limit.ts
+- [ ] T406 [US7] Add mock mode for development in packages/ai-gateway/src/providers/mock.ts
 
 **Acceptance Criteria**:
 
@@ -936,14 +1258,14 @@ Where:
 
 ### AI Triage Integration
 
-- [ ] T266 [US7] Create "Triage with AI" button in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T267 [US7] Send issue context to AI Gateway in apps/web/src/lib/ai/triage.ts
-- [ ] T268 [US7] Display AI analysis in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T269 [US7] Show priority suggestions in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T270 [US7] Show assignee suggestions in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T271 [US7] Allow accepting/modifying suggestions in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T272 [US7] Implement graceful degradation when AI unavailable in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T273 [US7] Create AI triage API endpoint in apps/web/app/api/projects/[projectId]/issues/[issueKey]/ai-triage/route.ts
+- [ ] T407 [US7] Create "Triage with AI" button in packages/ui/src/organisms/IssueDetail.tsx
+- [ ] T408 [US7] Send issue context to AI Gateway in apps/web/src/lib/ai/triage.ts
+- [ ] T409 [US7] Display AI analysis in packages/ui/src/organisms/IssueDetail.tsx
+- [ ] T410 [US7] Show priority suggestions in packages/ui/src/organisms/IssueDetail.tsx
+- [ ] T411 [US7] Show assignee suggestions in packages/ui/src/organisms/IssueDetail.tsx
+- [ ] T412 [US7] Allow accepting/modifying suggestions in packages/ui/src/organisms/IssueDetail.tsx
+- [ ] T413 [US7] Implement graceful degradation when AI unavailable in packages/ui/src/organisms/IssueDetail.tsx
+- [ ] T414 [US7] Create AI triage API endpoint in apps/web/app/api/projects/[projectId]/issues/[issueKey]/ai-triage/route.ts
 
 **Acceptance Criteria**:
 
@@ -962,22 +1284,22 @@ Where:
 
 ### Testing
 
-- [ ] T274 Setup Vitest for unit tests in root/vitest.config.ts
-- [ ] T275 Configure test environment in root/vitest.config.ts
-- [ ] T276 Create test utilities in apps/web/src/**tests**/utils.ts
-- [ ] T277 Write unit tests for utilities in apps/web/src/**tests**/unit/
-- [ ] T278 Write unit tests for components in packages/ui/src/**tests**/
-- [ ] T279 Setup test database for integration tests in apps/web/src/**tests**/setup.ts
-- [ ] T280 Create test fixtures in apps/web/src/**tests**/fixtures.ts
-- [ ] T281 Write API route tests in apps/web/src/**tests**/api/
-- [ ] T282 Write database operation tests in apps/web/src/**tests**/database/
-- [ ] T283 Write webhook tests in apps/web/src/**tests**/webhooks/
-- [ ] T284 Setup Playwright for E2E tests in root/playwright.config.ts
-- [ ] T285 Create E2E test utilities in apps/web/e2e/utils.ts
-- [ ] T286 Write E2E tests for User Story 1 in apps/web/e2e/us1-deployment.spec.ts
-- [ ] T287 Write E2E tests for User Story 2 in apps/web/e2e/us2-issues.spec.ts
-- [ ] T288 Write E2E tests for critical flows in apps/web/e2e/critical-flows.spec.ts
-- [ ] T289 Setup CI/CD integration in .github/workflows/test.yml
+- [ ] T329 Setup Vitest for unit tests in root/vitest.config.ts
+- [ ] T330 Configure test environment in root/vitest.config.ts
+- [ ] T331 Create test utilities in apps/web/src/**tests**/utils.ts
+- [ ] T332 Write unit tests for utilities in apps/web/src/**tests**/unit/
+- [ ] T333 Write unit tests for components in packages/ui/src/**tests**/
+- [ ] T334 Setup test database for integration tests in apps/web/src/**tests**/setup.ts
+- [ ] T335 Create test fixtures in apps/web/src/**tests**/fixtures.ts
+- [ ] T336 Write API route tests in apps/web/src/**tests**/api/
+- [ ] T337 Write database operation tests in apps/web/src/**tests**/database/
+- [ ] T338 Write webhook tests in apps/web/src/**tests**/webhooks/
+- [ ] T339 Setup Playwright for E2E tests in root/playwright.config.ts
+- [ ] T340 Create E2E test utilities in apps/web/e2e/utils.ts
+- [ ] T341 Write E2E tests for User Story 1 in apps/web/e2e/us1-deployment.spec.ts
+- [ ] T342 Write E2E tests for User Story 2 in apps/web/e2e/us2-issues.spec.ts
+- [ ] T343 Write E2E tests for critical flows in apps/web/e2e/critical-flows.spec.ts
+- [ ] T344 Setup CI/CD integration in .github/workflows/test.yml
 
 **Acceptance Criteria**:
 
@@ -988,12 +1310,12 @@ Where:
 
 ### Performance Optimization
 
-- [ ] T290 Optimize database queries (add missing indexes) in packages/database/prisma/schema.prisma
-- [ ] T291 Implement query result caching in apps/web/src/lib/cache/query-cache.ts
-- [ ] T292 Optimize Kanban board rendering (virtualization if needed) in packages/ui/src/organisms/KanbanBoard.tsx
-- [ ] T293 Add code splitting for heavy components in apps/web/app/
-- [ ] T294 Optimize bundle size in apps/web/next.config.ts
-- [ ] T295 Implement image optimization in apps/web/next.config.ts
+- [ ] T311 Optimize database queries (add missing indexes) in packages/database/prisma/schema.prisma
+- [ ] T312 Implement query result caching in apps/web/src/lib/cache/query-cache.ts
+- [ ] T313 Optimize Kanban board rendering (virtualization if needed) in packages/ui/src/organisms/KanbanBoard.tsx
+- [ ] T314 Add code splitting for heavy components in apps/web/app/
+- [ ] T315 Optimize bundle size in apps/web/next.config.ts
+- [ ] T316 Implement image optimization in apps/web/next.config.ts
 
 **Acceptance Criteria**:
 
@@ -1003,12 +1325,12 @@ Where:
 
 ### Documentation
 
-- [ ] T296 Create API documentation in docs/api/
-- [ ] T297 Create deployment guide in docs/deployment/
-- [ ] T298 Create developer guide in docs/development/
-- [ ] T299 Create user guide in docs/user/
-- [ ] T300 Add inline code documentation (JSDoc) in apps/web/src/
-- [ ] T301 Create README for each package in packages/\*/README.md
+- [ ] T317 Create API documentation in docs/api/
+- [ ] T318 Create deployment guide in docs/deployment/
+- [ ] T319 Create developer guide in docs/development/
+- [ ] T320 Create user guide in docs/user/
+- [ ] T321 Add inline code documentation (JSDoc) in apps/web/src/
+- [ ] T322 Create README for each package in packages/\*/README.md
 
 **Acceptance Criteria**:
 
@@ -1019,12 +1341,12 @@ Where:
 
 ### Security Hardening
 
-- [ ] T302 Review and fix security vulnerabilities in apps/web/
-- [ ] T303 Implement rate limiting on all API routes in apps/web/src/middleware/rate-limit.ts
-- [ ] T304 Add security headers in apps/web/next.config.ts
-- [ ] T305 Audit authentication and authorization in apps/web/src/lib/auth/
-- [ ] T306 Review input validation in apps/web/src/lib/validation/
-- [ ] T307 Implement CSRF protection in apps/web/src/middleware/csrf.ts
+- [ ] T323 Review and fix security vulnerabilities in apps/web/
+- [ ] T324 Implement rate limiting on all API routes in apps/web/src/middleware/rate-limit.ts
+- [ ] T325 Add security headers in apps/web/next.config.ts
+- [ ] T326 Audit authentication and authorization in apps/web/src/lib/auth/
+- [ ] T327 Review input validation in apps/web/src/lib/validation/
+- [ ] T328 Implement CSRF protection in apps/web/src/middleware/csrf.ts
 
 **Acceptance Criteria**:
 
@@ -1035,12 +1357,12 @@ Where:
 
 ### Production Readiness
 
-- [ ] T308 Create production environment configuration in .env.production.example
-- [ ] T309 Setup error monitoring (Sentry integration) in apps/web/src/lib/error-tracking.ts
-- [ ] T310 Create health check endpoint in apps/web/app/api/health/route.ts
-- [ ] T311 Implement graceful shutdown in apps/web/src/lib/shutdown.ts
-- [ ] T312 Create production deployment scripts in scripts/deploy/
-- [ ] T313 Setup logging aggregation in apps/web/src/lib/logger.ts
+- [ ] T345 Create production environment configuration in .env.production.example
+- [ ] T346 Setup error monitoring (Sentry integration) in apps/web/src/lib/error-tracking.ts
+- [ ] T347 Create health check endpoint in apps/web/app/api/health/route.ts
+- [ ] T348 Implement graceful shutdown in apps/web/src/lib/shutdown.ts
+- [ ] T349 Create production deployment scripts in scripts/deploy/
+- [ ] T350 Setup logging aggregation in apps/web/src/lib/logger.ts
 
 **Acceptance Criteria**:
 
@@ -1066,8 +1388,9 @@ Phase 1: Setup
                           └─> Phase 7.5: Authenticated Layouts Infrastructure
                                 └─> Phase 7.6: Settings Pages and Navigation Fixes
                                       ├─> Phase 8: User Story 6 (Diagnostics)
-                                      └─> Phase 9: User Story 7 (AI Triage)
-                                            └─> Phase 10: Polish & Testing
+                                      ├─> Phase 8.5: Repository Connections (Settings)
+                                      ├─> Phase 9: User Story 7 (AI Triage)
+                                      └─> Phase 10: Polish & Testing
 ```
 
 ### Story Dependencies
@@ -1079,6 +1402,7 @@ Phase 1: Setup
 - **US5** (Sprints): Depends on US2 (needs issues to assign)
 - **Phase 7.5** (Authenticated Layouts): Depends on US1 (needs authentication infrastructure)
 - **Phase 7.6** (Settings Pages): Depends on US1 (needs authentication), optional dependency on Phase 7.5 (layouts enhance UX)
+- **Phase 8.5** (Repository Connections): Depends on Phase 7.6 (project settings pages must exist), Phase 3 (repository connection API endpoints must exist)
 - **US6** (Diagnostics): Depends on US2 (needs issues to create from errors)
 - **US7** (AI): Depends on US2 (needs issues to triage)
 
@@ -1125,9 +1449,16 @@ Phase 1: Setup
 
 - T241-T246 (Webhooks) can be parallelized with T247-T251 (Issue creation)
 
+**Within Phase 8.5 (Repository Connections)**:
+
+- T260-T263 (Settings page) can be parallelized with T264-T268 (Form component)
+- T269-T273 (Status display) can be parallelized with T274-T277 (OAuth flow)
+- T278-T281 (Manual flow) can be parallelized with T282-T287 (Error handling)
+- T288-T290 (Notifications) can run in parallel
+
 **Within Phase 9 (US7)**:
 
-- T259-T265 (AI Gateway) can be parallelized with T266-T273 (Integration)
+- T296-T302 (AI Gateway) can be parallelized with T303-T310 (Integration)
 
 ---
 
@@ -1218,7 +1549,7 @@ Phase 1: Setup
 **Phase 9 (US7)**: 15 tasks  
 **Phase 10 (Polish)**: 40 tasks
 
-**Parallel Opportunities**: ~80 tasks marked with [P]
+**Parallel Opportunities**: ~95 tasks marked with [P]
 
 **Estimated Timeline**:
 

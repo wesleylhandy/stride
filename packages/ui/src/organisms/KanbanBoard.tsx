@@ -88,10 +88,15 @@ function KanbanColumn({ status, issues, onIssueClick, isFiltered: _isFiltered, i
       ref={setNodeRef}
       className={cn(
         'flex flex-col h-full min-w-[280px] max-w-[320px]',
-        'rounded-lg border border-border dark:border-border-dark',
+        'rounded-lg border-2',
         'bg-background-secondary dark:bg-background-dark-secondary',
-        isOver && isValidDrop && 'ring-2 ring-primary ring-offset-2',
-        isOver && isValidDrop === false && 'ring-2 ring-error ring-offset-2'
+        'transition-all',
+        // Use border color changes instead of ring to prevent cutoff
+        isOver && isValidDrop
+          ? 'border-primary'
+          : isOver && isValidDrop === false
+          ? 'border-error'
+          : 'border-border dark:border-border-dark'
       )}
       data-status={status.key}
     >
@@ -145,20 +150,82 @@ function SortableIssueCard({
     isDragging,
   } = useSortable({ id: issue.id });
 
+  // Track if we should prevent click (after a drag)
+  const preventClickRef = React.useRef(false);
+  const pointerDownTimeRef = React.useRef<number | null>(null);
+  const pointerDownPosRef = React.useRef<{ x: number; y: number } | null>(null);
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
   };
 
+  // Track when drag starts - if dragging, prevent clicks
+  React.useEffect(() => {
+    if (isDragging) {
+      preventClickRef.current = true;
+    }
+  }, [isDragging]);
+
+  // Enhanced listeners that track pointer down
+  const enhancedListeners = React.useMemo(() => {
+    return {
+      ...listeners,
+      onPointerDown: (e: React.PointerEvent) => {
+        pointerDownTimeRef.current = Date.now();
+        pointerDownPosRef.current = { x: e.clientX, y: e.clientY };
+        preventClickRef.current = false;
+        listeners?.onPointerDown?.(e);
+      },
+    };
+  }, [listeners]);
+
+  // Handle click - check if it was actually a drag
+  const handleClick = (e: React.MouseEvent) => {
+    // If we're currently dragging, definitely prevent click
+    if (isDragging || preventClickRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+
+    // Check if pointer moved significantly (more than activation distance)
+    if (pointerDownPosRef.current) {
+      const deltaX = Math.abs(e.clientX - pointerDownPosRef.current.x);
+      const deltaY = Math.abs(e.clientY - pointerDownPosRef.current.y);
+      const moved = deltaX > 8 || deltaY > 8; // Match activation constraint
+
+      if (moved) {
+        e.preventDefault();
+        e.stopPropagation();
+        preventClickRef.current = true;
+        // Reset after delay
+        setTimeout(() => {
+          preventClickRef.current = false;
+        }, 300);
+        return;
+      }
+    }
+
+    // Only trigger click if no drag occurred
+    if (onClick) {
+      onClick();
+    }
+
+    // Reset tracking
+    pointerDownTimeRef.current = null;
+    pointerDownPosRef.current = null;
+  };
+
   return (
     <div ref={setNodeRef} style={style}>
-      <IssueCard
-        issue={issue}
-        isDragging={isDragging}
-        onClick={onClick}
-        {...attributes}
-        {...listeners}
-      />
+      <div {...attributes} {...enhancedListeners}>
+        <IssueCard
+          issue={issue}
+          isDragging={isDragging}
+          onClick={handleClick}
+        />
+      </div>
     </div>
   );
 }
@@ -196,16 +263,18 @@ function validateStatusTransition(
 
   // Check if statuses exist in config
   if (!currentStatusConfig) {
+    const availableStatuses = config.workflow.statuses.map(s => `"${s.name}" (${s.key})`).join(', ');
     errors.push({
       field: 'status',
-      message: `Current status "${currentStatus}" is not defined in workflow`,
+      message: `Current status "${currentStatus}" is not defined in your project workflow configuration. Available statuses: ${availableStatuses}. Please update your project configuration to include this status.`,
     });
   }
 
   if (!newStatusConfig) {
+    const availableStatuses = config.workflow.statuses.map(s => `"${s.name}" (${s.key})`).join(', ');
     errors.push({
       field: 'status',
-      message: `Status "${newStatus}" is not defined in workflow`,
+      message: `Target status "${newStatus}" is not defined in your project workflow configuration. Available statuses: ${availableStatuses}. Please update your project configuration to include this status.`,
     });
   }
 
@@ -225,10 +294,22 @@ function validateStatusTransition(
       if (newStatusConfig.type !== 'closed') {
         errors.push({
           field: 'status',
-          message: 'Cannot transition from a closed status to an open or in-progress status',
+          message: `Cannot move from "${currentStatusConfig.name}" (${currentStatusConfig.type} status) to "${newStatusConfig.name}" (${newStatusConfig.type} status). Once an issue is closed, it can only be moved to another closed status.`,
         });
       }
     }
+    
+    // Provide helpful context about what transitions are allowed
+    if (currentStatusConfig.type === 'open' && newStatusConfig.type === 'closed') {
+      // This is allowed, no error
+    } else if (currentStatusConfig.type === 'in_progress' && newStatusConfig.type === 'closed') {
+      // This is allowed, no error
+    } else if (currentStatusConfig.type === 'open' && newStatusConfig.type === 'in_progress') {
+      // This is allowed, no error
+    } else if (currentStatusConfig.type === 'in_progress' && newStatusConfig.type === 'in_progress') {
+      // This is allowed, no error
+    }
+    // All other transitions from open/in_progress are allowed by default
   }
 
   return {
@@ -261,9 +342,10 @@ function validateRequiredCustomFields(
 
     // Check if field is missing or empty
     if (fieldValue === undefined || fieldValue === null || fieldValue === '') {
+      const fieldType = field.type || 'text';
       errors.push({
         field: `customFields.${field.key}`,
-        message: `Required field "${field.name}" must be set before changing status to "${newStatusConfig.name}"`,
+        message: `Required field "${field.name}" (${fieldType}) must be set before moving to "${newStatusConfig.name}". This is required by your project configuration.`,
       });
     }
   }
@@ -499,8 +581,18 @@ export function KanbanBoard({
     const validation = validateStatusChange(activeIssue, targetStatus, projectConfig);
 
     if (!validation.isValid) {
-      // Show validation errors (T164)
-      setValidationErrors(validation.errors);
+      // Show validation errors (T164) with user-friendly messages that explain configuration
+      const friendlyErrors = validation.errors.map((err) => {
+        // If message already explains the issue with configuration context, use it
+        if (err.message && (err.message.includes('configuration') || err.message.includes('workflow') || err.message.includes('Required field'))) {
+          return err;
+        }
+        return {
+          ...err,
+          message: err.message || `Cannot move issue to "${targetStatus}": ${err.field || 'validation failed'}. Check your project configuration for allowed status transitions.`,
+        };
+      });
+      setValidationErrors(friendlyErrors);
       return; // Prevent the move
     }
 

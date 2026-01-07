@@ -16,7 +16,7 @@ export interface IssueCardProps {
   /**
    * Click handler
    */
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent) => void;
   /**
    * Additional CSS classes
    */

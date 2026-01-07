@@ -12,6 +12,8 @@ servers:
 tags:
   - name: auth
     description: Authentication and authorization
+  - name: users
+    description: User management
   - name: projects
     description: Project management
   - name: issues
@@ -84,6 +86,31 @@ paths:
                 $ref: '#/components/schemas/User'
         '401':
           $ref: '#/components/responses/Unauthorized'
+
+  # Users
+  /users:
+    get:
+      tags: [users]
+      summary: List all users
+      description: Returns list of all users in the system for assignment purposes. Simple endpoint returning all users (no pagination needed for self-hosted small teams).
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
   # Projects
   /projects:
@@ -936,6 +963,19 @@ components:
 
     NotFound:
       description: Not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+    InternalServerError:
+      description: Internal server error
       content:
         application/json:
           schema:

@@ -37,6 +37,11 @@ export interface IssueFormProps {
    */
   isSubmitting?: boolean;
   /**
+   * Form mode: 'create' for new issues, 'edit' for existing issues
+   * Defaults to 'create' if initialValues not provided, 'edit' if provided
+   */
+  mode?: 'create' | 'edit';
+  /**
    * Additional CSS classes
    */
   className?: string;
@@ -241,8 +246,12 @@ export function IssueForm({
   onSubmit,
   onCancel,
   isSubmitting = false,
+  mode,
   className,
 }: IssueFormProps) {
+  // Determine mode: use prop if provided, otherwise infer from initialValues
+  const formMode = mode || (initialValues && Object.keys(initialValues).length > 0 ? 'edit' : 'create');
+
   const formSchema = React.useMemo(
     () => createFormSchema(projectConfig),
     [projectConfig],
@@ -445,7 +454,13 @@ export function IssueForm({
           </Button>
         )}
         <Button type="submit" loading={isSubmitting} disabled={isSubmitting}>
-          {isSubmitting ? 'Creating...' : 'Create Issue'}
+          {formMode === 'edit'
+            ? isSubmitting
+              ? 'Saving...'
+              : 'Save Changes'
+            : isSubmitting
+            ? 'Creating...'
+            : 'Create Issue'}
         </Button>
       </div>
     </form>

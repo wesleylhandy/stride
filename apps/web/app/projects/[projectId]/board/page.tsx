@@ -78,11 +78,6 @@ export default async function KanbanBoardPage({ params }: PageParams) {
 
   return (
     <div className="py-6">
-      <div className="mb-4">
-        <p className="text-sm text-foreground-secondary dark:text-foreground-dark-secondary">
-          Drag and drop issues to change their status
-        </p>
-      </div>
       <KanbanBoardClient
         projectId={projectId}
         initialIssues={typedIssues}
