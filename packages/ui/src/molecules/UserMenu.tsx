@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '../atoms/Button';
 import { cn } from '../utils/cn';
 
 export interface UserMenuProps {

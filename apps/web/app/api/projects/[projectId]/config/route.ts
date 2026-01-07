@@ -12,7 +12,7 @@ import { invalidateConfigCache } from "@/lib/cache/invalidation";
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { projectId: string } }
+  { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
     const authResult = await requireAuth(request);
@@ -21,7 +21,7 @@ export async function GET(
     }
 
     const session = authResult;
-    const projectId = params.projectId;
+    const { projectId } = await params;
 
     // Check if project exists
     const project = await projectRepository.findById(projectId);
@@ -61,7 +61,7 @@ export async function GET(
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { projectId: string } }
+  { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
     const authResult = await requireAuth(request);
@@ -79,7 +79,7 @@ export async function PUT(
       );
     }
 
-    const projectId = params.projectId;
+    const { projectId } = await params;
     const body = await request.json();
     const { configYaml, configVersion } = body;
 

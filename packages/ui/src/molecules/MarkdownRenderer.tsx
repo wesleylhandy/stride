@@ -180,7 +180,8 @@ export function MarkdownRenderer({
         ]}
         components={{
           // Customize code blocks - handle Mermaid diagrams (T140)
-          code({ node, inline, className, children, ...props }) {
+          code: (props) => {
+            const { node: _node, inline, className, children, ...restProps } = props as { node?: unknown; inline?: boolean; className?: string; children?: React.ReactNode; [key: string]: unknown };
             const match = /language-(\w+)/.exec(className || '');
             const language = match ? match[1] : null;
             const codeContent = String(children).replace(/\n$/, '');
@@ -204,7 +205,7 @@ export function MarkdownRenderer({
 
             // Regular code blocks
             return (
-              <code className={className} {...props}>
+              <code className={className} {...(restProps as React.HTMLAttributes<HTMLElement>)}>
                 {children}
               </code>
             );
@@ -212,7 +213,7 @@ export function MarkdownRenderer({
           // Customize pre blocks to handle Mermaid
           pre({ children, ...props }) {
             // Check if this pre contains a Mermaid code block
-            const child = React.Children.only(children) as React.ReactElement;
+            const child = React.Children.only(children) as React.ReactElement<{ className?: string }>;
             if (
               child?.props?.className?.includes('language-mermaid') &&
               enableMermaid

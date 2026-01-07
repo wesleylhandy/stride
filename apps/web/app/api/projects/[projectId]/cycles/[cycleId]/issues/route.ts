@@ -13,10 +13,10 @@ import {
 import { z } from "zod";
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     projectId: string;
     cycleId: string;
-  };
+  }>;
 }
 
 /**
@@ -35,6 +35,7 @@ export async function POST(
     }
 
     const session = authResult;
+    const { projectId, cycleId } = await params;
 
     // Check permission to update cycles (required to assign issues)
     if (!canUpdateCycle(session.role)) {
@@ -45,7 +46,7 @@ export async function POST(
     }
 
     // Verify project exists
-    const project = await projectRepository.findById(params.projectId);
+    const project = await projectRepository.findById(projectId);
     if (!project) {
       return NextResponse.json(
         { error: "Project not found" },
@@ -54,8 +55,8 @@ export async function POST(
     }
 
     // Verify cycle exists and belongs to project
-    const cycle = await cycleRepository.findById(params.cycleId);
-    if (!cycle || cycle.projectId !== params.projectId) {
+    const cycle = await cycleRepository.findById(cycleId);
+    if (!cycle || cycle.projectId !== projectId) {
       return NextResponse.json(
         { error: "Cycle not found" },
         { status: 404 },
@@ -74,7 +75,7 @@ export async function POST(
           { status: 404 },
         );
       }
-      if (issue.projectId !== params.projectId) {
+      if (issue.projectId !== projectId) {
         return NextResponse.json(
           { error: `Issue with id "${issueId}" does not belong to this project` },
           { status: 400 },
@@ -83,7 +84,7 @@ export async function POST(
     }
 
     // Assign all issues to the cycle
-    await cycleRepository.assignIssues(params.cycleId, validated.issueIds);
+    await cycleRepository.assignIssues(cycleId, validated.issueIds);
 
     // Return updated issues
     const updatedIssues = await Promise.all(

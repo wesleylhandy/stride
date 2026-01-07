@@ -29,11 +29,10 @@ export default function CompletePage() {
   }, []);
 
   const handleGoToDashboard = () => {
-    if (projects.length > 0) {
-      router.push(`/projects/${projects[0].id}`);
-    } else {
-      router.push("/projects");
-    }
+    // Always redirect to projects listing page (T017, T036)
+    // The listing page will show projects or empty state as appropriate
+    // Documentation: The /projects route serves as the main dashboard after onboarding
+    router.push("/projects");
   };
 
   return (

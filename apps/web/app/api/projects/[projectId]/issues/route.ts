@@ -13,9 +13,9 @@ import {
 import { z } from "zod";
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     projectId: string;
-  };
+  }>;
 }
 
 /**
@@ -34,6 +34,7 @@ export async function GET(
     }
 
     const session = authResult;
+    const { projectId } = await params;
 
     // Check permission to view issues
     if (!canViewIssue(session.role)) {
@@ -44,7 +45,7 @@ export async function GET(
     }
 
     // Verify project exists
-    const project = await projectRepository.findById(params.projectId);
+    const project = await projectRepository.findById(projectId);
     if (!project) {
       return NextResponse.json(
         { error: "Project not found" },
@@ -55,7 +56,7 @@ export async function GET(
     // Parse query parameters
     const searchParams = request.nextUrl.searchParams;
     const filterData: Record<string, unknown> = {
-      projectId: params.projectId,
+      projectId,
     };
 
     // Parse filter from query params
@@ -82,7 +83,7 @@ export async function GET(
     // Handle search query
     if (filter.search) {
       const searchResult = await issueRepository.search(
-        params.projectId,
+        projectId,
         filter.search,
         {
           page: filter.page,
@@ -94,7 +95,7 @@ export async function GET(
 
     // Build filter object for findManyPaginated
     const issueFilter: Record<string, unknown> = {
-      projectId: params.projectId,
+      projectId,
     };
 
     if (filter.status) issueFilter.status = filter.status;
@@ -139,6 +140,7 @@ export async function POST(
     }
 
     const session = authResult;
+    const { projectId } = await params;
 
     // Check permission to create issues
     if (!canCreateIssue(session.role)) {
@@ -149,7 +151,7 @@ export async function POST(
     }
 
     // Verify project exists
-    const project = await projectRepository.findById(params.projectId);
+    const project = await projectRepository.findById(projectId);
     if (!project) {
       return NextResponse.json(
         { error: "Project not found" },
@@ -160,12 +162,19 @@ export async function POST(
     const body = await request.json();
     const validated = createIssueSchema.parse({
       ...body,
-      projectId: params.projectId,
+      projectId,
     });
+
+    // Convert null to undefined for repository
+    const createData = {
+      ...validated,
+      assigneeId: validated.assigneeId ?? undefined,
+      cycleId: validated.cycleId ?? undefined,
+    };
 
     // Create issue with reporter ID from session
     const issue = await issueRepository.create({
-      ...validated,
+      ...createData,
       reporterId: session.userId,
     });
 

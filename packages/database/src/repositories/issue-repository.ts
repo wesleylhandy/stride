@@ -157,7 +157,7 @@ export class IssueRepository
           reporterId: data.reporterId,
           assigneeId: data.assigneeId,
           cycleId: data.cycleId,
-          customFields: data.customFields || {},
+          customFields: (data.customFields || {}) as Prisma.InputJsonValue,
           storyPoints: data.storyPoints,
         },
       });
@@ -191,7 +191,7 @@ export class IssueRepository
 
     for (const issue of issues) {
       const match = issue.key.match(/^(.+)-(\d+)$/);
-      if (match && match[1] === projectKey) {
+      if (match && match[1] === projectKey && match[2]) {
         const number = parseInt(match[2], 10);
         if (number > maxNumber) {
           maxNumber = number;
@@ -224,7 +224,7 @@ export class IssueRepository
         priority: data.priority,
         assigneeId: data.assigneeId,
         cycleId: data.cycleId,
-        customFields: data.customFields,
+        customFields: data.customFields !== undefined ? (data.customFields as Prisma.InputJsonValue) : undefined,
         storyPoints: data.storyPoints,
         closedAt: data.status === "Done" ? existing.closedAt || new Date() : null,
       },
@@ -323,7 +323,7 @@ export class IssueRepository
 
     for (const issue of issues) {
       const match = issue.key.match(/^(.+)-(\d+)$/);
-      if (match && match[1] === projectKey) {
+      if (match && match[1] === projectKey && match[2]) {
         const number = parseInt(match[2], 10);
         if (number > maxNumber) {
           maxNumber = number;

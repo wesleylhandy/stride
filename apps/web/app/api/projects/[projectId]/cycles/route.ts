@@ -12,9 +12,9 @@ import {
 import { z } from "zod";
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     projectId: string;
-  };
+  }>;
 }
 
 /**
@@ -33,6 +33,7 @@ export async function GET(
     }
 
     const session = authResult;
+    const { projectId } = await params;
 
     // Check permission to view cycles
     if (!canViewCycle(session.role)) {
@@ -43,7 +44,7 @@ export async function GET(
     }
 
     // Verify project exists
-    const project = await projectRepository.findById(params.projectId);
+    const project = await projectRepository.findById(projectId);
     if (!project) {
       return NextResponse.json(
         { error: "Project not found" },
@@ -53,7 +54,7 @@ export async function GET(
 
     // Get all cycles for the project
     const cycles = await cycleRepository.findMany({
-      projectId: params.projectId,
+      projectId,
     });
 
     return NextResponse.json({ data: cycles });
@@ -82,6 +83,7 @@ export async function POST(
     }
 
     const session = authResult;
+    const { projectId } = await params;
 
     // Check permission to create cycles
     if (!canCreateCycle(session.role)) {
@@ -92,7 +94,7 @@ export async function POST(
     }
 
     // Verify project exists
-    const project = await projectRepository.findById(params.projectId);
+    const project = await projectRepository.findById(projectId);
     if (!project) {
       return NextResponse.json(
         { error: "Project not found" },
@@ -115,7 +117,7 @@ export async function POST(
 
     // Create cycle
     const cycle = await cycleRepository.create({
-      projectId: params.projectId,
+      projectId,
       name: validated.name,
       description: validated.description,
       startDate,

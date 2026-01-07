@@ -2,8 +2,11 @@
   "extends": "../tsconfig/base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src",
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "paths": {
+      "@stride/types": ["../types/src"],
+      "@stride/yaml-config": ["../yaml-config/src"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

@@ -24,7 +24,7 @@ export function extractIssueKeyFromBranch(
   const issueKeyPattern = /\b([A-Z][A-Z0-9]*-[0-9]+)\b/i;
 
   const match = branchName.match(issueKeyPattern);
-  if (match) {
+  if (match && match[1]) {
     return match[1].toUpperCase(); // Normalize to uppercase
   }
 
@@ -53,10 +53,9 @@ export async function findIssueByKey(
       projectId: issue.projectId,
     };
   } catch (error) {
-    logger.error("Failed to find issue by key", {
+    logger.error("Failed to find issue by key", error instanceof Error ? error : undefined, {
       projectId,
       issueKey,
-      error: error instanceof Error ? error.message : "Unknown error",
     });
     return null;
   }
@@ -120,10 +119,9 @@ export async function addBranchToIssue(
     });
     return true;
   } catch (error) {
-    logger.error("Failed to add branch to issue", {
+    logger.error("Failed to add branch to issue", error instanceof Error ? error : undefined, {
       issueId,
       branchName,
-      error: error instanceof Error ? error.message : "Unknown error",
     });
     return false;
   }

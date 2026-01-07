@@ -12,10 +12,10 @@ import {
 } from "@/lib/metrics/cycle-time";
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     projectId: string;
     cycleId: string;
-  };
+  }>;
 }
 
 /**
@@ -34,6 +34,7 @@ export async function GET(
     }
 
     const session = authResult;
+    const { projectId, cycleId } = await params;
 
     // Check permission to view cycles
     if (!canViewCycle(session.role)) {
@@ -44,7 +45,7 @@ export async function GET(
     }
 
     // Verify project exists
-    const project = await projectRepository.findById(params.projectId);
+    const project = await projectRepository.findById(projectId);
     if (!project) {
       return NextResponse.json(
         { error: "Project not found" },
@@ -53,7 +54,7 @@ export async function GET(
     }
 
     // Get cycle with issues
-    const cycle = await cycleRepository.findById(params.cycleId);
+    const cycle = await cycleRepository.findById(cycleId);
 
     if (!cycle) {
       return NextResponse.json(
@@ -63,7 +64,7 @@ export async function GET(
     }
 
     // Verify cycle belongs to project
-    if (cycle.projectId !== params.projectId) {
+    if (cycle.projectId !== projectId) {
       return NextResponse.json(
         { error: "Cycle not found in this project" },
         { status: 404 },
@@ -71,7 +72,7 @@ export async function GET(
     }
 
     // Get all issues for this cycle
-    const issues = await cycleRepository.getIssues(params.cycleId);
+    const issues = await cycleRepository.getIssues(cycleId);
 
     // Get closed statuses from project config
     const projectConfig = project.config as {

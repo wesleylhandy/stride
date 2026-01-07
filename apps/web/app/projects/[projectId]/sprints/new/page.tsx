@@ -1,5 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
 import { cycleRepository, issueRepository, projectRepository } from '@stride/database';
+import type { Issue, Cycle, IssueType, Priority } from '@stride/types';
 import { canUpdateCycle, canViewCycle } from '@/lib/auth/permissions';
 import { requireAuth } from '@/middleware/auth';
 import { headers } from 'next/headers';
@@ -7,12 +8,12 @@ import { SprintPlanningClient } from '@/components/SprintPlanningClient';
 import { BurndownChartClient } from '@/components/BurndownChartClient';
 
 interface PageParams {
-  params: {
+  params: Promise<{
     projectId: string;
-  };
-  searchParams: {
+  }>;
+  searchParams: Promise<{
     cycleId?: string;
-  };
+  }>;
 }
 
 /**
@@ -31,6 +32,10 @@ export default async function SprintPlanningPage({
   params,
   searchParams,
 }: PageParams) {
+  // Await params (Next.js 15+ requires this)
+  const { projectId } = await params;
+  const { cycleId } = await searchParams;
+
   // Get auth
   const headersList = await headers();
   const authResult = await requireAuth({
@@ -49,21 +54,20 @@ export default async function SprintPlanningPage({
   }
 
   // Fetch project
-  const project = await projectRepository.findById(params.projectId);
+  const project = await projectRepository.findById(projectId);
   if (!project) {
     notFound();
   }
 
   // If cycleId is provided, load that cycle; otherwise redirect to cycles list
-  const cycleId = searchParams.cycleId;
   if (!cycleId) {
     // Redirect to cycles list or create new cycle page
-    redirect(`/projects/${params.projectId}/sprints`);
+    redirect(`/projects/${projectId}/sprints`);
   }
 
   // Fetch cycle
   const cycle = await cycleRepository.findById(cycleId);
-  if (!cycle || cycle.projectId !== params.projectId) {
+  if (!cycle || cycle.projectId !== projectId) {
     notFound();
   }
 
@@ -72,9 +76,40 @@ export default async function SprintPlanningPage({
 
   // Fetch backlog issues (issues not assigned to any cycle)
   const allIssues = await issueRepository.findMany({
-    projectId: params.projectId,
+    projectId,
   });
   const backlogIssues = allIssues.filter((issue) => !issue.cycleId);
+
+  // Convert Prisma issues to @stride/types Issue (null -> undefined, enum conversion)
+  const typedSprintIssues: Issue[] = sprintIssues.map((issue) => ({
+    ...issue,
+    description: issue.description ?? undefined,
+    assigneeId: issue.assigneeId ?? undefined,
+    cycleId: issue.cycleId ?? undefined,
+    closedAt: issue.closedAt ?? undefined,
+    type: issue.type as IssueType,
+    priority: issue.priority ? (issue.priority as Priority) : undefined,
+    customFields: (issue.customFields as Record<string, unknown>) || {},
+    storyPoints: issue.storyPoints ?? undefined,
+  }));
+  const typedBacklogIssues: Issue[] = backlogIssues.map((issue) => ({
+    ...issue,
+    description: issue.description ?? undefined,
+    assigneeId: issue.assigneeId ?? undefined,
+    cycleId: issue.cycleId ?? undefined,
+    closedAt: issue.closedAt ?? undefined,
+    type: issue.type as IssueType,
+    priority: issue.priority ? (issue.priority as Priority) : undefined,
+    customFields: (issue.customFields as Record<string, unknown>) || {},
+    storyPoints: issue.storyPoints ?? undefined,
+  }));
+
+  // Convert Prisma cycle to @stride/types Cycle (null -> undefined)
+  const typedCycle: Cycle = {
+    ...cycle,
+    description: cycle.description ?? undefined,
+    goal: cycle.goal ?? undefined,
+  };
 
   // Check edit permissions
   const canEdit = canUpdateCycle(session.role);
@@ -92,7 +127,7 @@ export default async function SprintPlanningPage({
       <div className="mb-6 bg-background-secondary rounded-lg p-6 border border-border">
         <h2 className="text-xl font-semibold mb-4">Burndown Chart</h2>
         <BurndownChartClient
-          projectId={params.projectId}
+          projectId={projectId}
           cycleId={cycle.id}
         />
       </div>
@@ -100,10 +135,10 @@ export default async function SprintPlanningPage({
       {/* Sprint Planning Interface */}
       <div className="h-[calc(100vh-32rem)]">
         <SprintPlanningClient
-          projectId={params.projectId}
-          cycle={cycle}
-          initialSprintIssues={sprintIssues}
-          initialBacklogIssues={backlogIssues}
+          projectId={projectId}
+          cycle={typedCycle}
+          initialSprintIssues={typedSprintIssues}
+          initialBacklogIssues={typedBacklogIssues}
           canEdit={canEdit}
         />
       </div>

@@ -1,5 +1,5 @@
 import { prisma } from "../connection";
-import type { IssueBranch, Prisma, PullRequestStatus } from "@prisma/client";
+import type { IssueBranch, PullRequestStatus } from "@prisma/client";
 
 export interface CreateIssueBranchInput {
   issueId: string;

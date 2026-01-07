@@ -141,9 +141,7 @@ export function CommandPalette({
     }
   }, [selectedIndex]);
 
-  if (!open) return null;
-
-  // Group commands
+  // Group commands (must be before early return to maintain hook order)
   const groupedCommands = React.useMemo(() => {
     const groups: Record<string, Command[]> = {};
     filteredCommands.forEach((cmd) => {
@@ -155,6 +153,8 @@ export function CommandPalette({
     });
     return groups;
   }, [filteredCommands]);
+
+  if (!open) return null;
 
   return (
     <div
@@ -197,7 +197,7 @@ export function CommandPalette({
                 <div className="px-3 py-2 text-xs font-semibold text-foreground-secondary uppercase tracking-wider">
                   {groupName}
                 </div>
-                {groupCommands.map((command, index) => {
+                {groupCommands.map((command) => {
                   const globalIndex = filteredCommands.indexOf(command);
                   const isSelected = globalIndex === selectedIndex;
 

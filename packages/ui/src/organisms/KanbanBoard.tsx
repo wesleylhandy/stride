@@ -26,7 +26,7 @@ import { cn } from '../utils/cn';
 import { Badge } from '../atoms/Badge';
 import { IssueCard } from '../molecules/IssueCard';
 import type { Issue } from '@stride/types';
-import type { ProjectConfig, StatusConfig, CustomFieldConfig } from '@stride/yaml-config';
+import type { ProjectConfig, StatusConfig } from '@stride/yaml-config';
 
 export interface ValidationError {
   field?: string;
@@ -71,7 +71,7 @@ interface ColumnProps {
 /**
  * Kanban column component (droppable)
  */
-function KanbanColumn({ status, issues, onIssueClick, isFiltered, isValidDrop }: ColumnProps) {
+function KanbanColumn({ status, issues, onIssueClick, isFiltered: _isFiltered, isValidDrop }: ColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: status.key,
   });
@@ -88,15 +88,16 @@ function KanbanColumn({ status, issues, onIssueClick, isFiltered, isValidDrop }:
       ref={setNodeRef}
       className={cn(
         'flex flex-col h-full min-w-[280px] max-w-[320px]',
-        'rounded-lg border border-border bg-background-secondary',
+        'rounded-lg border border-border dark:border-border-dark',
+        'bg-background-secondary dark:bg-background-dark-secondary',
         isOver && isValidDrop && 'ring-2 ring-primary ring-offset-2',
         isOver && isValidDrop === false && 'ring-2 ring-error ring-offset-2'
       )}
       data-status={status.key}
     >
-      <div className="p-4 border-b border-border">
+      <div className="p-4 border-b border-border dark:border-border-dark">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-foreground">{status.name}</h3>
+          <h3 className="font-semibold text-foreground dark:text-foreground-dark">{status.name}</h3>
           <Badge variant="default" size="sm">
             {issues.length}
           </Badge>
@@ -116,7 +117,7 @@ function KanbanColumn({ status, issues, onIssueClick, isFiltered, isValidDrop }:
           ))}
         </SortableContext>
         {sortedIssues.length === 0 && (
-          <div className="text-sm text-foreground-secondary text-center py-8">
+          <div className="text-sm text-foreground-secondary dark:text-foreground-dark-secondary text-center py-8">
             No issues
           </div>
         )}
@@ -383,8 +384,9 @@ export function KanbanBoard({
 
     // Group issues
     localIssues.forEach((issue) => {
-      if (grouped[issue.status]) {
-        grouped[issue.status].push(issue);
+      const statusGroup = grouped[issue.status];
+      if (statusGroup) {
+        statusGroup.push(issue);
       }
     });
 
@@ -413,7 +415,7 @@ export function KanbanBoard({
 
   // Handle drag over (T165 - validate during drag)
   const handleDragOver = (event: DragOverEvent) => {
-    const { active, over } = event;
+    const { active: _active, over } = event;
     
     if (!over || !draggedIssue) {
       setDropTargetStatus(null);
@@ -475,7 +477,7 @@ export function KanbanBoard({
               }
             }
             return issue;
-          });
+          }).filter((issue): issue is Issue => issue !== undefined);
           setLocalIssues(updatedIssues);
         }
         return; // No status change, exit early

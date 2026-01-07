@@ -12,10 +12,10 @@ import {
 import { z } from "zod";
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     projectId: string;
     issueKey: string;
-  };
+  }>;
 }
 
 /**
@@ -34,6 +34,7 @@ export async function GET(
     }
 
     const session = authResult;
+    const { projectId, issueKey } = await params;
 
     // Check permission to view issues
     if (!canViewIssue(session.role)) {
@@ -44,7 +45,7 @@ export async function GET(
     }
 
     // Verify project exists
-    const project = await projectRepository.findById(params.projectId);
+    const project = await projectRepository.findById(projectId);
     if (!project) {
       return NextResponse.json(
         { error: "Project not found" },
@@ -54,8 +55,8 @@ export async function GET(
 
     // Find issue by key
     const issue = await issueRepository.findByKey(
-      params.projectId,
-      params.issueKey,
+      projectId,
+      issueKey,
     );
 
     if (!issue) {
@@ -91,6 +92,7 @@ export async function PUT(
     }
 
     const session = authResult;
+    const { projectId, issueKey } = await params;
 
     // Check permission to update issues
     if (!canUpdateIssue(session.role)) {
@@ -101,7 +103,7 @@ export async function PUT(
     }
 
     // Verify project exists
-    const project = await projectRepository.findById(params.projectId);
+    const project = await projectRepository.findById(projectId);
     if (!project) {
       return NextResponse.json(
         { error: "Project not found" },
@@ -111,8 +113,8 @@ export async function PUT(
 
     // Find issue by key
     const existing = await issueRepository.findByKey(
-      params.projectId,
-      params.issueKey,
+      projectId,
+      issueKey,
     );
 
     if (!existing) {
@@ -125,8 +127,18 @@ export async function PUT(
     const body = await request.json();
     const validated = updateIssueSchema.parse(body);
 
+    // Convert null to undefined for repository
+    const updateData = {
+      ...validated,
+      description: validated.description ?? undefined,
+      assigneeId: validated.assigneeId ?? undefined,
+      cycleId: validated.cycleId ?? undefined,
+      priority: validated.priority ?? undefined,
+      storyPoints: validated.storyPoints ?? undefined,
+    };
+
     // Update issue
-    const issue = await issueRepository.update(existing.id, validated);
+    const issue = await issueRepository.update(existing.id, updateData);
 
     return NextResponse.json(issue);
   } catch (error) {

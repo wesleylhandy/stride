@@ -492,9 +492,11 @@ test.describe('Onboarding Flow', () => {
     await page.fill('input[name="repositoryUrl"]', 'https://github.com/test/repo');
     await page.click('button:has-text("Connect")');
     
-    // 4. Verify dashboard
-    await expect(page.getByText('Dashboard')).toBeVisible();
-    await expect(page.getByText('test/repo')).toBeVisible();
+    // 4. Verify projects dashboard (projects listing page)
+    await page.waitForURL('/projects');
+    await expect(page.getByText('Projects')).toBeVisible();
+    // Verify project is displayed (project name or key should be visible)
+    await expect(page.getByText(/test|repo/i)).toBeVisible();
   });
 });
 ```
@@ -705,7 +707,7 @@ export async function loginAsTestUser(page: Page) {
   await page.fill('input[name="email"]', 'test@example.com');
   await page.fill('input[name="password"]', 'password');
   await page.click('button[type="submit"]');
-  await page.waitForURL('/dashboard');
+  await page.waitForURL('/projects');
 }
 ```
 
