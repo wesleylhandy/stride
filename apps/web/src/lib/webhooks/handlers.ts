@@ -19,13 +19,11 @@ export function handleWebhookError(
     error instanceof Error ? error.message : "Unknown error";
   const errorStack = error instanceof Error ? error.stack : undefined;
 
-  logger.error("Webhook processing error", {
+  logger.error("Webhook processing error", error instanceof Error ? error : undefined, {
     serviceType: context.serviceType,
     eventType: context.eventType,
     projectId: context.projectId,
     repositoryUrl: context.repositoryUrl,
-    error: errorMessage,
-    stack: errorStack,
   });
 
   // Update webhook last received timestamp even on error
@@ -41,8 +39,7 @@ export function handleWebhookError(
         },
       })
       .catch((updateError) => {
-        logger.error("Failed to update webhook timestamp", {
-          error: updateError,
+        logger.error("Failed to update webhook timestamp", updateError instanceof Error ? updateError : undefined, {
           projectId: context.projectId,
         });
       });

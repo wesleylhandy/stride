@@ -26,7 +26,7 @@ import { cn } from '../utils/cn';
 import { Badge } from '../atoms/Badge';
 import { IssueCard } from '../molecules/IssueCard';
 import type { Issue } from '@stride/types';
-import type { ProjectConfig, StatusConfig, CustomFieldConfig } from '@stride/yaml-config';
+import type { ProjectConfig, StatusConfig } from '@stride/yaml-config';
 
 export interface ValidationError {
   field?: string;
@@ -71,7 +71,7 @@ interface ColumnProps {
 /**
  * Kanban column component (droppable)
  */
-function KanbanColumn({ status, issues, onIssueClick, isFiltered, isValidDrop }: ColumnProps) {
+function KanbanColumn({ status, issues, onIssueClick, isFiltered: _isFiltered, isValidDrop }: ColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: status.key,
   });
@@ -384,8 +384,9 @@ export function KanbanBoard({
 
     // Group issues
     localIssues.forEach((issue) => {
-      if (grouped[issue.status]) {
-        grouped[issue.status].push(issue);
+      const statusGroup = grouped[issue.status];
+      if (statusGroup) {
+        statusGroup.push(issue);
       }
     });
 
@@ -414,7 +415,7 @@ export function KanbanBoard({
 
   // Handle drag over (T165 - validate during drag)
   const handleDragOver = (event: DragOverEvent) => {
-    const { active, over } = event;
+    const { active: _active, over } = event;
     
     if (!over || !draggedIssue) {
       setDropTargetStatus(null);
@@ -476,7 +477,7 @@ export function KanbanBoard({
               }
             }
             return issue;
-          });
+          }).filter((issue): issue is Issue => issue !== undefined);
           setLocalIssues(updatedIssues);
         }
         return; // No status change, exit early

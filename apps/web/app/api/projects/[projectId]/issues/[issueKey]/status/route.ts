@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireAuth } from "@/middleware/auth";
 import { issueRepository, projectRepository } from "@stride/database";
+import type { Issue, IssueType, Priority } from "@stride/types";
+import { parseYamlConfig } from "@stride/yaml-config";
 import {
   updateIssueStatusSchema,
 } from "@/lib/validation/issue";
@@ -12,10 +14,10 @@ import { validateStatusChange } from "@/lib/workflow/validation";
 import { z } from "zod";
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     projectId: string;
     issueKey: string;
-  };
+  }>;
 }
 
 /**
@@ -34,6 +36,7 @@ export async function PATCH(
     }
 
     const session = authResult;
+    const { projectId, issueKey } = await params;
 
     // Check permission to update issues
     if (!canUpdateIssue(session.role)) {
@@ -44,7 +47,7 @@ export async function PATCH(
     }
 
     // Verify project exists
-    const project = await projectRepository.findById(params.projectId);
+    const project = await projectRepository.findById(projectId);
     if (!project) {
       return NextResponse.json(
         { error: "Project not found" },
@@ -54,8 +57,8 @@ export async function PATCH(
 
     // Find issue by key
     const existing = await issueRepository.findByKey(
-      params.projectId,
-      params.issueKey,
+      projectId,
+      issueKey,
     );
 
     if (!existing) {
@@ -70,10 +73,31 @@ export async function PATCH(
 
     // Validate status change against workflow rules (T161-T163)
     if (project.config) {
+      // Parse project config
+      const parseResult = parseYamlConfig(project.config as unknown as string);
+      if (!parseResult.success || !parseResult.data) {
+        return NextResponse.json(
+          { error: "Invalid project configuration" },
+          { status: 500 },
+        );
+      }
+      
+      // Convert Prisma issue to types Issue (null -> undefined, enum conversion)
+      const issueForValidation: Issue = {
+        ...existing,
+        description: existing.description ?? undefined,
+        assigneeId: existing.assigneeId ?? undefined,
+        cycleId: existing.cycleId ?? undefined,
+        closedAt: existing.closedAt ?? undefined,
+        type: existing.type as IssueType,
+        priority: existing.priority ? (existing.priority as Priority) : undefined,
+        customFields: (existing.customFields as Record<string, unknown>) || {},
+        storyPoints: existing.storyPoints ?? undefined,
+      };
       const validationResult = validateStatusChange(
-        existing,
+        issueForValidation,
         validated.status,
-        project.config,
+        parseResult.data,
       );
 
       if (!validationResult.isValid) {

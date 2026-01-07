@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import { cn } from '../utils/cn';
-import { Input } from '../atoms/Input';
 
 export interface MarkdownEditorProps {
   /**

@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation';
 import { IssueDetail } from '@stride/ui';
 import { projectRepository, issueRepository, issueBranchRepository } from '@stride/database';
+import type { Issue, ProjectConfig, IssueType, Priority } from '@stride/types';
+import { parseYamlConfig } from '@stride/yaml-config';
 import { canUpdateIssue } from '@/lib/auth/permissions';
 import { requireAuth } from '@/middleware/auth';
 import { headers } from 'next/headers';
@@ -52,6 +54,28 @@ export default async function IssueDetailPage({ params }: PageParams) {
   // Fetch linked branches and PRs
   const branches = await issueBranchRepository.findByIssueId(issue.id);
 
+  // Convert Prisma issue to @stride/types Issue (null -> undefined, enum conversion)
+  const typedIssue: Issue = {
+    ...issue,
+    description: issue.description ?? undefined,
+    assigneeId: issue.assigneeId ?? undefined,
+    cycleId: issue.cycleId ?? undefined,
+    closedAt: issue.closedAt ?? undefined,
+    type: issue.type as IssueType,
+    priority: issue.priority ? (issue.priority as Priority) : undefined,
+    customFields: (issue.customFields as Record<string, unknown>) || {},
+    storyPoints: issue.storyPoints ?? undefined,
+  };
+
+  // Parse project config
+  let projectConfig: ProjectConfig | undefined;
+  if (project.config) {
+    const parseResult = parseYamlConfig(project.config as unknown as string);
+    if (parseResult.success && parseResult.data) {
+      projectConfig = parseResult.data;
+    }
+  }
+
   // Check edit permissions
   const canEdit = canUpdateIssue(session.role);
 
@@ -61,8 +85,8 @@ export default async function IssueDetailPage({ params }: PageParams) {
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <IssueDetail
-        issue={issue}
-        projectConfig={project.config || undefined}
+        issue={typedIssue}
+        projectConfig={projectConfig}
         branches={branches}
         canEdit={canEdit}
       />

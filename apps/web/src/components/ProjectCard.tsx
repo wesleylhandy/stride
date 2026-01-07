@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import type { Project } from '@prisma/client';
+import type { Project } from '@stride/database';
 
 interface ProjectCardProps {
   project: Project;

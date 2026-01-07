@@ -41,7 +41,7 @@ export async function updateIssueStatusOnBranchCreation(
   try {
     const project = await projectRepository.findById(projectId);
     if (!project) {
-      logger.error("Project not found for status update", { projectId });
+      logger.error("Project not found for status update", undefined, { projectId });
       return;
     }
 
@@ -79,9 +79,8 @@ export async function updateIssueStatusOnBranchCreation(
       newStatus: inProgressStatus,
     });
   } catch (error) {
-    logger.error("Failed to update issue status on branch creation", {
+    logger.error("Failed to update issue status on branch creation", error instanceof Error ? error : undefined, {
       issueId,
-      error: error instanceof Error ? error.message : "Unknown error",
     });
   }
 }
@@ -98,7 +97,7 @@ export async function updateIssueStatusOnPRMerge(
   try {
     const project = await projectRepository.findById(projectId);
     if (!project) {
-      logger.error("Project not found for status update", { projectId });
+      logger.error("Project not found for status update", undefined, { projectId });
       return;
     }
 
@@ -122,9 +121,8 @@ export async function updateIssueStatusOnPRMerge(
       newStatus: completionStatus,
     });
   } catch (error) {
-    logger.error("Failed to update issue status on PR merge", {
+    logger.error("Failed to update issue status on PR merge", error instanceof Error ? error : undefined, {
       issueId,
-      error: error instanceof Error ? error.message : "Unknown error",
     });
   }
 }

@@ -1,4 +1,4 @@
-import type { Issue } from "@prisma/client";
+import type { Issue } from "@stride/database";
 
 /**
  * Calculate cycle time for a single issue
@@ -94,14 +94,14 @@ export function calculateCycleTimeStats(
   const average = cycleTimes.reduce((acc, time) => acc + time, 0) / cycleTimes.length;
   const median =
     cycleTimes.length % 2 === 0
-      ? (cycleTimes[cycleTimes.length / 2 - 1] + cycleTimes[cycleTimes.length / 2]) / 2
-      : cycleTimes[Math.floor(cycleTimes.length / 2)];
-  const min = cycleTimes[0];
-  const max = cycleTimes[cycleTimes.length - 1];
+      ? (cycleTimes[cycleTimes.length / 2 - 1]! + cycleTimes[cycleTimes.length / 2]!) / 2
+      : cycleTimes[Math.floor(cycleTimes.length / 2)]!;
+  const min = cycleTimes[0] ?? null;
+  const max = cycleTimes[cycleTimes.length - 1] ?? null;
 
   return {
     average,
-    median,
+    median: median ?? null,
     min,
     max,
     count: cycleTimes.length,

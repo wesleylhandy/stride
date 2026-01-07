@@ -132,7 +132,7 @@ export class ProjectRepository
         name: data.name,
         description: data.description,
         configYaml: data.configYaml,
-        config: data.config,
+        config: data.config as Prisma.InputJsonValue,
         configVersion: data.configVersion,
         repositoryUrl: data.repositoryUrl,
         repositoryType: data.repositoryType,
@@ -156,7 +156,7 @@ export class ProjectRepository
         name: data.name,
         description: data.description,
         configYaml: data.configYaml,
-        config: data.config,
+        config: data.config !== undefined ? (data.config as Prisma.InputJsonValue) : undefined,
         configVersion: data.configVersion,
         repositoryUrl: data.repositoryUrl,
         repositoryType: data.repositoryType,
@@ -226,7 +226,7 @@ export class ProjectRepository
       where: { id },
       data: {
         configYaml,
-        config,
+        config: config as Prisma.InputJsonValue,
         configVersion: version,
         updatedAt: new Date(), // Ensure updatedAt is refreshed
       },

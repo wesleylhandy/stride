@@ -35,9 +35,15 @@ export async function createSession(
     role,
   };
 
-  const token = jwt.sign(payload, JWT_SECRET, {
-    expiresIn: JWT_EXPIRES_IN,
-  });
+  // Type assertion needed because jwt.sign has complex overloads
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const token = (jwt.sign as any)(
+    payload,
+    String(JWT_SECRET),
+    {
+      expiresIn: String(JWT_EXPIRES_IN),
+    },
+  ) as string;
 
   // Calculate expiration date
   const expiresAt = new Date();

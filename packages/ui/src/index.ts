@@ -24,7 +24,7 @@ export { ConfigEditor, type ConfigEditorProps } from './organisms/ConfigEditor';
 export { IssueForm, type IssueFormProps } from './organisms/IssueForm';
 export { KanbanBoard, type KanbanBoardProps } from './organisms/KanbanBoard';
 export { IssueDetail, type IssueDetailProps } from './organisms/IssueDetail';
-export { SprintPlanning, type SprintPlanningProps } from './organisms/SprintPlanning';
+export { SprintPlanning, type SprintPlanningProps, type CycleMetrics } from './organisms/SprintPlanning';
 
 // Utils
 export { cn } from './utils/cn';

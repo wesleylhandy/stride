@@ -1,5 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
 import { cycleRepository, issueRepository, projectRepository } from '@stride/database';
+import type { Issue, Cycle, IssueType, Priority } from '@stride/types';
 import { canUpdateCycle, canViewCycle } from '@/lib/auth/permissions';
 import { requireAuth } from '@/middleware/auth';
 import { headers } from 'next/headers';
@@ -79,6 +80,37 @@ export default async function SprintPlanningPage({
   });
   const backlogIssues = allIssues.filter((issue) => !issue.cycleId);
 
+  // Convert Prisma issues to @stride/types Issue (null -> undefined, enum conversion)
+  const typedSprintIssues: Issue[] = sprintIssues.map((issue) => ({
+    ...issue,
+    description: issue.description ?? undefined,
+    assigneeId: issue.assigneeId ?? undefined,
+    cycleId: issue.cycleId ?? undefined,
+    closedAt: issue.closedAt ?? undefined,
+    type: issue.type as IssueType,
+    priority: issue.priority ? (issue.priority as Priority) : undefined,
+    customFields: (issue.customFields as Record<string, unknown>) || {},
+    storyPoints: issue.storyPoints ?? undefined,
+  }));
+  const typedBacklogIssues: Issue[] = backlogIssues.map((issue) => ({
+    ...issue,
+    description: issue.description ?? undefined,
+    assigneeId: issue.assigneeId ?? undefined,
+    cycleId: issue.cycleId ?? undefined,
+    closedAt: issue.closedAt ?? undefined,
+    type: issue.type as IssueType,
+    priority: issue.priority ? (issue.priority as Priority) : undefined,
+    customFields: (issue.customFields as Record<string, unknown>) || {},
+    storyPoints: issue.storyPoints ?? undefined,
+  }));
+
+  // Convert Prisma cycle to @stride/types Cycle (null -> undefined)
+  const typedCycle: Cycle = {
+    ...cycle,
+    description: cycle.description ?? undefined,
+    goal: cycle.goal ?? undefined,
+  };
+
   // Check edit permissions
   const canEdit = canUpdateCycle(session.role);
 
@@ -104,9 +136,9 @@ export default async function SprintPlanningPage({
       <div className="h-[calc(100vh-32rem)]">
         <SprintPlanningClient
           projectId={projectId}
-          cycle={cycle}
-          initialSprintIssues={sprintIssues}
-          initialBacklogIssues={backlogIssues}
+          cycle={typedCycle}
+          initialSprintIssues={typedSprintIssues}
+          initialBacklogIssues={typedBacklogIssues}
           canEdit={canEdit}
         />
       </div>

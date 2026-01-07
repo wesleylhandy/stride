@@ -51,26 +51,34 @@ export function BurndownChart({
 
     // Add actual data points
     actual.forEach((point) => {
-      const dateStr = point.date.toISOString().split('T')[0];
-      dataMap.set(dateStr, {
-        date: dateStr,
-        actual: point.remaining,
-      });
+      if (point.date) {
+        const dateStr = point.date.toISOString().split('T')[0];
+        if (dateStr) {
+          dataMap.set(dateStr, {
+            date: dateStr,
+            actual: point.remaining,
+          });
+        }
+      }
     });
 
     // Add ideal data points if provided
     if (ideal) {
       ideal.forEach((point) => {
-        const dateStr = point.date.toISOString().split('T')[0];
-        const existing = dataMap.get(dateStr);
-        if (existing) {
-          existing.ideal = point.remaining;
-        } else {
-          dataMap.set(dateStr, {
-            date: dateStr,
-            actual: 0,
-            ideal: point.remaining,
-          });
+        if (point.date) {
+          const dateStr = point.date.toISOString().split('T')[0];
+          if (dateStr) {
+            const existing = dataMap.get(dateStr);
+            if (existing) {
+              existing.ideal = point.remaining;
+            } else {
+              dataMap.set(dateStr, {
+                date: dateStr,
+                actual: 0,
+                ideal: point.remaining,
+              });
+            }
+          }
         }
       });
     }

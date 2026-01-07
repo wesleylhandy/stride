@@ -44,19 +44,17 @@ export async function getLinkPreview(url: string): Promise<LinkPreview | null> {
 
     const preview: LinkPreview = {
       url,
-      title: result.ogTitle || result.twitterTitle || result.oEmbedTitle || undefined,
+      title: result.ogTitle || result.twitterTitle || undefined,
       description:
         result.ogDescription ||
         result.twitterDescription ||
-        result.oEmbedDescription ||
         undefined,
       image:
         result.ogImage?.[0]?.url ||
         result.twitterImage?.[0]?.url ||
-        result.oEmbedThumbnailUrl ||
         undefined,
       siteName: result.ogSiteName || undefined,
-      type: result.ogType || result.oEmbedType || undefined,
+      type: result.ogType || undefined,
     };
 
     // Cache the result

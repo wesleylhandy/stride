@@ -167,7 +167,7 @@ export function parseGitLabRepositoryUrl(
 
   for (const pattern of patterns) {
     const match = repositoryUrl.match(pattern);
-    if (match) {
+    if (match && match[1]) {
       return match[1];
     }
   }

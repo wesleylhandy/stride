@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import type { Project } from '@prisma/client';
+import type { Project } from '@stride/database';
 import { formatRelativeTime } from '@/lib/utils/date';
 
 interface ProjectCardProps {

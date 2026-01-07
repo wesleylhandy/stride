@@ -54,7 +54,7 @@ export function PaginationControls({
           className={currentPage <= 1 ? 'pointer-events-none opacity-50' : ''}
         >
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             disabled={currentPage <= 1}
             aria-disabled={currentPage <= 1}
@@ -75,7 +75,7 @@ export function PaginationControls({
           className={currentPage >= totalPages ? 'pointer-events-none opacity-50' : ''}
         >
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             disabled={currentPage >= totalPages}
             aria-disabled={currentPage >= totalPages}

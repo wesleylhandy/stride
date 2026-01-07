@@ -1,6 +1,5 @@
 'use client';
 
-import * as React from 'react';
 import { cn } from '../utils/cn';
 import { Badge, type BadgeProps } from '../atoms/Badge';
 import type { Issue, IssueType, Priority } from '@stride/types';

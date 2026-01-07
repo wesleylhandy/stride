@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import type { CreateIssueInput, IssueType, Priority } from '@stride/types';
+import type { CreateIssueInput } from '@stride/types';
 import type { CustomFieldConfig, ProjectConfig } from '@stride/yaml-config';
 import { Button } from '../atoms/Button';
 import { Input } from '../atoms/Input';

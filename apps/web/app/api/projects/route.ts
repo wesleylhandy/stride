@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireAuth } from "@/middleware/auth";
 import { projectRepository } from "@stride/database";
+import type { Prisma } from "@stride/database";
 import {
   createProjectSchema,
   validateProjectKeyUnique,
@@ -113,7 +114,7 @@ export async function POST(request: NextRequest) {
       name: validated.name,
       description: validated.description,
       configYaml,
-      config: parseResult.data,
+      config: parseResult.data as Prisma.JsonValue,
       repositoryUrl: validated.repositoryUrl || undefined,
       repositoryType: validated.repositoryType,
     });

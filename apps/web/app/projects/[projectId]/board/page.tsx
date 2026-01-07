@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation';
 import { KanbanBoard } from '@stride/ui';
 import { projectRepository, issueRepository } from '@stride/database';
+import type { Issue, ProjectConfig, IssueType, Priority } from '@stride/types';
+import { parseYamlConfig } from '@stride/yaml-config';
 import { canUpdateIssue } from '@/lib/auth/permissions';
 import { requireAuth } from '@/middleware/auth';
 import { headers } from 'next/headers';
@@ -49,6 +51,28 @@ export default async function KanbanBoardPage({ params }: PageParams) {
     projectId,
   });
 
+  // Convert Prisma issues to @stride/types Issue (null -> undefined, enum conversion)
+  const typedIssues: Issue[] = issues.map((issue) => ({
+    ...issue,
+    description: issue.description ?? undefined,
+    assigneeId: issue.assigneeId ?? undefined,
+    cycleId: issue.cycleId ?? undefined,
+    closedAt: issue.closedAt ?? undefined,
+    type: issue.type as IssueType, // Cast Prisma enum to @stride/types enum
+    priority: issue.priority ? (issue.priority as Priority) : undefined, // Cast Prisma enum to @stride/types enum
+    customFields: (issue.customFields as Record<string, unknown>) || {},
+    storyPoints: issue.storyPoints ?? undefined,
+  }));
+
+  // Parse project config
+  let projectConfig: ProjectConfig | undefined;
+  if (project.configYaml) {
+    const parseResult = parseYamlConfig(project.configYaml);
+    if (parseResult.success && parseResult.data) {
+      projectConfig = parseResult.data;
+    }
+  }
+
   // Check edit permissions
   const canEdit = canUpdateIssue(session.role);
 
@@ -62,8 +86,8 @@ export default async function KanbanBoardPage({ params }: PageParams) {
       </div>
       <KanbanBoardClient
         projectId={projectId}
-        initialIssues={issues}
-        projectConfig={project.config || undefined}
+        initialIssues={typedIssues}
+        projectConfig={projectConfig}
         canEdit={canEdit}
       />
     </div>

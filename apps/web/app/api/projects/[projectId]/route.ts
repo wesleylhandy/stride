@@ -6,9 +6,9 @@ import { updateProjectSchema } from "@/lib/validation/project";
 import { z } from "zod";
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     projectId: string;
-  };
+  }>;
 }
 
 /**
@@ -26,7 +26,8 @@ export async function GET(
       return authResult;
     }
 
-    const project = await projectRepository.findById(params.projectId);
+    const { projectId } = await params;
+    const project = await projectRepository.findById(projectId);
 
     if (!project) {
       return NextResponse.json(
@@ -60,11 +61,12 @@ export async function PUT(
       return authResult;
     }
 
+    const { projectId } = await params;
     const body = await request.json();
     const validated = updateProjectSchema.parse(body);
 
     // Check if project exists
-    const existing = await projectRepository.findById(params.projectId);
+    const existing = await projectRepository.findById(projectId);
     if (!existing) {
       return NextResponse.json(
         { error: "Project not found" },
@@ -73,7 +75,7 @@ export async function PUT(
     }
 
     // Update project
-    const project = await projectRepository.update(params.projectId, {
+    const project = await projectRepository.update(projectId, {
       name: validated.name,
       description: validated.description ?? undefined,
       repositoryUrl: validated.repositoryUrl ?? undefined,
@@ -112,8 +114,9 @@ export async function DELETE(
       return authResult;
     }
 
+    const { projectId } = await params;
     // Check if project exists
-    const existing = await projectRepository.findById(params.projectId);
+    const existing = await projectRepository.findById(projectId);
     if (!existing) {
       return NextResponse.json(
         { error: "Project not found" },
@@ -122,7 +125,7 @@ export async function DELETE(
     }
 
     // Delete project
-    await projectRepository.delete(params.projectId);
+    await projectRepository.delete(projectId);
 
     return NextResponse.json({ message: "Project deleted successfully" });
   } catch (error) {

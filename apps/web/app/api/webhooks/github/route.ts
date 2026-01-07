@@ -16,8 +16,7 @@ import {
   parseGitHubPR,
   processPRWebhook,
 } from "@/lib/webhooks/pr-parser";
-import { issueBranchRepository } from "@stride/database";
-import { PullRequestStatus } from "@prisma/client";
+import { issueBranchRepository, PullRequestStatus } from "@stride/database";
 
 /**
  * GitHub webhook endpoint
@@ -49,7 +48,7 @@ export async function POST(request: NextRequest) {
 
   // Find repository connection by repository URL
   let repositoryConnection;
-  let projectId: string;
+  let projectId: string | undefined;
 
   try {
     if (eventType === "push") {

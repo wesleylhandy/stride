@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireAuth } from "@/middleware/auth";
-import { prisma } from "@stride/database";
-import { projectRepository } from "@stride/database";
+import { prisma, projectRepository } from "@stride/database";
+import type { Prisma } from "@stride/database";
 import { encrypt } from "@/lib/integrations/storage";
 import { registerWebhook } from "@/lib/integrations/webhooks";
 import { syncConfigFromRepository } from "@/lib/integrations/config-sync";
@@ -19,9 +19,9 @@ import {
 import { z } from "zod";
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     projectId: string;
-  };
+  }>;
 }
 
 const connectRepositorySchema = z.object({
@@ -47,6 +47,7 @@ export async function GET(
       return authResult;
     }
 
+    const { projectId } = await params;
     const searchParams = request.nextUrl.searchParams;
     const action = searchParams.get("action");
     const repositoryType = searchParams.get("type") as
@@ -58,7 +59,7 @@ export async function GET(
     // If requesting OAuth URL
     if (action === "oauth" && repositoryType) {
       const state = crypto.randomUUID();
-      const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/projects/${params.projectId}/repositories/callback`;
+      const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/projects/${projectId}/repositories/callback`;
 
       let authUrl: string;
 
@@ -89,7 +90,7 @@ export async function GET(
 
     // Get existing repository connection
     const connection = await prisma.repositoryConnection.findFirst({
-      where: { projectId: params.projectId },
+      where: { projectId },
     });
 
     if (!connection) {
@@ -132,11 +133,12 @@ export async function POST(
       return authResult;
     }
 
+    const { projectId } = await params;
     const body = await request.json();
     const validated = connectRepositorySchema.parse(body);
 
     // Verify project exists
-    const project = await projectRepository.findById(params.projectId);
+    const project = await projectRepository.findById(projectId);
     if (!project) {
       return NextResponse.json(
         { error: "Project not found" },
@@ -148,7 +150,7 @@ export async function POST(
 
     // Handle OAuth flow
     if (validated.code) {
-      const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/projects/${params.projectId}/repositories/callback`;
+      const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/projects/${projectId}/repositories/callback`;
 
       if (validated.repositoryType === "GitHub") {
         const config: GitHubOAuthConfig = {
@@ -191,9 +193,9 @@ export async function POST(
 
     // Update project with config
     await projectRepository.updateConfig(
-      params.projectId,
+      projectId,
       configYaml,
-      config,
+      config as Prisma.JsonValue,
     );
 
     // Generate webhook URL
@@ -224,7 +226,7 @@ export async function POST(
         lastSyncAt: new Date(),
       },
       create: {
-        projectId: params.projectId,
+        projectId,
         repositoryUrl: validated.repositoryUrl,
         serviceType: validated.repositoryType,
         accessToken: encryptedToken,

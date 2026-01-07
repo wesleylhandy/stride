@@ -14,7 +14,6 @@ import {
   type DragStartEvent,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
@@ -149,7 +148,7 @@ export function SprintPlanning({
   const [activeId, setActiveId] = React.useState<string | null>(null);
   const [goal, setGoal] = React.useState(cycle.goal || '');
   const [isSavingGoal, setIsSavingGoal] = React.useState(false);
-  const [isAssigning, setIsAssigning] = React.useState(false);
+  const [_isAssigning, setIsAssigning] = React.useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),

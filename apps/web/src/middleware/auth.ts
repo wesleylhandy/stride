@@ -75,7 +75,7 @@ export function withAuth<T = unknown>(
 
     if (authResult instanceof NextResponse) {
       // Auth failed, return error response
-      return authResult;
+      return authResult as NextResponse<T>;
     }
 
     // Auth succeeded, call handler with user

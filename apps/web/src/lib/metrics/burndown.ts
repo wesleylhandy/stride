@@ -1,4 +1,4 @@
-import type { Issue, Cycle } from "@prisma/client";
+import type { Issue, Cycle } from "@stride/database";
 import type { BurndownDataPoint } from "@stride/types";
 
 /**

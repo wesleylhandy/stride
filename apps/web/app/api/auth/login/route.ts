@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@stride/database";
 import { verifyPassword } from "@/lib/auth/password";
 import { createSession, getTokenFromHeaders } from "@/lib/auth/session";
+import { UserRole } from "@stride/types";
 import { z } from "zod";
 import { cookies } from "next/headers";
 
@@ -53,7 +54,7 @@ export async function POST(request: Request) {
     const token = await createSession(
       user.id,
       user.email,
-      user.role,
+      user.role as UserRole,
       ipAddress || undefined,
       userAgent,
     );

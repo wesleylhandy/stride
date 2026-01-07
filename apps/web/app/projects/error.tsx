@@ -116,7 +116,7 @@ export default function ProjectsError({
             </Button>
           )}
           <Button 
-            variant="outline" 
+            variant="secondary" 
             size="lg"
             onClick={() => window.location.href = '/'}
             aria-label="Go to home page"

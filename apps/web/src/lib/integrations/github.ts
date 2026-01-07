@@ -164,7 +164,7 @@ export function parseGitHubRepositoryUrl(
 
   for (const pattern of patterns) {
     const match = repositoryUrl.match(pattern);
-    if (match) {
+    if (match && match[1] && match[2]) {
       return {
         owner: match[1],
         repo: match[2],

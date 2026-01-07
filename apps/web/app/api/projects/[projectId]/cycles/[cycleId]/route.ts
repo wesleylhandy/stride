@@ -11,10 +11,10 @@ import { calculateAverageCycleTime } from "@/lib/metrics/cycle-time";
 import { z } from "zod";
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     projectId: string;
     cycleId: string;
-  };
+  }>;
 }
 
 /**
@@ -33,6 +33,7 @@ export async function GET(
     }
 
     const session = authResult;
+    const { projectId, cycleId } = await params;
 
     // Check permission to view cycles
     if (!canViewCycle(session.role)) {
@@ -43,7 +44,7 @@ export async function GET(
     }
 
     // Verify project exists
-    const project = await projectRepository.findById(params.projectId);
+    const project = await projectRepository.findById(projectId);
     if (!project) {
       return NextResponse.json(
         { error: "Project not found" },
@@ -52,7 +53,7 @@ export async function GET(
     }
 
     // Get cycle with issues
-    const cycle = await cycleRepository.findById(params.cycleId);
+    const cycle = await cycleRepository.findById(cycleId);
 
     if (!cycle) {
       return NextResponse.json(
@@ -62,7 +63,7 @@ export async function GET(
     }
 
     // Verify cycle belongs to project
-    if (cycle.projectId !== params.projectId) {
+    if (cycle.projectId !== projectId) {
       return NextResponse.json(
         { error: "Cycle not found in this project" },
         { status: 404 },
@@ -70,7 +71,7 @@ export async function GET(
     }
 
     // Calculate metrics
-    const issues = await cycleRepository.getIssues(params.cycleId);
+    const issues = await cycleRepository.getIssues(cycleId);
     const totalStoryPoints = issues.reduce((sum, issue) => sum + (issue.storyPoints || 0), 0);
     
     // Calculate completed story points (issues in "done" or "closed" status)
@@ -95,7 +96,6 @@ export async function GET(
         completedStoryPoints,
         remainingStoryPoints,
         averageCycleTime,
-        burndownData,
       },
     });
   } catch (error) {
@@ -123,6 +123,7 @@ export async function PUT(
     }
 
     const session = authResult;
+    const { projectId, cycleId } = await params;
 
     // Check permission to update cycles
     if (!canUpdateCycle(session.role)) {
@@ -133,7 +134,7 @@ export async function PUT(
     }
 
     // Verify project exists
-    const project = await projectRepository.findById(params.projectId);
+    const project = await projectRepository.findById(projectId);
     if (!project) {
       return NextResponse.json(
         { error: "Project not found" },
@@ -142,8 +143,8 @@ export async function PUT(
     }
 
     // Verify cycle exists and belongs to project
-    const existingCycle = await cycleRepository.findById(params.cycleId);
-    if (!existingCycle || existingCycle.projectId !== params.projectId) {
+    const existingCycle = await cycleRepository.findById(cycleId);
+    if (!existingCycle || existingCycle.projectId !== projectId) {
       return NextResponse.json(
         { error: "Cycle not found" },
         { status: 404 },
@@ -154,16 +155,19 @@ export async function PUT(
     const validated = updateCycleSchema.parse(body);
 
     // Convert date strings to Date objects if needed
+    // Convert null to undefined to match UpdateCycleInput type
     const updateData: {
       name?: string;
-      description?: string | null;
+      description?: string;
       startDate?: Date;
       endDate?: Date;
-      goal?: string | null;
+      goal?: string;
     } = {};
 
     if (validated.name !== undefined) updateData.name = validated.name;
-    if (validated.description !== undefined) updateData.description = validated.description;
+    if (validated.description !== undefined) {
+      updateData.description = validated.description ?? undefined;
+    }
     if (validated.startDate !== undefined) {
       updateData.startDate =
         typeof validated.startDate === "string"
@@ -176,10 +180,12 @@ export async function PUT(
           ? new Date(validated.endDate)
           : validated.endDate;
     }
-    if (validated.goal !== undefined) updateData.goal = validated.goal;
+    if (validated.goal !== undefined) {
+      updateData.goal = validated.goal ?? undefined;
+    }
 
     // Update cycle
-    const cycle = await cycleRepository.update(params.cycleId, updateData);
+    const cycle = await cycleRepository.update(cycleId, updateData);
 
     return NextResponse.json({ data: cycle });
   } catch (error) {
