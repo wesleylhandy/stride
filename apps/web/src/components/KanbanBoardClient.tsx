@@ -129,7 +129,7 @@ export function KanbanBoardClient({
   if (!projectConfig) {
     return (
       <div className="flex items-center justify-center p-8">
-        <p className="text-foreground-secondary">
+        <p className="text-foreground-secondary dark:text-foreground-dark-secondary">
           Project configuration not found
         </p>
       </div>
@@ -145,8 +145,8 @@ export function KanbanBoardClient({
         onIssueClick={handleIssueClick}
       />
       {isUpdating && (
-        <div className="fixed bottom-4 left-4 bg-background-secondary border border-border rounded-lg p-3 shadow-lg">
-          <p className="text-sm text-foreground-secondary">
+        <div className="fixed bottom-4 left-4 bg-background-secondary dark:bg-background-dark-secondary border border-border dark:border-border-dark rounded-lg p-3 shadow-lg">
+          <p className="text-sm text-foreground-secondary dark:text-foreground-dark-secondary">
             Updating issue status...
           </p>
         </div>

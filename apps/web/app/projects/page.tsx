@@ -1,0 +1,119 @@
+import { redirect } from 'next/navigation';
+import { requireAuth } from '@/middleware/auth';
+import { projectRepository } from '@stride/database';
+import { headers } from 'next/headers';
+import { ProjectCard } from '@/components/ProjectCard';
+import { ProjectsEmptyState } from '@/components/ProjectsEmptyState';
+import { PaginationControls } from '@/components/PaginationControls';
+
+interface ProjectsPageProps {
+  searchParams: Promise<{
+    page?: string;
+    pageSize?: string;
+  }>;
+}
+
+/**
+ * Projects Listing Page
+ * 
+ * Displays all projects accessible to the current user.
+ * 
+ * Features:
+ * - Authentication required
+ * - Project cards with navigation
+ * - Empty state handling
+ * - Error boundaries
+ * - Pagination support (T025, T034)
+ * - Error logging (T031)
+ * - Edge case handling documentation (T035)
+ * 
+ * Edge Cases Handled:
+ * - Long project names: Truncated with tooltip in ProjectCard (T032)
+ * - Many projects (100+): Pagination UI controls displayed (T034)
+ * - Archived/deleted projects: Not currently supported in schema (T033)
+ * - Empty state: Shows friendly message with CTA (T016)
+ * - Error state: Error boundary with retry (T012, T013)
+ * 
+ * Performance:
+ * - Pagination limits data fetched (default 20 per page)
+ * - Server-side rendering for initial load
+ * - Caching headers for static data (T026)
+ */
+export default async function ProjectsPage({ searchParams }: ProjectsPageProps) {
+  try {
+    // Authenticate user (T002)
+    const headersList = await headers();
+    const authResult = await requireAuth({
+      headers: headersList,
+    } as any);
+
+    // Redirect to login if not authenticated (T004)
+    if (!authResult || 'status' in authResult) {
+      redirect('/login');
+    }
+
+    // Parse pagination parameters (T025)
+    const params = await searchParams;
+    const page = Math.max(1, parseInt(params.page || '1', 10));
+    const pageSize = Math.min(100, Math.max(1, parseInt(params.pageSize || '20', 10)));
+
+    // Fetch projects using repository with pagination (T003, T025)
+    const projects = await projectRepository.findManyPaginated(undefined, {
+      page,
+      pageSize,
+    });
+
+    // Handle empty state (T016)
+    if (projects.items.length === 0) {
+      return <ProjectsEmptyState />;
+    }
+
+    // Render projects list (T015)
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-foreground dark:text-foreground-dark">
+            Projects
+          </h1>
+          <p className="text-foreground-secondary dark:text-foreground-dark-secondary mt-1">
+            {projects.total} {projects.total === 1 ? 'project' : 'projects'}
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {projects.items.map((project) => (
+            <ProjectCard key={project.id} project={project} />
+          ))}
+        </div>
+        
+        {/* Pagination controls for 100+ projects (T034) */}
+        {projects.totalPages > 1 && (
+          <div className="mt-8">
+            <PaginationControls
+              currentPage={projects.page}
+              totalPages={projects.totalPages}
+              totalItems={projects.total}
+              pageSize={projects.pageSize}
+              basePath="/projects"
+            />
+          </div>
+        )}
+      </div>
+    );
+  } catch (error) {
+    // Error logging for debugging (T031)
+    console.error('Projects page error:', {
+      error,
+      timestamp: new Date().toISOString(),
+      path: '/projects',
+    });
+    
+    // Re-throw to trigger error boundary
+    throw error;
+  }
+}
+
+// Cache configuration for static project data (T026)
+// Projects listing is user-specific, so we use dynamic rendering
+// but can add revalidation for better performance
+export const revalidate = 60; // Revalidate every 60 seconds
+

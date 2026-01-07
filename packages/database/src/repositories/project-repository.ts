@@ -94,6 +94,11 @@ export class ProjectRepository
         skip,
         take,
         orderBy: { createdAt: "desc" },
+        include: {
+          _count: {
+            select: { issues: true },
+          },
+        },
       }),
       prisma.project.count({ where }),
     ]);

@@ -6,10 +6,10 @@ import { requireAuth } from '@/middleware/auth';
 import { headers } from 'next/headers';
 
 interface PageParams {
-  params: {
+  params: Promise<{
     projectId: string;
     issueKey: string;
-  };
+  }>;
 }
 
 /**
@@ -18,6 +18,9 @@ interface PageParams {
  * Displays issue details with edit functionality and status change UI.
  */
 export default async function IssueDetailPage({ params }: PageParams) {
+  // Await params (Next.js 15+ requires this)
+  const { projectId, issueKey } = await params;
+
   // Get auth (this will redirect if not authenticated)
   const headersList = await headers();
   const authResult = await requireAuth({
@@ -31,15 +34,15 @@ export default async function IssueDetailPage({ params }: PageParams) {
   const session = authResult;
 
   // Fetch project to get config
-  const project = await projectRepository.findById(params.projectId);
+  const project = await projectRepository.findById(projectId);
   if (!project) {
     notFound();
   }
 
   // Fetch issue directly from repository
   const issue = await issueRepository.findByKey(
-    params.projectId,
-    params.issueKey,
+    projectId,
+    issueKey,
   );
 
   if (!issue) {

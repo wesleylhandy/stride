@@ -66,7 +66,8 @@ export function IssueCard({
     <div
       onClick={onClick}
       className={cn(
-        'group cursor-pointer rounded-lg border bg-background p-3 shadow-sm',
+        'group cursor-pointer rounded-lg border border-border dark:border-border-dark',
+        'bg-background dark:bg-background-dark p-3 shadow-sm',
         'transition-all hover:shadow-md',
         'focus-ring focus-visible:outline-none',
         isDragging && 'opacity-50 shadow-lg',
@@ -79,14 +80,14 @@ export function IssueCard({
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-sm font-medium text-foreground-secondary">
+            <span className="text-sm font-medium text-foreground-secondary dark:text-foreground-dark-secondary">
               {issue.key}
             </span>
             <Badge variant={getTypeVariant(issue.type)} size="sm">
               {issue.type}
             </Badge>
           </div>
-          <h3 className="text-sm font-semibold text-foreground line-clamp-2 mb-2">
+          <h3 className="text-sm font-semibold text-foreground dark:text-foreground-dark line-clamp-2 mb-2">
             {issue.title}
           </h3>
         </div>
@@ -100,7 +101,7 @@ export function IssueCard({
             </Badge>
           )}
           {issue.storyPoints !== undefined && issue.storyPoints !== null && (
-            <span className="text-xs text-foreground-secondary">
+            <span className="text-xs text-foreground-secondary dark:text-foreground-dark-secondary">
               {issue.storyPoints} SP
             </span>
           )}

@@ -1,0 +1,173 @@
+openapi: 3.0.0
+info:
+  title: Projects API
+  description: API endpoints for projects listing page
+  version: 1.0.0
+servers:
+  - url: /api
+    description: API base path
+
+paths:
+  /projects:
+    get:
+      summary: List all projects
+      description: Returns paginated list of projects accessible to the authenticated user. Used by the projects listing page.
+      operationId: listProjects
+      tags:
+        - Projects
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: Page number (1-indexed)
+          required: false
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: pageSize
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: search
+          in: query
+          description: Search term for project name
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response with paginated projects
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProjectsResponse'
+        '401':
+          description: Unauthenticated - user must log in
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    Project:
+      type: object
+      required:
+        - id
+        - key
+        - name
+        - configYaml
+        - config
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique project identifier
+        key:
+          type: string
+          description: Project key (e.g., "APP")
+          example: APP
+        name:
+          type: string
+          description: Project display name
+          example: My Application
+        description:
+          type: string
+          nullable: true
+          description: Project description
+          example: Main application project
+        configYaml:
+          type: string
+          description: Raw YAML configuration
+        config:
+          type: object
+          description: Parsed configuration object
+        configVersion:
+          type: string
+          nullable: true
+          description: Configuration version (Git commit hash)
+        repositoryUrl:
+          type: string
+          nullable: true
+          format: uri
+          description: Git repository URL
+        repositoryType:
+          type: string
+          nullable: true
+          enum:
+            - GitHub
+            - GitLab
+            - Bitbucket
+          description: Repository service type
+        createdAt:
+          type: string
+          format: date-time
+          description: Project creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp (used as "last activity")
+    
+    PaginatedProjectsResponse:
+      type: object
+      required:
+        - items
+        - total
+        - page
+        - pageSize
+        - totalPages
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Project'
+          description: Array of projects for current page
+        total:
+          type: integer
+          description: Total number of projects
+          example: 10
+        page:
+          type: integer
+          description: Current page number (1-indexed)
+          example: 1
+        pageSize:
+          type: integer
+          description: Number of items per page
+          example: 20
+        totalPages:
+          type: integer
+          description: Total number of pages
+          example: 1
+    
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: Internal server error
+
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session_token
+      description: HTTP-only cookie containing JWT session token
+

@@ -88,15 +88,16 @@ function KanbanColumn({ status, issues, onIssueClick, isFiltered, isValidDrop }:
       ref={setNodeRef}
       className={cn(
         'flex flex-col h-full min-w-[280px] max-w-[320px]',
-        'rounded-lg border border-border bg-background-secondary',
+        'rounded-lg border border-border dark:border-border-dark',
+        'bg-background-secondary dark:bg-background-dark-secondary',
         isOver && isValidDrop && 'ring-2 ring-primary ring-offset-2',
         isOver && isValidDrop === false && 'ring-2 ring-error ring-offset-2'
       )}
       data-status={status.key}
     >
-      <div className="p-4 border-b border-border">
+      <div className="p-4 border-b border-border dark:border-border-dark">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-foreground">{status.name}</h3>
+          <h3 className="font-semibold text-foreground dark:text-foreground-dark">{status.name}</h3>
           <Badge variant="default" size="sm">
             {issues.length}
           </Badge>
@@ -116,7 +117,7 @@ function KanbanColumn({ status, issues, onIssueClick, isFiltered, isValidDrop }:
           ))}
         </SortableContext>
         {sortedIssues.length === 0 && (
-          <div className="text-sm text-foreground-secondary text-center py-8">
+          <div className="text-sm text-foreground-secondary dark:text-foreground-dark-secondary text-center py-8">
             No issues
           </div>
         )}

@@ -7,12 +7,12 @@ import { SprintPlanningClient } from '@/components/SprintPlanningClient';
 import { BurndownChartClient } from '@/components/BurndownChartClient';
 
 interface PageParams {
-  params: {
+  params: Promise<{
     projectId: string;
-  };
-  searchParams: {
+  }>;
+  searchParams: Promise<{
     cycleId?: string;
-  };
+  }>;
 }
 
 /**
@@ -31,6 +31,10 @@ export default async function SprintPlanningPage({
   params,
   searchParams,
 }: PageParams) {
+  // Await params (Next.js 15+ requires this)
+  const { projectId } = await params;
+  const { cycleId } = await searchParams;
+
   // Get auth
   const headersList = await headers();
   const authResult = await requireAuth({
@@ -49,21 +53,20 @@ export default async function SprintPlanningPage({
   }
 
   // Fetch project
-  const project = await projectRepository.findById(params.projectId);
+  const project = await projectRepository.findById(projectId);
   if (!project) {
     notFound();
   }
 
   // If cycleId is provided, load that cycle; otherwise redirect to cycles list
-  const cycleId = searchParams.cycleId;
   if (!cycleId) {
     // Redirect to cycles list or create new cycle page
-    redirect(`/projects/${params.projectId}/sprints`);
+    redirect(`/projects/${projectId}/sprints`);
   }
 
   // Fetch cycle
   const cycle = await cycleRepository.findById(cycleId);
-  if (!cycle || cycle.projectId !== params.projectId) {
+  if (!cycle || cycle.projectId !== projectId) {
     notFound();
   }
 
@@ -72,7 +75,7 @@ export default async function SprintPlanningPage({
 
   // Fetch backlog issues (issues not assigned to any cycle)
   const allIssues = await issueRepository.findMany({
-    projectId: params.projectId,
+    projectId,
   });
   const backlogIssues = allIssues.filter((issue) => !issue.cycleId);
 
@@ -92,7 +95,7 @@ export default async function SprintPlanningPage({
       <div className="mb-6 bg-background-secondary rounded-lg p-6 border border-border">
         <h2 className="text-xl font-semibold mb-4">Burndown Chart</h2>
         <BurndownChartClient
-          projectId={params.projectId}
+          projectId={projectId}
           cycleId={cycle.id}
         />
       </div>
@@ -100,7 +103,7 @@ export default async function SprintPlanningPage({
       {/* Sprint Planning Interface */}
       <div className="h-[calc(100vh-32rem)]">
         <SprintPlanningClient
-          projectId={params.projectId}
+          projectId={projectId}
           cycle={cycle}
           initialSprintIssues={sprintIssues}
           initialBacklogIssues={backlogIssues}

@@ -7,9 +7,9 @@ import { headers } from 'next/headers';
 import { KanbanBoardClient } from '@/components/KanbanBoardClient';
 
 interface PageParams {
-  params: {
+  params: Promise<{
     projectId: string;
-  };
+  }>;
 }
 
 /**
@@ -23,6 +23,9 @@ interface PageParams {
  * - Real-time updates
  */
 export default async function KanbanBoardPage({ params }: PageParams) {
+  // Await params (Next.js 15+ requires this)
+  const { projectId } = await params;
+
   // Get auth
   const headersList = await headers();
   const authResult = await requireAuth({
@@ -36,14 +39,14 @@ export default async function KanbanBoardPage({ params }: PageParams) {
   const session = authResult;
 
   // Fetch project to get config
-  const project = await projectRepository.findById(params.projectId);
+  const project = await projectRepository.findById(projectId);
   if (!project) {
     notFound();
   }
 
   // Fetch all issues for the project
   const issues = await issueRepository.findMany({
-    projectId: params.projectId,
+    projectId,
   });
 
   // Check edit permissions
@@ -52,13 +55,13 @@ export default async function KanbanBoardPage({ params }: PageParams) {
   return (
     <div className="container mx-auto px-4 py-8 h-full">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold">Kanban Board</h1>
-        <p className="text-foreground-secondary mt-1">
+        <h1 className="text-3xl font-bold text-foreground dark:text-foreground-dark">Kanban Board</h1>
+        <p className="text-foreground-secondary dark:text-foreground-dark-secondary mt-1">
           {project.name} - Drag and drop issues to change their status
         </p>
       </div>
       <KanbanBoardClient
-        projectId={params.projectId}
+        projectId={projectId}
         initialIssues={issues}
         projectConfig={project.config || undefined}
         canEdit={canEdit}
