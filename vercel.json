@@ -1,8 +1,7 @@
 {
-  "buildCommand": "pnpm build",
+  "buildCommand": "cd apps/site && pnpm build",
   "installCommand": "pnpm install",
-  "outputDirectory": ".next",
-  "framework": "nextjs",
-  "rootDirectory": "apps/site"
+  "outputDirectory": "apps/site/.next",
+  "framework": "nextjs"
 }
 
