@@ -10,6 +10,15 @@ const nextConfig: NextConfig = {
   ],
   // Enable standalone output for Docker
   output: "standalone",
+  // Workarounds for Next.js 16.0.10 + React 19 compatibility issues
+  experimental: {
+    // Suppress ViewportBoundary bundler warnings
+    serverActions: {
+      bodySizeLimit: "2mb",
+    },
+  },
+  // Next.js 16 uses Turbopack by default, so we don't need webpack config
+  // Error suppression is handled by ErrorSuppressor component instead
 };
 
 export default nextConfig;

@@ -17,6 +17,8 @@ export { MarkdownEditor, type MarkdownEditorProps } from './molecules/MarkdownEd
 export { IssueCard, type IssueCardProps } from './molecules/IssueCard';
 export { UserMenu, type UserMenuProps } from './molecules/UserMenu';
 export { BurndownChart, type BurndownChartProps } from './molecules/BurndownChart';
+export { ProjectSelector, type ProjectSelectorProps, type Project } from './molecules/ProjectSelector';
+export { Breadcrumbs, type BreadcrumbsProps, type BreadcrumbItem } from './molecules/Breadcrumbs';
 
 // Organisms
 export { CommandPalette, type CommandPaletteProps, type Command } from './organisms/CommandPalette';
@@ -25,6 +27,9 @@ export { IssueForm, type IssueFormProps } from './organisms/IssueForm';
 export { KanbanBoard, type KanbanBoardProps } from './organisms/KanbanBoard';
 export { IssueDetail, type IssueDetailProps } from './organisms/IssueDetail';
 export { SprintPlanning, type SprintPlanningProps, type CycleMetrics } from './organisms/SprintPlanning';
+export { TopBar, type TopBarProps } from './organisms/TopBar';
+export { Sidebar, type SidebarProps } from './organisms/Sidebar';
+export { ProjectTabs, type ProjectTabsProps, type ProjectTab } from './organisms/ProjectTabs';
 
 // Utils
 export { cn } from './utils/cn';

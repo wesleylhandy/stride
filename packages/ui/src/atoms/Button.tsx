@@ -28,13 +28,13 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variantStyles = {
       primary:
-        'bg-primary text-white hover:bg-primary-hover active:bg-primary-active',
+        'bg-primary text-white hover:bg-primary-hover active:bg-primary-active shadow-sm hover:shadow-md transition-all',
       secondary:
-        'bg-secondary text-foreground dark:text-foreground-dark hover:bg-secondary-hover active:bg-secondary-active border border-border dark:border-border-dark',
+        'bg-surface dark:bg-surface-dark text-foreground dark:text-foreground-dark hover:bg-background-secondary dark:hover:bg-background-dark-secondary active:bg-background-tertiary dark:active:bg-background-dark-tertiary border border-border dark:border-border-dark hover:border-border-hover dark:hover:border-border-dark-hover',
       ghost:
-        'bg-transparent text-foreground dark:text-foreground-dark hover:bg-background-secondary dark:hover:bg-background-dark-secondary active:bg-background-tertiary dark:active:bg-background-dark-tertiary',
+        'bg-transparent text-foreground-secondary dark:text-foreground-dark-secondary hover:bg-background-secondary dark:hover:bg-background-dark-secondary hover:text-foreground dark:hover:text-foreground-dark active:bg-background-tertiary dark:active:bg-background-dark-tertiary',
       danger:
-        'bg-error text-white hover:bg-error-dark active:bg-error-dark',
+        'bg-error text-white hover:bg-error-dark active:bg-error-dark shadow-sm hover:shadow-md transition-all',
     };
 
     const sizeStyles = {

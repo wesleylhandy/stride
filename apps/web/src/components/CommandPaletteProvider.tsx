@@ -95,11 +95,13 @@ export function CommandPaletteProvider({
   return (
     <>
       {children}
-      <CommandPalette
-        open={isOpen}
-        onClose={() => setIsOpen(false)}
-        commands={commands}
-      />
+      {isOpen && (
+        <CommandPalette
+          open={isOpen}
+          onClose={() => setIsOpen(false)}
+          commands={commands}
+        />
+      )}
     </>
   );
 }

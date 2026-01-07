@@ -10,6 +10,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@hookform/resolvers": "^3.9.0",
     "@stride/database": "workspace:*",
     "@stride/types": "workspace:*",
     "@stride/ui": "workspace:*",
@@ -21,6 +22,7 @@
     "open-graph-scraper": "^6.0.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "react-hook-form": "^7.54.0",
     "react-icons": "^5.5.0",
     "zod": "^3.24.1"
   },

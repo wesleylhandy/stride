@@ -41,7 +41,8 @@ interface ProjectsPageProps {
  */
 export default async function ProjectsPage({ searchParams }: ProjectsPageProps) {
   try {
-    // Authenticate user (T002)
+    // Note: Layout handles authentication and redirects
+    // We still need to check auth here for server component safety
     const headersList = await headers();
     const authResult = await requireAuth({
       headers: headersList,
@@ -69,13 +70,11 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
     }
 
     // Render projects list (T015)
+    // Note: Layout provides header and breadcrumbs
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div>
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-foreground dark:text-foreground-dark">
-            Projects
-          </h1>
-          <p className="text-foreground-secondary dark:text-foreground-dark-secondary mt-1">
+          <p className="text-sm text-foreground-secondary dark:text-foreground-dark-secondary">
             {projects.total} {projects.total === 1 ? 'project' : 'projects'}
           </p>
         </div>

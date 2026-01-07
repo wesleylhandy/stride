@@ -682,6 +682,175 @@ Where:
 
 ---
 
+## Phase 7.5: Authenticated Layouts and Navigation Infrastructure (P2)
+
+**Goal**: Provide consistent layout, navigation, and logout access across all authenticated pages to ensure professional UX and security (logout always accessible).
+
+**Independent Test**: Navigate to any authenticated page (projects listing, kanban board, project settings), verify that a header with user menu and logout is visible, and confirm that navigation between pages works consistently. Test succeeds when all authenticated pages have consistent layout with accessible logout functionality.
+
+**Dependencies**: Phase 3 complete (authentication and user management must exist)
+
+**Rationale**: This infrastructure should be in place before building additional features. While onboarding has a layout, post-onboarding pages currently lack consistent navigation/logout. This phase ensures all authenticated pages have proper layout infrastructure.
+
+### TopBar Component
+
+- [x] T240.1 [P] Create TopBar component in packages/ui/src/organisms/TopBar.tsx
+- [x] T240.2 [P] Integrate UserMenu in TopBar component in packages/ui/src/organisms/TopBar.tsx
+- [x] T240.3 [P] Add search functionality placeholder to TopBar in packages/ui/src/organisms/TopBar.tsx
+- [x] T240.4 [P] Add notifications placeholder to TopBar in packages/ui/src/organisms/TopBar.tsx
+- [x] T240.5 [P] Style TopBar with Tailwind CSS using existing design tokens in packages/ui/src/organisms/TopBar.tsx
+- [x] T240.6 [P] Ensure TopBar is responsive and works on mobile devices in packages/ui/src/organisms/TopBar.tsx
+
+**Acceptance Criteria**:
+
+- TopBar displays on all authenticated pages
+- UserMenu with logout is accessible from TopBar
+- TopBar has consistent styling with onboarding header
+- Responsive design works on mobile
+
+### Sidebar Component
+
+- [x] T240.7 [P] Create Sidebar component in packages/ui/src/organisms/Sidebar.tsx
+- [x] T240.8 [P] Add navigation items (Projects, Dashboard) to Sidebar in packages/ui/src/organisms/Sidebar.tsx
+- [x] T240.9 [P] Create ProjectSelector component for sidebar in packages/ui/src/molecules/ProjectSelector.tsx
+- [x] T240.10 [P] Add collapsible state management with Jotai atom in packages/ui/src/organisms/Sidebar.tsx
+- [x] T240.11 [P] Implement keyboard navigation for sidebar items in packages/ui/src/organisms/Sidebar.tsx
+- [x] T240.12 [P] Style Sidebar with Tailwind CSS using existing design tokens in packages/ui/src/organisms/Sidebar.tsx
+- [x] T240.13 [P] Ensure Sidebar is responsive (collapses on mobile) in packages/ui/src/organisms/Sidebar.tsx
+
+**Acceptance Criteria**:
+
+- Sidebar displays navigation items
+- Project selector allows switching between projects
+- Collapsible state persists (Jotai atom)
+- Keyboard navigation works
+- Responsive design works on mobile
+
+### DashboardLayout Component
+
+- [x] T240.14 Create DashboardLayout server component in apps/web/app/components/templates/DashboardLayout.tsx
+- [x] T240.15 Integrate Sidebar in DashboardLayout in apps/web/app/components/templates/DashboardLayout.tsx
+- [x] T240.16 Integrate TopBar in DashboardLayout in apps/web/app/components/templates/DashboardLayout.tsx
+- [x] T240.17 Create Breadcrumbs component in packages/ui/src/molecules/Breadcrumbs.tsx
+- [x] T240.18 Add Breadcrumbs to DashboardLayout in apps/web/app/components/templates/DashboardLayout.tsx
+- [x] T240.19 Style DashboardLayout with proper layout structure (sidebar + main content) in apps/web/app/components/templates/DashboardLayout.tsx
+- [x] T240.20 Create layout wrapper for /projects route using DashboardLayout in apps/web/app/projects/layout.tsx
+- [x] T240.21 Verify DashboardLayout displays correctly on projects listing page
+
+**Acceptance Criteria**:
+
+- DashboardLayout wraps authenticated pages consistently
+- Sidebar and TopBar are visible
+- Breadcrumbs show navigation path
+- Layout structure is responsive
+- Projects listing page uses DashboardLayout
+
+### ProjectLayout Component
+
+- [x] T240.22 Create ProjectLayout server component in apps/web/app/components/templates/ProjectLayout.tsx
+- [x] T240.23 Create ProjectHeader component in apps/web/app/components/features/projects/ProjectHeader.tsx
+- [x] T240.24 Display project name and key in ProjectHeader in apps/web/app/components/features/projects/ProjectHeader.tsx
+- [x] T240.25 Add settings link to ProjectHeader in apps/web/app/components/features/projects/ProjectHeader.tsx
+- [x] T240.26 Create ProjectTabs component in packages/ui/src/organisms/ProjectTabs.tsx
+- [x] T240.27 Add tabs (Board, List, Roadmap, Settings) to ProjectTabs in packages/ui/src/organisms/ProjectTabs.tsx
+- [x] T240.28 Integrate ProjectHeader and ProjectTabs in ProjectLayout in apps/web/app/components/templates/ProjectLayout.tsx
+- [x] T240.29 Wrap ProjectLayout in DashboardLayout for consistent navigation in apps/web/app/components/templates/ProjectLayout.tsx
+- [x] T240.30 Create layout wrapper for /projects/[projectId] route using ProjectLayout in apps/web/app/projects/[projectId]/layout.tsx
+- [x] T240.31 Verify ProjectLayout displays correctly on kanban board page
+
+**Acceptance Criteria**:
+
+- ProjectLayout wraps project-specific pages
+- ProjectHeader displays project information
+- ProjectTabs allow navigation between project views
+- Layout is nested within DashboardLayout for consistent navigation
+- Kanban board page uses ProjectLayout
+
+### Integration and Testing
+
+- [x] T240.32 Verify all authenticated routes use appropriate layout (DashboardLayout or ProjectLayout)
+- [x] T240.33 Ensure logout works from all authenticated pages
+- [x] T240.34 Test navigation between projects listing and individual project pages
+- [x] T240.35 Verify responsive design works on mobile devices
+- [x] T240.36 Ensure keyboard navigation works throughout layout components
+- [x] T240.37 Verify accessibility (WCAG 2.1 AA) for layout components
+
+**Acceptance Criteria**:
+
+- All authenticated pages have consistent layout
+- Logout is accessible from every page
+- Navigation works smoothly
+- Responsive design is functional
+- Accessibility requirements are met
+
+---
+
+## Phase 7.6: Settings Pages and Navigation Fixes (P2 - Critical Fixes)
+
+**Goal**: Fix critical 404 errors for settings navigation and provide essential user account and project settings pages.
+
+**Independent Test**: Access account settings via command palette (Cmd/Ctrl+K → "Go to Settings"), verify page loads correctly. Click "Settings" link on project card, verify project settings index page loads. Test succeeds when all settings navigation works without 404 errors.
+
+**Dependencies**: Phase 3 complete (authentication must exist), Phase 7.5 optional (layouts can enhance these pages later)
+
+**Rationale**: These are critical fixes preventing 404 errors. Navigation commands and UI links reference routes that don't exist. Quick fixes ensure application works as expected before building additional features.
+
+### User Account Settings Page
+
+- [x] T240.38 Create user account settings page route in apps/web/app/settings/page.tsx
+- [x] T240.39 Add authentication check for settings page in apps/web/app/settings/page.tsx
+- [x] T240.40 Create UserProfileForm component in apps/web/app/components/features/settings/UserProfileForm.tsx
+- [x] T240.41 Display current user profile information (name, email, username) in UserProfileForm in apps/web/app/components/features/settings/UserProfileForm.tsx
+- [x] T240.42 Implement profile update functionality in UserProfileForm in apps/web/app/components/features/settings/UserProfileForm.tsx
+- [x] T240.43 Create ChangePasswordForm component in apps/web/app/components/features/settings/ChangePasswordForm.tsx
+- [x] T240.44 Implement password change functionality in ChangePasswordForm in apps/web/app/components/features/settings/ChangePasswordForm.tsx
+- [x] T240.45 Create user profile update API route in apps/web/app/api/user/profile/route.ts
+- [x] T240.46 Create password change API route in apps/web/app/api/user/password/route.ts
+- [x] T240.47 Add input validation with Zod schemas for profile and password forms in apps/web/src/lib/validation/user.ts
+- [x] T240.48 Style settings page with Tailwind CSS using existing design tokens in apps/web/app/settings/page.tsx
+- [x] T240.49 Verify navigation command "Go to Settings" works correctly (navigates to /settings)
+
+**Acceptance Criteria**:
+
+- User account settings page is accessible at `/settings`
+- Profile information displays correctly
+- Profile updates work successfully
+- Password change functionality works
+- Authentication is enforced
+- Navigation command works without 404
+
+### Project Settings Index Page
+
+- [x] T240.50 Create project settings index page route in apps/web/app/projects/[projectId]/settings/page.tsx
+- [x] T240.51 Add project access permission check for settings page in apps/web/app/projects/[projectId]/settings/page.tsx
+- [x] T240.52 Create ProjectSettingsNavigation component in apps/web/app/components/features/projects/ProjectSettingsNavigation.tsx
+- [x] T240.53 Add navigation link to Configuration page in ProjectSettingsNavigation in apps/web/app/components/features/projects/ProjectSettingsNavigation.tsx
+- [x] T240.54 Display project name and key in project settings header in apps/web/app/projects/[projectId]/settings/page.tsx
+- [x] T240.55 Style project settings index page with Tailwind CSS using existing design tokens in apps/web/app/projects/[projectId]/settings/page.tsx
+- [x] T240.56 Verify ProjectCard "Settings" link works correctly (navigates to /projects/[projectId]/settings)
+
+**Acceptance Criteria**:
+
+- Project settings index page is accessible at `/projects/[projectId]/settings`
+- Navigation to Configuration sub-page works
+- Project access permissions are enforced
+- ProjectCard settings link works without 404
+- Page displays project information correctly
+
+### Navigation Fixes
+
+- [x] T240.57 Verify all navigation commands in command palette point to existing routes
+- [x] T240.58 Update navigation.ts if any commands need route adjustments
+- [x] T240.59 Test navigation from all entry points (command palette, ProjectCard, menus)
+
+**Acceptance Criteria**:
+
+- All navigation commands work without 404 errors
+- All UI links point to existing routes
+- Navigation is consistent across the application
+
+---
+
 ## Phase 8: User Story 6 - Root Cause Diagnostics Integration (P3)
 
 **Goal**: Enable automatic issue creation from monitoring service webhooks with error traces displayed in Root Cause Dashboard section.
@@ -894,9 +1063,11 @@ Phase 1: Setup
                     ├─> Phase 5: User Story 3 (Configuration)
                     ├─> Phase 6: User Story 4 (Git Integration)
                     └─> Phase 7: User Story 5 (Sprint Planning)
-                          ├─> Phase 8: User Story 6 (Diagnostics)
-                          └─> Phase 9: User Story 7 (AI Triage)
-                                └─> Phase 10: Polish & Testing
+                          └─> Phase 7.5: Authenticated Layouts Infrastructure
+                                └─> Phase 7.6: Settings Pages and Navigation Fixes
+                                      ├─> Phase 8: User Story 6 (Diagnostics)
+                                      └─> Phase 9: User Story 7 (AI Triage)
+                                            └─> Phase 10: Polish & Testing
 ```
 
 ### Story Dependencies
@@ -906,6 +1077,8 @@ Phase 1: Setup
 - **US3** (Configuration): Depends on US2 (needs issues to configure)
 - **US4** (Git Integration): Depends on US2 (needs issues to link)
 - **US5** (Sprints): Depends on US2 (needs issues to assign)
+- **Phase 7.5** (Authenticated Layouts): Depends on US1 (needs authentication infrastructure)
+- **Phase 7.6** (Settings Pages): Depends on US1 (needs authentication), optional dependency on Phase 7.5 (layouts enhance UX)
 - **US6** (Diagnostics): Depends on US2 (needs issues to create from errors)
 - **US7** (AI): Depends on US2 (needs issues to triage)
 
@@ -936,6 +1109,17 @@ Phase 1: Setup
 **Within Phase 6 (US4)**:
 
 - T197-T202 (Webhooks) can be parallelized with T203-T207 (Branch detection)
+
+**Within Phase 7.5 (Authenticated Layouts)**:
+
+- T240.1-T240.6 (TopBar) can be parallelized with T240.7-T240.13 (Sidebar)
+- T240.14-T240.21 (DashboardLayout) can be parallelized with T240.22-T240.31 (ProjectLayout)
+- All TopBar and Sidebar tasks (T240.1-T240.13) can run in parallel
+
+**Within Phase 7.6 (Settings Pages)**:
+
+- T240.40-T240.44 (User forms) can be parallelized with T240.45-T240.46 (API routes)
+- T240.50-T240.54 (Project settings page) can run in parallel with user settings tasks
 
 **Within Phase 8 (US6)**:
 
@@ -1020,7 +1204,7 @@ Phase 1: Setup
 
 ## Task Summary
 
-**Total Tasks**: 313  
+**Total Tasks**: 388  
 **Phase 1 (Setup)**: 14 tasks  
 **Phase 2 (Foundational)**: 44 tasks  
 **Phase 3 (US1)**: 38 tasks  
@@ -1028,6 +1212,8 @@ Phase 1: Setup
 **Phase 5 (US3)**: 31 tasks  
 **Phase 6 (US4)**: 20 tasks  
 **Phase 7 (US5)**: 24 tasks  
+**Phase 7.5 (Authenticated Layouts)**: 37 tasks  
+**Phase 7.6 (Settings Pages Fixes)**: 22 tasks  
 **Phase 8 (US6)**: 18 tasks  
 **Phase 9 (US7)**: 15 tasks  
 **Phase 10 (Polish)**: 40 tasks

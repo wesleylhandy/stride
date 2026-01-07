@@ -141,7 +141,7 @@ export function CommandPalette({
     }
   }, [selectedIndex]);
 
-  // Group commands (must be before early return to maintain hook order)
+  // Group commands
   const groupedCommands = React.useMemo(() => {
     const groups: Record<string, Command[]> = {};
     filteredCommands.forEach((cmd) => {
@@ -153,8 +153,6 @@ export function CommandPalette({
     });
     return groups;
   }, [filteredCommands]);
-
-  if (!open) return null;
 
   return (
     <div

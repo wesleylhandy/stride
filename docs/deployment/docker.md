@@ -122,6 +122,9 @@ GITHUB_CLIENT_SECRET=your-github-client-secret
 GITLAB_CLIENT_ID=your-gitlab-client-id
 GITLAB_CLIENT_SECRET=your-gitlab-client-secret
 
+# Marketing Site Configuration (Optional - for apps/site)
+NEXT_PUBLIC_GITHUB_REPOSITORY_URL=https://github.com/your-org/stride
+
 # Rate Limiting (Optional)
 RATE_LIMIT_ENABLED=true
 RATE_LIMIT_MAX_REQUESTS=100
@@ -183,6 +186,7 @@ ERROR_TRACKING_ENABLED=true
 | `GITHUB_CLIENT_SECRET` | No | - | GitHub OAuth client secret |
 | `GITLAB_CLIENT_ID` | No | - | GitLab OAuth client ID (for repository integration) |
 | `GITLAB_CLIENT_SECRET` | No | - | GitLab OAuth client secret |
+| `NEXT_PUBLIC_GITHUB_REPOSITORY_URL` | No | `https://github.com` | GitHub repository URL for marketing site's "View on GitHub" button |
 | `RATE_LIMIT_ENABLED` | No | `true` | Enable rate limiting |
 | `RATE_LIMIT_MAX_REQUESTS` | No | `100` | Maximum requests per time window |
 | `RATE_LIMIT_WINDOW_MS` | No | `60000` | Rate limit time window (milliseconds) |

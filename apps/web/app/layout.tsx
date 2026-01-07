@@ -3,7 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import "@stride/ui/styles";
 import { CommandPaletteProvider } from "@/components/CommandPaletteProvider";
-import { ThemeToggle } from "./components/ThemeToggle";
+import { ErrorSuppressor } from "./components/ErrorSuppressor";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -32,9 +32,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased bg-background dark:bg-background-dark`}
       >
-        <div className="fixed top-4 right-4 z-50">
-          <ThemeToggle />
-        </div>
+        <ErrorSuppressor />
         <CommandPaletteProvider>{children}</CommandPaletteProvider>
       </body>
     </html>

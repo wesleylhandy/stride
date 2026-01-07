@@ -28,7 +28,7 @@ export default async function KanbanBoardPage({ params }: PageParams) {
   // Await params (Next.js 15+ requires this)
   const { projectId } = await params;
 
-  // Get auth
+  // Get auth (layout handles redirect, but we need session for permissions)
   const headersList = await headers();
   const authResult = await requireAuth({
     headers: headersList,
@@ -40,7 +40,7 @@ export default async function KanbanBoardPage({ params }: PageParams) {
 
   const session = authResult;
 
-  // Fetch project to get config
+  // Fetch project to get config (layout already fetched, but we need config)
   const project = await projectRepository.findById(projectId);
   if (!project) {
     notFound();
@@ -77,11 +77,10 @@ export default async function KanbanBoardPage({ params }: PageParams) {
   const canEdit = canUpdateIssue(session.role);
 
   return (
-    <div className="container mx-auto px-4 py-8 h-full">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground dark:text-foreground-dark">Kanban Board</h1>
-        <p className="text-foreground-secondary dark:text-foreground-dark-secondary mt-1">
-          {project.name} - Drag and drop issues to change their status
+    <div className="py-6">
+      <div className="mb-4">
+        <p className="text-sm text-foreground-secondary dark:text-foreground-dark-secondary">
+          Drag and drop issues to change their status
         </p>
       </div>
       <KanbanBoardClient

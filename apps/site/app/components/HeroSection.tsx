@@ -30,7 +30,10 @@ export function HeroSection() {
               Get Started (Self-Host)
             </Link>
             <Link
-              href="https://github.com"
+              href={
+                process.env.NEXT_PUBLIC_GITHUB_REPOSITORY_URL ||
+                "https://github.com"
+              }
               className="text-sm font-semibold leading-6 text-foreground dark:text-foreground-dark"
             >
               View on GitHub <span aria-hidden="true">→</span>

@@ -207,6 +207,18 @@ A developer clicks "Triage with AI" on an issue, and the system sends the issue 
 - **FR-032**: System MUST persist issues with all metadata (status, assignee, custom fields, descriptions)
 - **FR-033**: System MUST persist sprint/cycle data with issue associations
 - **FR-034**: System MUST persist configuration file content and version history
+- **FR-035**: System MUST provide a consistent layout for all authenticated pages with navigation and logout access
+- **FR-035a**: System MUST display a top navigation bar with user menu (including logout) on all authenticated pages
+- **FR-035b**: System MUST provide a dashboard layout with sidebar navigation for accessing projects and main application areas
+- **FR-035c**: System MUST provide a project-specific layout with project header and tabs for project views (Board, List, Settings)
+- **FR-035d**: System MUST ensure logout functionality is accessible from any authenticated page
+- **FR-036**: System MUST provide a user account settings page accessible at `/settings` route
+- **FR-036a**: System MUST allow users to view and edit their profile information (name, email, username) on the account settings page
+- **FR-036b**: System MUST allow users to change their password on the account settings page
+- **FR-036c**: System MUST enforce authentication requirements for accessing account settings page
+- **FR-037**: System MUST provide a project settings index page accessible at `/projects/[projectId]/settings` route
+- **FR-037a**: System MUST display navigation tabs or links to project settings sub-pages (Configuration, Integrations, etc.) on the project settings index page
+- **FR-037b**: System MUST enforce project access permissions when accessing project settings pages
 
 ### Key Entities *(include if feature involves data)*
 
