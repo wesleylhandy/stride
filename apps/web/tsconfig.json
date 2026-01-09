@@ -13,6 +13,16 @@
     "noUnusedParameters": false
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.e2e.spec.ts",
+    "**/*.integration.test.tsx",
+    "playwright.config.ts",
+    "vitest.config.ts",
+    "vitest.setup.ts"
+  ]
 }
 

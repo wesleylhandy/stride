@@ -2,13 +2,26 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Input } from "@stride/ui";
+import { Button, Input, AuthForm, useToast } from "@stride/ui";
+import { ThemeToggle } from "@/components/ThemeToggle";
+
+// Email validation regex
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Username validation: 3-30 characters, alphanumeric + underscore
+const USERNAME_REGEX = /^[a-zA-Z0-9_]{3,30}$/;
 
 export default function SetupPage() {
   const router = useRouter();
+  const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{
+    email?: string;
+    username?: string;
+    password?: string;
+    confirmPassword?: string;
+  }>({});
   const [formData, setFormData] = useState({
     email: "",
     username: "",
@@ -16,6 +29,112 @@ export default function SetupPage() {
     confirmPassword: "",
     name: "",
   });
+
+  // Validate email format
+  const validateEmail = (email: string): string | undefined => {
+    if (!email) {
+      return "Email is required";
+    }
+    if (!EMAIL_REGEX.test(email)) {
+      return "Please enter a valid email address";
+    }
+    return undefined;
+  };
+
+  // Validate username
+  const validateUsername = (username: string): string | undefined => {
+    if (!username) {
+      return "Username is required";
+    }
+    if (username.length < 3 || username.length > 30) {
+      return "Username must be between 3 and 30 characters";
+    }
+    if (!USERNAME_REGEX.test(username)) {
+      return "Username can only contain letters, numbers, and underscores";
+    }
+    return undefined;
+  };
+
+  // Validate password
+  const validatePassword = (password: string): string | undefined => {
+    if (!password) {
+      return "Password is required";
+    }
+    if (password.length < 8) {
+      return "Password must be at least 8 characters long";
+    }
+    return undefined;
+  };
+
+  // Validate password confirmation
+  const validatePasswordConfirmation = (
+    password: string,
+    confirmPassword: string
+  ): string | undefined => {
+    if (!confirmPassword) {
+      return "Please confirm your password";
+    }
+    if (password !== confirmPassword) {
+      return "Passwords do not match";
+    }
+    return undefined;
+  };
+
+  // Handle email blur - real-time validation
+  const handleEmailBlur = () => {
+    const emailError = validateEmail(formData.email);
+    setFieldErrors((prev) => ({
+      ...prev,
+      email: emailError,
+    }));
+  };
+
+  // Handle username blur - real-time validation
+  const handleUsernameBlur = () => {
+    const usernameError = validateUsername(formData.username);
+    setFieldErrors((prev) => ({
+      ...prev,
+      username: usernameError,
+    }));
+  };
+
+  // Handle password confirmation change - real-time validation
+  const handlePasswordConfirmationChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const confirmPassword = e.target.value;
+    setFormData({ ...formData, confirmPassword });
+    
+    // Only validate if password is set
+    if (formData.password) {
+      const confirmError = validatePasswordConfirmation(
+        formData.password,
+        confirmPassword
+      );
+      setFieldErrors((prev) => ({
+        ...prev,
+        confirmPassword: confirmError,
+      }));
+    }
+  };
+
+  // Handle password change - trigger confirmation validation if needed
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const password = e.target.value;
+    setFormData({ ...formData, password });
+    
+    // Re-validate confirmation if it's already set
+    if (formData.confirmPassword) {
+      const confirmError = validatePasswordConfirmation(
+        password,
+        formData.confirmPassword
+      );
+      setFieldErrors((prev) => ({
+        ...prev,
+        confirmPassword: confirmError,
+      }));
+    }
+  };
 
   // Check if admin already exists on mount
   useEffect(() => {
@@ -42,14 +161,28 @@ export default function SetupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setLoading(true);
+    setFieldErrors({});
 
-    // Validate passwords match
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
-      setLoading(false);
+    // Validate all fields
+    const emailError = validateEmail(formData.email);
+    const usernameError = validateUsername(formData.username);
+    const passwordError = validatePassword(formData.password);
+    const confirmPasswordError = validatePasswordConfirmation(
+      formData.password,
+      formData.confirmPassword
+    );
+
+    if (emailError || usernameError || passwordError || confirmPasswordError) {
+      setFieldErrors({
+        email: emailError,
+        username: usernameError,
+        password: passwordError,
+        confirmPassword: confirmPasswordError,
+      });
       return;
     }
+
+    setLoading(true);
 
     try {
       const response = await fetch("/api/auth/register", {
@@ -68,7 +201,10 @@ export default function SetupPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || "Failed to create admin account");
+        const errorMessage = data.error || "Failed to create admin account";
+        toast.error(errorMessage, {
+          description: "Please check your input and try again",
+        });
         setLoading(false);
         return;
       }
@@ -87,6 +223,9 @@ export default function SetupPage() {
 
       if (!loginResponse.ok) {
         // Registration succeeded but login failed - redirect to login
+        toast.error("Registration successful", {
+          description: "Please log in with your new account",
+        });
         router.push("/login");
         return;
       }
@@ -94,7 +233,13 @@ export default function SetupPage() {
       // Redirect to onboarding
       router.push("/onboarding");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An unexpected error occurred");
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "An unexpected error occurred. Please try again.";
+      toast.error("Registration failed", {
+        description: errorMessage,
+      });
       setLoading(false);
     }
   };
@@ -103,146 +248,122 @@ export default function SetupPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background-secondary dark:bg-background-dark">
         <div className="text-center">
-          <p className="text-foreground-secondary dark:text-foreground-dark-secondary">Checking setup status...</p>
+          <p className="text-foreground-secondary dark:text-foreground-dark-secondary">
+            Checking setup status...
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background-secondary dark:bg-background-dark px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8">
+    <AuthForm
+      title="Create Admin Account"
+      subtitle="Create the first admin account to get started with Stride"
+      onSubmit={handleSubmit}
+      loading={loading}
+      error={error}
+      themeToggle={<ThemeToggle />}
+    >
+      <div className="space-y-6">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-foreground dark:text-foreground-dark">
-            Create Admin Account
-          </h2>
-          <p className="mt-2 text-center text-sm text-foreground-secondary dark:text-foreground-dark-secondary">
-            Create the first admin account to get started with Stride
+          <Input
+            id="email"
+            type="email"
+            label="Email Address"
+            required
+            autoComplete="email"
+            value={formData.email}
+            onChange={(e) =>
+              setFormData({ ...formData, email: e.target.value })
+            }
+            onBlur={handleEmailBlur}
+            error={fieldErrors.email}
+            placeholder="admin@example.com"
+          />
+        </div>
+
+        <div>
+          <Input
+            id="username"
+            type="text"
+            label="Username"
+            required
+            autoComplete="username"
+            value={formData.username}
+            onChange={(e) =>
+              setFormData({ ...formData, username: e.target.value })
+            }
+            onBlur={handleUsernameBlur}
+            error={fieldErrors.username}
+            placeholder="admin"
+            minLength={3}
+            maxLength={30}
+          />
+          <p className="mt-1 text-xs text-foreground-tertiary dark:text-foreground-dark-tertiary">
+            3-30 characters, letters, numbers, and underscores only
           </p>
         </div>
-        <form className="mt-8 rounded-lg bg-surface dark:bg-surface-dark px-6 py-8 shadow-md space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
-              <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
-            </div>
-          )}
 
-          <div className="space-y-4">
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-foreground dark:text-foreground-dark"
-              >
-                Email Address
-              </label>
-              <Input
-                id="email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                className="mt-1"
-                placeholder="admin@example.com"
-              />
-            </div>
+        <div>
+          <Input
+            id="name"
+            type="text"
+            label="Full Name (Optional)"
+            autoComplete="name"
+            value={formData.name}
+            onChange={(e) =>
+              setFormData({ ...formData, name: e.target.value })
+            }
+            placeholder="Admin User"
+          />
+        </div>
 
-            <div>
-              <label
-                htmlFor="username"
-                className="block text-sm font-medium text-foreground dark:text-foreground-dark"
-              >
-                Username
-              </label>
-              <Input
-                id="username"
-                type="text"
-                required
-                value={formData.username}
-                onChange={(e) =>
-                  setFormData({ ...formData, username: e.target.value })
-                }
-                className="mt-1"
-                placeholder="admin"
-                minLength={3}
-                maxLength={30}
-              />
-            </div>
+        <div>
+          <Input
+            id="password"
+            type="password"
+            label="Password"
+            required
+            autoComplete="new-password"
+            value={formData.password}
+            onChange={handlePasswordChange}
+            error={fieldErrors.password}
+            placeholder="••••••••"
+            minLength={8}
+          />
+          <p className="mt-1 text-xs text-foreground-tertiary dark:text-foreground-dark-tertiary">
+            Must be at least 8 characters long
+          </p>
+        </div>
 
-            <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-foreground dark:text-foreground-dark"
-              >
-                Full Name (Optional)
-              </label>
-              <Input
-                id="name"
-                type="text"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                className="mt-1"
-                placeholder="Admin User"
-              />
-            </div>
+        <div>
+          <Input
+            id="confirmPassword"
+            type="password"
+            label="Confirm Password"
+            required
+            autoComplete="new-password"
+            value={formData.confirmPassword}
+            onChange={handlePasswordConfirmationChange}
+            error={fieldErrors.confirmPassword}
+            placeholder="••••••••"
+            minLength={8}
+          />
+        </div>
 
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-foreground dark:text-foreground-dark"
-              >
-                Password
-              </label>
-              <Input
-                id="password"
-                type="password"
-                required
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
-                className="mt-1"
-                placeholder="••••••••"
-                minLength={8}
-              />
-              <p className="mt-1 text-xs text-foreground-tertiary dark:text-foreground-dark-tertiary">
-                Must be at least 8 characters long
-              </p>
-            </div>
-
-            <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-medium text-foreground dark:text-foreground-dark"
-              >
-                Confirm Password
-              </label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                required
-                value={formData.confirmPassword}
-                onChange={(e) =>
-                  setFormData({ ...formData, confirmPassword: e.target.value })
-                }
-                className="mt-1"
-                placeholder="••••••••"
-                minLength={8}
-              />
-            </div>
-          </div>
-
-          <div>
-            <Button type="submit" variant="primary" loading={loading} className="w-full">
-              Create Admin Account
-            </Button>
-          </div>
-        </form>
+        <div>
+          <Button
+            type="submit"
+            variant="primary"
+            loading={loading}
+            className="w-full min-h-[44px]"
+          >
+            Create Admin Account
+          </Button>
+        </div>
       </div>
-    </div>
+    </AuthForm>
   );
 }
 

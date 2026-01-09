@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { UserMenu } from "@stride/ui";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const steps = [
   { id: "admin", name: "Admin Account", path: "/onboarding/admin" },
@@ -24,14 +25,17 @@ export default function OnboardingLayout({
 
   return (
     <div className="flex min-h-screen flex-col bg-background-secondary dark:bg-background-dark">
-      {/* Header with user menu */}
+      {/* Header with user menu and theme toggle */}
       <div className="border-b border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
         <div className="mx-auto max-w-4xl px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <h1 className="text-lg font-semibold text-foreground dark:text-foreground-dark">
               Stride Setup
             </h1>
-            <UserMenu />
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <ThemeToggle />
+              <UserMenu />
+            </div>
           </div>
         </div>
       </div>

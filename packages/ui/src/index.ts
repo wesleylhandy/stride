@@ -22,6 +22,8 @@ export { Breadcrumbs, type BreadcrumbsProps, type BreadcrumbItem } from './molec
 export { Modal, type ModalProps } from './molecules/Modal';
 export { DocumentationLink, type DocumentationLinkProps } from './molecules/DocumentationLink';
 export { CodeBlock, type CodeBlockProps } from './molecules/CodeBlock';
+export { AuthForm, type AuthFormProps } from './molecules/AuthForm';
+export { AuthError, type AuthErrorProps } from './molecules/AuthError';
 
 // Organisms
 export { CommandPalette, type CommandPaletteProps, type Command } from './organisms/CommandPalette';
