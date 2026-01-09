@@ -62,11 +62,12 @@ model User {
   updatedAt     DateTime @updatedAt
 
   // Relations
-  reportedIssues Issue[]      @relation("Reporter")
-  assignedIssues Issue[]      @relation("Assignee")
-  comments       Comment[]
-  attachments    Attachment[]
-  sessions       Session[]
+  reportedIssues   Issue[]       @relation("Reporter")
+  assignedIssues   Issue[]       @relation("Assignee")
+  comments         Comment[]
+  attachments      Attachment[]
+  sessions         Session[]
+  sentInvitations  Invitation[]  @relation("SentInvitations")
 
   @@index([role])
   @@map("users")
@@ -265,4 +266,24 @@ model Session {
   @@index([expiresAt])
   @@index([token])
   @@map("sessions")
+}
+
+model Invitation {
+  id         String    @id @default(uuid())
+  email      String    @unique
+  token      String    @unique
+  role       UserRole
+  invitedById String
+  expiresAt  DateTime
+  acceptedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  // Relations
+  invitedBy User @relation("SentInvitations", fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([expiresAt])
+  @@index([invitedById])
+  @@map("invitations")
 }

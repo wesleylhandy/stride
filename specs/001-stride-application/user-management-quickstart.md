@@ -15,20 +15,29 @@ This quickstart guide covers how to use the admin user management features to ad
 
 ## Email Service Configuration (Optional)
 
-If you want to send email invitations, configure SMTP in your environment variables:
+**The application works fully without SMTP configuration.** Email is only required for automatic invitation emails.
 
+If SMTP is not configured:
+- ✅ All core features work normally
+- ✅ User creation works (direct creation only)
+- ✅ Invitations can be created (manual link sharing)
+- ❌ Automatic email invitations are disabled
+
+**To enable email invitations**, configure SMTP in your environment variables. See the [SMTP Configuration Guide](../../docs/deployment/smtp-configuration.md) for detailed setup instructions and troubleshooting.
+
+**Quick setup** (add to your `.env` file):
 ```bash
-# SMTP Configuration
 SMTP_HOST=smtp.example.com
 SMTP_PORT=587
 SMTP_USER=your-email@example.com
 SMTP_PASSWORD=your-password
-SMTP_SECURE=true  # Use TLS
+SMTP_SECURE=false  # false for STARTTLS (port 587), true for SSL (port 465)
 SMTP_FROM=noreply@example.com  # Optional, defaults to SMTP_USER
-BASE_URL=https://stride.example.com  # For invitation links
 ```
 
-**Note**: If email is not configured, you can still create invitations and manually share the invitation link.
+**Supported SMTP services**: SendGrid, AWS SES, Mailgun, Gmail, Microsoft 365, or any self-hosted mail server (Postfix, Exim, etc.)
+
+**If email is not configured**: You can still create invitations and manually share the invitation link via any communication method (Slack, Teams, direct email, etc.).
 
 ---
 

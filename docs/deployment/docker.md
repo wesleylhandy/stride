@@ -109,7 +109,9 @@ LLM_ENDPOINT=http://localhost:11434
 # OPENAI_API_KEY=sk-...
 # ANTHROPIC_API_KEY=sk-ant-...
 
-# Email Configuration (Optional)
+# Email Configuration (Optional - see docs/deployment/smtp-configuration.md)
+# The application works fully without SMTP. Email is only needed for automatic invitation emails.
+# If SMTP is not configured, you can still create invitations and share links manually.
 SMTP_HOST=smtp.example.com
 SMTP_PORT=587
 SMTP_USER=your-email@example.com
@@ -177,11 +179,13 @@ ERROR_TRACKING_ENABLED=true
 | `LLM_ENDPOINT` | No | `http://localhost:11434` | Local LLM endpoint (Ollama) |
 | `OPENAI_API_KEY` | No | - | OpenAI API key (alternative to local LLM) |
 | `ANTHROPIC_API_KEY` | No | - | Anthropic API key (alternative to local LLM) |
-| `SMTP_HOST` | No | - | SMTP server hostname |
-| `SMTP_PORT` | No | `587` | SMTP server port |
-| `SMTP_USER` | No | - | SMTP authentication username |
-| `SMTP_PASSWORD` | No | - | SMTP authentication password |
-| `SMTP_FROM` | No | - | Default sender email address |
+| `SMTP_HOST` | No* | - | SMTP server hostname (required only if using email invitations) |
+| `SMTP_PORT` | No* | `587` | SMTP server port (required only if using email invitations) |
+| `SMTP_USER` | No* | - | SMTP authentication username (required only if using email invitations) |
+| `SMTP_PASSWORD` | No* | - | SMTP authentication password (required only if using email invitations) |
+| `SMTP_FROM` | No | `SMTP_USER` | Default sender email address |
+
+**Note**: SMTP configuration is optional. The application works fully without it. See [SMTP Configuration Guide](./smtp-configuration.md) for setup instructions and troubleshooting.
 | `GITHUB_CLIENT_ID` | No | - | GitHub OAuth client ID (for repository integration) |
 | `GITHUB_CLIENT_SECRET` | No | - | GitHub OAuth client secret |
 | `GITLAB_CLIENT_ID` | No | - | GitLab OAuth client ID (for repository integration) |

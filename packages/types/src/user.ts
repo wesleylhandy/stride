@@ -21,7 +21,7 @@ export interface CreateUserInput {
   username: string;
   password: string;
   name?: string;
-  role?: UserRole;
+  role: 'Member' | 'Viewer';
 }
 
 export interface UpdateUserInput {

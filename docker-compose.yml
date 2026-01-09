@@ -72,10 +72,15 @@ services:
       AI_GATEWAY_URL: ${AI_GATEWAY_URL:-http://ai-gateway:3001}
       
       # Email Configuration (optional)
+      # For local testing with MailHog, use:
+      # SMTP_HOST=mailhog
+      # SMTP_PORT=1025
+      # SMTP_SECURE=false
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
       SMTP_FROM: ${SMTP_FROM:-}
       
       # OAuth Configuration (optional, for repository integration)
@@ -120,6 +125,21 @@ services:
       NODE_ENV: ${NODE_ENV:-development}
     ports:
       - "3001:3001"
+    networks:
+      - stride-network
+
+  # MailHog - Local Email Testing Server (Optional)
+  # Captures all emails sent by the application for local testing
+  # Web UI: http://localhost:8025
+  # SMTP: localhost:1025
+  # To disable, comment out this service or don't start it.
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: stride-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"  # SMTP port
+      - "8025:8025"  # Web UI port
     networks:
       - stride-network
 

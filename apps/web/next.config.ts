@@ -4,9 +4,16 @@ const nextConfig: NextConfig = {
   /* config options here */
   transpilePackages: [
     "@stride/ui",
-    "@stride/database",
     "@stride/types",
     "@stride/yaml-config",
+  ],
+  // Mark server-only packages as external to prevent client bundling
+  // Note: These packages cannot be in transpilePackages at the same time
+  serverExternalPackages: [
+    "@stride/database",
+    "pg",
+    "@prisma/adapter-pg",
+    "@prisma/client",
   ],
   // Enable standalone output for Docker
   output: "standalone",

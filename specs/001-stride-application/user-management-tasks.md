@@ -10,11 +10,14 @@
 
 This document provides actionable, dependency-ordered tasks for implementing admin user management functionality that allows admins to create and invite new users to the system.
 
-**Total Tasks**: 65  
+**Total Tasks**: 103  
 **Phase 1**: Database Schema & Types (Tasks T481-T490, 10 tasks)  
-**Phase 2**: Services & Utilities (Tasks T491-T505, 15 tasks)  
-**Phase 3**: API Endpoints (Tasks T506-T525, 20 tasks)  
-**Phase 4**: UI Components (Tasks T526-T545, 20 tasks)  
+**Phase 2**: Services & Utilities (Tasks T491-T510, 20 tasks)  
+**Phase 3**: API Endpoints (Tasks T511-T528, 18 tasks)  
+**Phase 4**: UI Components (Tasks T529-T542, 14 tasks)  
+**Phase 5**: Pages & Integration (Tasks T543-T555, 13 tasks)  
+**Phase 6**: Error Handling & Polish (Tasks T556-T565, 10 tasks)  
+**Phase 7**: Testing (Tasks T566-T585, 20 tasks)  
 **Dependencies**: Requires existing authentication infrastructure (User Story 1) to be complete
 
 ## Implementation Strategy
@@ -52,11 +55,11 @@ Where:
 
 ### Database Schema
 
-- [ ] T481 [ENH] Add Invitation model to Prisma schema in packages/database/prisma/schema.prisma with fields: id (UUID), email (String unique), token (String unique), role (UserRole), invitedById (UUID foreign key), expiresAt (DateTime), acceptedAt (DateTime nullable), createdAt, updatedAt
-- [ ] T482 [ENH] Add sentInvitations relation to User model in packages/database/prisma/schema.prisma with relation "SentInvitations" and onDelete Cascade
-- [ ] T483 [ENH] Add indexes on Invitation model in packages/database/prisma/schema.prisma: token (index), expiresAt (index), invitedById (index)
-- [ ] T484 [ENH] Create database migration for Invitation model in packages/database/prisma/migrations/
-- [ ] T485 [ENH] Run migration to create invitations table in database
+- [x] T481 [ENH] Add Invitation model to Prisma schema in packages/database/prisma/schema.prisma with fields: id (UUID), email (String unique), token (String unique), role (UserRole), invitedById (UUID foreign key), expiresAt (DateTime), acceptedAt (DateTime nullable), createdAt, updatedAt
+- [x] T482 [ENH] Add sentInvitations relation to User model in packages/database/prisma/schema.prisma with relation "SentInvitations" and onDelete Cascade
+- [x] T483 [ENH] Add indexes on Invitation model in packages/database/prisma/schema.prisma: token (index), expiresAt (index), invitedById (index)
+- [x] T484 [ENH] Create database migration for Invitation model in packages/database/prisma/migrations/
+- [x] T485 [ENH] Run migration to create invitations table in database
 
 **Acceptance Criteria**:
 
@@ -68,11 +71,11 @@ Where:
 
 ### Types
 
-- [ ] T486 [P] [ENH] Create CreateUserInput type in packages/types/src/user.ts with fields: email (string), username (string), password (string), name (string optional), role ("Member" | "Viewer")
-- [ ] T487 [P] [ENH] Create InviteUserInput type in packages/types/src/invitation.ts with fields: email (string), role ("Member" | "Viewer")
-- [ ] T488 [P] [ENH] Create AcceptInvitationInput type in packages/types/src/invitation.ts with fields: username (string), password (string), name (string optional)
-- [ ] T489 [P] [ENH] Create Invitation type in packages/types/src/invitation.ts with fields: id, email, token, role, invitedById, expiresAt, acceptedAt, createdAt, updatedAt
-- [ ] T490 [P] [ENH] Export all invitation types from packages/types/src/invitation.ts
+- [x] T486 [P] [ENH] Create CreateUserInput type in packages/types/src/user.ts with fields: email (string), username (string), password (string), name (string optional), role ("Member" | "Viewer")
+- [x] T487 [P] [ENH] Create InviteUserInput type in packages/types/src/invitation.ts with fields: email (string), role ("Member" | "Viewer")
+- [x] T488 [P] [ENH] Create AcceptInvitationInput type in packages/types/src/invitation.ts with fields: username (string), password (string), name (string optional)
+- [x] T489 [P] [ENH] Create Invitation type in packages/types/src/invitation.ts with fields: id, email, token, role, invitedById, expiresAt, acceptedAt, createdAt, updatedAt
+- [x] T490 [P] [ENH] Export all invitation types from packages/types/src/invitation.ts
 
 **Acceptance Criteria**:
 
@@ -91,14 +94,14 @@ Where:
 
 ### Email Service
 
-- [ ] T491 [ENH] Create EmailService interface in apps/web/src/lib/services/email-service.ts with method sendInvitation(params) and isAvailable()
-- [ ] T492 [ENH] Install nodemailer package in apps/web/package.json
-- [ ] T493 [ENH] Implement SMTPEmailService class in apps/web/src/lib/services/email-service.ts with SMTP configuration from environment variables
-- [ ] T494 [ENH] Implement sendInvitation method in SMTPEmailService in apps/web/src/lib/services/email-service.ts to send invitation email with token link
-- [ ] T495 [ENH] Implement isAvailable method in SMTPEmailService in apps/web/src/lib/services/email-service.ts to check if SMTP is configured
-- [ ] T496 [ENH] Create email template for invitations in apps/web/src/lib/services/email-templates.ts with variables: email, token, invitedByName, expiresAt, inviteUrl
-- [ ] T497 [ENH] Add error handling for email service unavailability in apps/web/src/lib/services/email-service.ts with graceful degradation
-- [ ] T498 [ENH] Export EmailService instance from apps/web/src/lib/services/email-service.ts
+- [x] T491 [ENH] Create EmailService interface in apps/web/src/lib/services/email-service.ts with method sendInvitation(params) and isAvailable()
+- [x] T492 [ENH] Install nodemailer package in apps/web/package.json
+- [x] T493 [ENH] Implement SMTPEmailService class in apps/web/src/lib/services/email-service.ts with SMTP configuration from environment variables
+- [x] T494 [ENH] Implement sendInvitation method in SMTPEmailService in apps/web/src/lib/services/email-service.ts to send invitation email with token link
+- [x] T495 [ENH] Implement isAvailable method in SMTPEmailService in apps/web/src/lib/services/email-service.ts to check if SMTP is configured
+- [x] T496 [ENH] Create email template for invitations in apps/web/src/lib/services/email-templates.ts with variables: email, token, invitedByName, expiresAt, inviteUrl
+- [x] T497 [ENH] Add error handling for email service unavailability in apps/web/src/lib/services/email-service.ts with graceful degradation
+- [x] T498 [ENH] Export EmailService instance from apps/web/src/lib/services/email-service.ts
 
 **Acceptance Criteria**:
 
@@ -110,13 +113,13 @@ Where:
 
 ### Invitation Service
 
-- [ ] T499 [ENH] Create InvitationService class in apps/web/src/lib/services/invitation-service.ts
-- [ ] T500 [ENH] Implement generateInvitationToken method in InvitationService in apps/web/src/lib/services/invitation-service.ts using crypto.randomBytes(32).toString('hex')
-- [ ] T501 [ENH] Implement createInvitation method in InvitationService in apps/web/src/lib/services/invitation-service.ts to create invitation with 7-day expiration
-- [ ] T502 [ENH] Implement findInvitationByToken method in InvitationService in apps/web/src/lib/services/invitation-service.ts to find valid (not expired, not accepted) invitation
-- [ ] T503 [ENH] Implement acceptInvitation method in InvitationService in apps/web/src/lib/services/invitation-service.ts to mark invitation as accepted and create user
-- [ ] T504 [ENH] Implement validateInvitation method in InvitationService in apps/web/src/lib/services/invitation-service.ts to check if invitation is valid (not expired, not accepted)
-- [ ] T505 [ENH] Export InvitationService instance from apps/web/src/lib/services/invitation-service.ts
+- [x] T499 [ENH] Create InvitationService class in apps/web/src/lib/services/invitation-service.ts
+- [x] T500 [ENH] Implement generateInvitationToken method in InvitationService in apps/web/src/lib/services/invitation-service.ts using crypto.randomBytes(32).toString('hex')
+- [x] T501 [ENH] Implement createInvitation method in InvitationService in apps/web/src/lib/services/invitation-service.ts to create invitation with 7-day expiration
+- [x] T502 [ENH] Implement findInvitationByToken method in InvitationService in apps/web/src/lib/services/invitation-service.ts to find valid (not expired, not accepted) invitation
+- [x] T503 [ENH] Implement acceptInvitation method in InvitationService in apps/web/src/lib/services/invitation-service.ts to mark invitation as accepted and create user
+- [x] T504 [ENH] Implement validateInvitation method in InvitationService in apps/web/src/lib/services/invitation-service.ts to check if invitation is valid (not expired, not accepted)
+- [x] T505 [ENH] Export InvitationService instance from apps/web/src/lib/services/invitation-service.ts
 
 **Acceptance Criteria**:
 
@@ -128,11 +131,11 @@ Where:
 
 ### Validation
 
-- [ ] T506 [ENH] Create createUserSchema with Zod in apps/web/src/lib/validation/user.ts with validation for email, username (3-50 chars, alphanumeric + underscore), password (min 8 chars), name (optional), role (Member or Viewer only)
-- [ ] T507 [ENH] Create inviteUserSchema with Zod in apps/web/src/lib/validation/user.ts with validation for email (format) and role (Member or Viewer only)
-- [ ] T508 [ENH] Create acceptInvitationSchema with Zod in apps/web/src/lib/validation/user.ts with validation for username, password, name (optional)
-- [ ] T509 [ENH] Add email uniqueness validation check in apps/web/src/lib/validation/user.ts for createUserSchema (check User table)
-- [ ] T510 [ENH] Add username uniqueness validation check in apps/web/src/lib/validation/user.ts for createUserSchema and acceptInvitationSchema (check User table)
+- [x] T506 [ENH] Create createUserSchema with Zod in apps/web/src/lib/validation/user.ts with validation for email, username (3-50 chars, alphanumeric + underscore), password (min 8 chars), name (optional), role (Member or Viewer only)
+- [x] T507 [ENH] Create inviteUserSchema with Zod in apps/web/src/lib/validation/user.ts with validation for email (format) and role (Member or Viewer only)
+- [x] T508 [ENH] Create acceptInvitationSchema with Zod in apps/web/src/lib/validation/user.ts with validation for username, password, name (optional)
+- [x] T509 [ENH] Add email uniqueness validation check in apps/web/src/lib/validation/user.ts for createUserSchema (check User table)
+- [x] T510 [ENH] Add username uniqueness validation check in apps/web/src/lib/validation/user.ts for createUserSchema and acceptInvitationSchema (check User table)
 
 **Acceptance Criteria**:
 
@@ -153,11 +156,11 @@ Where:
 
 ### Repository
 
-- [ ] T511 [ENH] Create InvitationRepository class in packages/database/src/repositories/invitation-repository.ts with methods: create, findByToken, findByEmail, findPendingByEmail, update
-- [ ] T512 [ENH] Implement create method in InvitationRepository in packages/database/src/repositories/invitation-repository.ts to create invitation record
-- [ ] T513 [ENH] Implement findByToken method in InvitationRepository in packages/database/src/repositories/invitation-repository.ts to find invitation by token
-- [ ] T514 [ENH] Implement findPendingByEmail method in InvitationRepository in packages/database/src/repositories/invitation-repository.ts to check for pending invitations
-- [ ] T515 [ENH] Export InvitationRepository from packages/database/src/repositories/invitation-repository.ts
+- [x] T511 [ENH] Create InvitationRepository class in packages/database/src/repositories/invitation-repository.ts with methods: create, findByToken, findByEmail, findPendingByEmail, update
+- [x] T512 [ENH] Implement create method in InvitationRepository in packages/database/src/repositories/invitation-repository.ts to create invitation record
+- [x] T513 [ENH] Implement findByToken method in InvitationRepository in packages/database/src/repositories/invitation-repository.ts to find invitation by token
+- [x] T514 [ENH] Implement findPendingByEmail method in InvitationRepository in packages/database/src/repositories/invitation-repository.ts to check for pending invitations
+- [x] T515 [ENH] Export InvitationRepository from packages/database/src/repositories/invitation-repository.ts
 
 **Acceptance Criteria**:
 
@@ -168,19 +171,19 @@ Where:
 
 ### API Endpoints
 
-- [ ] T516 [ENH] Create POST /api/users endpoint in apps/web/app/api/users/route.ts with admin-only authentication check
-- [ ] T517 [ENH] Implement POST handler in /api/users route in apps/web/app/api/users/route.ts to create user with validation, password hashing, and user creation
-- [ ] T518 [ENH] Add error handling in POST /api/users route in apps/web/app/api/users/route.ts for validation errors (400), unauthorized (401), forbidden (403), conflict (409), server errors (500)
-- [ ] T519 [ENH] Update GET /api/users endpoint in apps/web/app/api/users/route.ts to add admin-only authentication check if not already present
-- [ ] T520 [ENH] Create POST /api/users/invite endpoint in apps/web/app/api/users/invite/route.ts with admin-only authentication check
-- [ ] T521 [ENH] Implement POST handler in /api/users/invite route in apps/web/app/api/users/invite/route.ts to create invitation, send email (if available), and return invitation or token for manual sharing
-- [ ] T522 [ENH] Add error handling in POST /api/users/invite route in apps/web/app/api/users/invite/route.ts for validation errors (400), unauthorized (401), forbidden (403), conflict (409), service unavailable (503), server errors (500)
-- [ ] T523 [ENH] Create GET /api/users/invite/[token] endpoint in apps/web/app/api/users/invite/[token]/route.ts (public endpoint, no auth required)
-- [ ] T524 [ENH] Implement GET handler in /api/users/invite/[token] route in apps/web/app/api/users/invite/[token]/route.ts to return invitation details if valid (not expired, not accepted)
-- [ ] T525 [ENH] Add error handling in GET /api/users/invite/[token] route in apps/web/app/api/users/invite/[token]/route.ts for invalid token (400), not found (404), already accepted (410)
-- [ ] T526 [ENH] Create POST /api/users/invite/[token] endpoint in apps/web/app/api/users/invite/[token]/route.ts (public endpoint, no auth required)
-- [ ] T527 [ENH] Implement POST handler in /api/users/invite/[token] route in apps/web/app/api/users/invite/[token]/route.ts to accept invitation, create user, mark invitation as accepted, and auto-login user
-- [ ] T528 [ENH] Add error handling in POST /api/users/invite/[token] route in apps/web/app/api/users/invite/[token]/route.ts for validation errors (400), not found (404), conflict (409), already accepted (410), server errors (500)
+- [x] T516 [ENH] Create POST /api/users endpoint in apps/web/app/api/users/route.ts with admin-only authentication check
+- [x] T517 [ENH] Implement POST handler in /api/users route in apps/web/app/api/users/route.ts to create user with validation, password hashing, and user creation
+- [x] T518 [ENH] Add error handling in POST /api/users route in apps/web/app/api/users/route.ts for validation errors (400), unauthorized (401), forbidden (403), conflict (409), server errors (500)
+- [x] T519 [ENH] Update GET /api/users endpoint in apps/web/app/api/users/route.ts to add admin-only authentication check if not already present
+- [x] T520 [ENH] Create POST /api/users/invite endpoint in apps/web/app/api/users/invite/route.ts with admin-only authentication check
+- [x] T521 [ENH] Implement POST handler in /api/users/invite route in apps/web/app/api/users/invite/route.ts to create invitation, send email (if available), and return invitation with token/link for manual sharing. If email unavailable, include message referencing docs/deployment/smtp-configuration.md
+- [x] T522 [ENH] Add error handling in POST /api/users/invite route in apps/web/app/api/users/invite/route.ts for validation errors (400), unauthorized (401), forbidden (403), conflict (409), service unavailable (503), server errors (500)
+- [x] T523 [ENH] Create GET /api/users/invite/[token] endpoint in apps/web/app/api/users/invite/[token]/route.ts (public endpoint, no auth required)
+- [x] T524 [ENH] Implement GET handler in /api/users/invite/[token] route in apps/web/app/api/users/invite/[token]/route.ts to return invitation details if valid (not expired, not accepted)
+- [x] T525 [ENH] Add error handling in GET /api/users/invite/[token] route in apps/web/app/api/users/invite/[token]/route.ts for invalid token (400), not found (404), already accepted (410)
+- [x] T526 [ENH] Create POST /api/users/invite/[token] endpoint in apps/web/app/api/users/invite/[token]/route.ts (public endpoint, no auth required)
+- [x] T527 [ENH] Implement POST handler in /api/users/invite/[token] route in apps/web/app/api/users/invite/[token]/route.ts to accept invitation, create user, mark invitation as accepted, and auto-login user
+- [x] T528 [ENH] Add error handling in POST /api/users/invite/[token] route in apps/web/app/api/users/invite/[token]/route.ts for validation errors (400), not found (404), conflict (409), already accepted (410), server errors (500)
 
 **Acceptance Criteria**:
 
@@ -202,16 +205,16 @@ Where:
 
 ### Forms
 
-- [ ] T529 [ENH] Create CreateUserForm component in apps/web/src/components/CreateUserForm.tsx with fields: email, username, password, confirmPassword, name, role (Member/Viewer dropdown)
-- [ ] T530 [ENH] Implement form validation in CreateUserForm in apps/web/src/components/CreateUserForm.tsx with real-time email/username uniqueness checks
-- [ ] T531 [ENH] Add form submission handler in CreateUserForm in apps/web/src/components/CreateUserForm.tsx to POST to /api/users with loading state and error handling
-- [ ] T532 [ENH] Create InviteUserForm component in apps/web/src/components/InviteUserForm.tsx with fields: email, role (Member/Viewer dropdown)
-- [ ] T533 [ENH] Implement form validation in InviteUserForm in apps/web/src/components/InviteUserForm.tsx with email format check and pending invitation check
-- [ ] T534 [ENH] Add form submission handler in InviteUserForm in apps/web/src/components/InviteUserForm.tsx to POST to /api/users/invite with loading state and error handling
-- [ ] T535 [ENH] Display invitation token/URL in InviteUserForm in apps/web/src/components/InviteUserForm.tsx when email unavailable for manual sharing
-- [ ] T536 [ENH] Create InviteAcceptForm component in apps/web/src/components/InviteAcceptForm.tsx with fields: username, password, confirmPassword, name
-- [ ] T537 [ENH] Implement form validation in InviteAcceptForm in apps/web/src/components/InviteAcceptForm.tsx with username uniqueness check and password strength validation
-- [ ] T538 [ENH] Add form submission handler in InviteAcceptForm in apps/web/src/components/InviteAcceptForm.tsx to POST to /api/users/invite/[token] with loading state and error handling
+- [x] T529 [ENH] Create CreateUserForm component in apps/web/src/components/CreateUserForm.tsx with fields: email, username, password, confirmPassword, name, role (Member/Viewer dropdown)
+- [x] T530 [ENH] Implement form validation in CreateUserForm in apps/web/src/components/CreateUserForm.tsx with real-time email/username uniqueness checks
+- [x] T531 [ENH] Add form submission handler in CreateUserForm in apps/web/src/components/CreateUserForm.tsx to POST to /api/users with loading state and error handling
+- [x] T532 [ENH] Create InviteUserForm component in apps/web/src/components/InviteUserForm.tsx with fields: email, role (Member/Viewer dropdown)
+- [x] T533 [ENH] Implement form validation in InviteUserForm in apps/web/src/components/InviteUserForm.tsx with email format check and pending invitation check
+- [x] T534 [ENH] Add form submission handler in InviteUserForm in apps/web/src/components/InviteUserForm.tsx to POST to /api/users/invite with loading state and error handling
+- [x] T535 [ENH] Display invitation token/URL in InviteUserForm in apps/web/src/components/InviteUserForm.tsx when email unavailable for manual sharing
+- [x] T536 [ENH] Create InviteAcceptForm component in apps/web/src/components/InviteAcceptForm.tsx with fields: username, password, confirmPassword, name
+- [x] T537 [ENH] Implement form validation in InviteAcceptForm in apps/web/src/components/InviteAcceptForm.tsx with username uniqueness check and password strength validation
+- [x] T538 [ENH] Add form submission handler in InviteAcceptForm in apps/web/src/components/InviteAcceptForm.tsx to POST to /api/users/invite/[token] with loading state and error handling
 
 **Acceptance Criteria**:
 
@@ -224,10 +227,10 @@ Where:
 
 ### Display Components
 
-- [ ] T539 [ENH] Create UserList component in apps/web/src/components/UserList.tsx to display users in table/card format with columns: email, username, name, role badge, created date
-- [ ] T540 [ENH] Add sorting to UserList component in apps/web/src/components/UserList.tsx by created date (newest first by default)
-- [ ] T541 [ENH] Style UserList component in apps/web/src/components/UserList.tsx with consistent styling matching existing UI patterns
-- [ ] T542 [ENH] Display invitation details in InviteAcceptForm in apps/web/src/components/InviteAcceptForm.tsx showing email, role, invited by name, expiration date
+- [x] T539 [ENH] Create UserList component in apps/web/src/components/UserList.tsx to display users in table/card format with columns: email, username, name, role badge, created date
+- [x] T540 [ENH] Add sorting to UserList component in apps/web/src/components/UserList.tsx by created date (newest first by default)
+- [x] T541 [ENH] Style UserList component in apps/web/src/components/UserList.tsx with consistent styling matching existing UI patterns
+- [x] T542 [ENH] Display invitation details in InviteAcceptForm in apps/web/src/components/InviteAcceptForm.tsx showing email, role, invited by name, expiration date
 
 **Acceptance Criteria**:
 
@@ -247,20 +250,24 @@ Where:
 
 ### Pages
 
-- [ ] T543 [ENH] Create user management page in apps/web/app/settings/users/page.tsx with admin-only access check (server component)
-- [ ] T544 [ENH] Add page layout in apps/web/app/settings/users/page.tsx with title "User Management" and sections for user list, create form, and invite form
-- [ ] T545 [ENH] Integrate UserList component in apps/web/app/settings/users/page.tsx with user data from GET /api/users
-- [ ] T546 [ENH] Integrate CreateUserForm component in apps/web/app/settings/users/page.tsx with success handler to refresh user list
-- [ ] T547 [ENH] Integrate InviteUserForm component in apps/web/app/settings/users/page.tsx with success handler to show success message
-- [ ] T548 [ENH] Create invitation acceptance page in apps/web/app/invite/[token]/page.tsx (server component, public access)
-- [ ] T549 [ENH] Fetch invitation details in invitation acceptance page in apps/web/app/invite/[token]/page.tsx using GET /api/users/invite/[token]
-- [ ] T550 [ENH] Handle expired/invalid invitation in invitation acceptance page in apps/web/app/invite/[token]/page.tsx with error message and redirect to home
-- [ ] T551 [ENH] Integrate InviteAcceptForm component in invitation acceptance page in apps/web/app/invite/[token]/page.tsx with success handler to redirect to dashboard after auto-login
+- [x] T543 [ENH] Create settings section page in apps/web/app/settings/[section]/page.tsx with dynamic routing for account and users sections, admin-only access check for users section
+- [x] T544 [ENH] Add SettingsNavigation component in apps/web/app/components/features/settings/SettingsNavigation.tsx with tabs for Account (all users) and Users (admin only), integrated into apps/web/app/settings/layout.tsx
+- [x] T545 [ENH] Integrate UserManagementClient component in apps/web/app/settings/users/UserManagementClient.tsx with user data from GET /api/users, rendered in apps/web/app/settings/[section]/page.tsx for users section
+- [x] T546 [ENH] Integrate CreateUserForm component in apps/web/app/settings/users/UserManagementClient.tsx with success handler to refresh user list
+- [x] T547 [ENH] Integrate InviteUserForm component in apps/web/app/settings/users/UserManagementClient.tsx with success handler to show success message
+- [x] T548 [ENH] Create invitation acceptance page in apps/web/app/invite/[token]/page.tsx (server component, public access)
+- [x] T549 [ENH] Fetch invitation details in invitation acceptance page in apps/web/app/invite/[token]/page.tsx using GET /api/users/invite/[token]
+- [x] T550 [ENH] Handle expired/invalid invitation in invitation acceptance page in apps/web/app/invite/[token]/page.tsx with error message and redirect to home
+- [x] T551 [ENH] Integrate InviteAcceptForm component in invitation acceptance page in apps/web/app/invite/[token]/page.tsx with success handler to redirect to dashboard after auto-login
 
 **Acceptance Criteria**:
 
-- User management page is accessible at /settings/users
-- Page checks for admin access and shows 403 for non-admins
+- Settings page structure uses `/settings/[section]` dynamic route with tabs
+- Settings navigation shows Account tab for all users and Users tab only for admins
+- User management page is accessible at /settings/users (admin only)
+- Non-admin users are redirected to /settings/account when accessing /settings/users
+- Page checks for admin access and shows 403/redirect for non-admins
+- Tab navigation works correctly between Account and Users sections
 - User list loads and displays correctly
 - Forms work correctly and refresh list on success
 - Invitation acceptance page loads with invitation details
@@ -269,10 +276,10 @@ Where:
 
 ### Navigation & Integration
 
-- [ ] T552 [ENH] Add "Users" link to Settings navigation in apps/web/app/settings/layout.tsx (or settings navigation component)
-- [ ] T553 [ENH] Ensure Settings navigation shows Users link only to admin users in apps/web/app/settings/layout.tsx
-- [ ] T554 [ENH] Add environment variables documentation for SMTP configuration in .env.example with SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_SECURE, SMTP_FROM, BASE_URL
-- [ ] T555 [ENH] Update API contracts documentation in specs/001-stride-application/contracts/api.yaml with user management endpoints
+- [x] T552 [ENH] Add "Users" link to Settings navigation in apps/web/app/settings/layout.tsx (or settings navigation component)
+- [x] T553 [ENH] Ensure Settings navigation shows Users link only to admin users in apps/web/app/settings/layout.tsx
+- [x] T554 [ENH] Add environment variables documentation for SMTP configuration in .env.example with SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_SECURE, SMTP_FROM, BASE_URL
+- [x] T555 [ENH] Update API contracts documentation in specs/001-stride-application/contracts/api.yaml with user management endpoints
 
 **Acceptance Criteria**:
 
@@ -291,11 +298,11 @@ Where:
 
 ### Error Handling
 
-- [ ] T556 [ENH] Add comprehensive error handling for email service failures in apps/web/src/lib/services/email-service.ts with clear error messages
-- [ ] T557 [ENH] Add error handling for invitation token generation collisions in apps/web/src/lib/services/invitation-service.ts with retry logic
-- [ ] T558 [ENH] Add error handling for concurrent invitation acceptance in apps/web/src/lib/services/invitation-service.ts to prevent duplicate user creation
-- [ ] T559 [ENH] Add user-friendly error messages in all API endpoints in apps/web/app/api/users/route.ts and apps/web/app/api/users/invite/route.ts
-- [ ] T560 [ENH] Handle edge case: expired invitation in GET /api/users/invite/[token] in apps/web/app/api/users/invite/[token]/route.ts with clear error message
+- [x] T556 [ENH] Add comprehensive error handling for email service failures in apps/web/src/lib/services/email-service.ts with clear error messages
+- [x] T557 [ENH] Add error handling for invitation token generation collisions in apps/web/src/lib/services/invitation-service.ts with retry logic
+- [x] T558 [ENH] Add error handling for concurrent invitation acceptance in apps/web/src/lib/services/invitation-service.ts to prevent duplicate user creation
+- [x] T559 [ENH] Add user-friendly error messages in all API endpoints in apps/web/app/api/users/route.ts and apps/web/app/api/users/invite/route.ts
+- [x] T560 [ENH] Handle edge case: expired invitation in GET /api/users/invite/[token] in apps/web/app/api/users/invite/[token]/route.ts with clear error message
 
 **Acceptance Criteria**:
 
@@ -306,11 +313,11 @@ Where:
 
 ### Polish & Edge Cases
 
-- [ ] T561 [ENH] Add loading states to all forms in apps/web/src/components/CreateUserForm.tsx, InviteUserForm.tsx, InviteAcceptForm.tsx
-- [ ] T562 [ENH] Add success messages with toast notifications in apps/web/src/components/CreateUserForm.tsx and InviteUserForm.tsx after successful operations
-- [ ] T563 [ENH] Handle email service unavailability gracefully in invitation flow in apps/web/src/components/InviteUserForm.tsx with clear warning and manual sharing option
+- [x] T561 [ENH] Add loading states to all forms in apps/web/src/components/CreateUserForm.tsx, InviteUserForm.tsx, InviteAcceptForm.tsx
+- [x] T562 [ENH] Add success messages with toast notifications in apps/web/src/components/CreateUserForm.tsx and InviteUserForm.tsx after successful operations
+- [x] T563 [ENH] Handle email service unavailability gracefully in invitation flow in apps/web/src/components/InviteUserForm.tsx with clear warning message "Email service not configured. See SMTP Configuration documentation (docs/deployment/smtp-configuration.md) to enable email invitations. Invitation link will be shown below for manual sharing." and manual sharing option
 - [ ] T564 [ENH] Add confirmation before creating users directly in apps/web/src/components/CreateUserForm.tsx (optional enhancement)
-- [ ] T565 [ENH] Add validation for invitation expiration display in apps/web/src/components/InviteAcceptForm.tsx showing countdown or expiration date
+- [x] T565 [ENH] Add validation for invitation expiration display in apps/web/src/components/InviteAcceptForm.tsx showing countdown or expiration date
 
 **Acceptance Criteria**:
 
@@ -331,6 +338,7 @@ Where:
 - **Phase 4** (UI Components): Requires Phase 3 complete
 - **Phase 5** (Pages & Integration): Requires Phase 4 complete
 - **Phase 6** (Error Handling & Polish): Requires Phase 5 complete
+- **Phase 7** (Testing): Requires Phase 6 complete
 
 ### Task Dependencies
 
@@ -365,6 +373,13 @@ Where:
 
 - T556-T565 (Error Handling & Polish): Can be done in parallel
 
+**Phase 7**:
+
+- T566-T570 (Unit Tests): Can be done in parallel
+- T571-T575 (Integration Tests): Can be done in parallel after unit tests
+- T576-T582 (E2E Tests): T576, T577-T578, T579-T580, T581, T582 can be done in parallel after integration tests
+- T583-T585 (Test Utilities): T583 must be first, then T584-T585 can be done in parallel
+
 ### Parallel Opportunities
 
 - **Phase 1**: Types (T486-T490) can be done in parallel
@@ -373,6 +388,7 @@ Where:
 - **Phase 4**: Forms (T529-T538) and display components (T539-T542) can be done in parallel
 - **Phase 5**: Page integrations (T545-T551) and navigation (T552-T555) can be done in parallel
 - **Phase 6**: All error handling and polish tasks can be done in parallel
+- **Phase 7**: Unit tests (T566-T570), integration tests (T571-T575), and E2E tests (T576-T582) can be done in parallel groups
 
 ### Integration Points
 
@@ -419,27 +435,78 @@ Where:
    - Polish UI/UX
    - Test edge cases
 
-### Testing Strategy
+7. **Step 7**: Testing (Phase 7)
+   - Create unit tests for services and validation
+   - Create integration tests for API endpoints
+   - Create E2E tests for user flows
+   - Set up test utilities and mocks
 
-**Unit Tests** (future):
+---
 
-- Email service tests
-- Invitation service tests
-- Validation schema tests
-- Repository tests
+## Phase 7: Testing
 
-**Integration Tests** (future):
+**Goal**: Comprehensive testing of user management functionality with unit, integration, and E2E tests.
 
-- API endpoint tests
-- Invitation flow tests
-- User creation flow tests
+**Dependencies**: Phase 6 complete (error handling and polish)
 
-**E2E Tests** (future):
+### Unit Tests
 
-- Admin creates user directly
-- Admin sends invitation
-- User accepts invitation
-- Permission checks
+- [ ] T566 [ENH] Create unit tests for EmailService in apps/web/src/lib/services/**tests**/email-service.test.ts testing isAvailable(), sendInvitation() with mocked nodemailer transporter, and error handling
+- [ ] T567 [ENH] Create unit tests for InvitationService in apps/web/src/lib/services/**tests**/invitation-service.test.ts testing generateInvitationToken(), createInvitation(), findInvitationByToken(), validateInvitation(), acceptInvitation() with mocked Prisma
+- [ ] T568 [ENH] Create unit tests for email templates in apps/web/src/lib/services/**tests**/email-templates.test.ts testing HTML and text generation with various parameter combinations
+- [ ] T569 [ENH] Create unit tests for validation schemas in apps/web/src/lib/validation/**tests**/user.test.ts testing createUserSchema, inviteUserSchema, acceptInvitationSchema with valid/invalid inputs and uniqueness checks
+- [ ] T570 [ENH] Create unit tests for InvitationRepository in packages/database/src/repositories/**tests**/invitation-repository.test.ts testing all CRUD operations with mocked Prisma
+
+**Acceptance Criteria**:
+
+- All service methods have unit test coverage
+- Validation schemas are tested with edge cases
+- Mocking is used for external dependencies (nodemailer, Prisma)
+- Test coverage is >80% for services and validation
+
+### Integration Tests
+
+- [ ] T571 [ENH] Create integration test for POST /api/users endpoint in apps/web/app/api/users/**tests**/route.test.ts testing user creation with valid/invalid inputs, admin authorization, and error cases
+- [ ] T572 [ENH] Create integration test for POST /api/users/invite endpoint in apps/web/app/api/users/invite/**tests**/route.test.ts testing invitation creation with/without SMTP configured, admin authorization, and error cases
+- [ ] T573 [ENH] Create integration test for GET /api/users/invite/[token] endpoint in apps/web/app/api/users/invite/[token]/**tests**/route.test.ts testing valid/invalid/expired/accepted invitation retrieval
+- [ ] T574 [ENH] Create integration test for POST /api/users/invite/[token] endpoint in apps/web/app/api/users/invite/[token]/**tests**/route.test.ts testing invitation acceptance, user creation, and session creation
+- [ ] T575 [ENH] Create integration test for GET /api/users endpoint in apps/web/app/api/users/**tests**/route.test.ts testing admin authorization and user list retrieval
+
+**Acceptance Criteria**:
+
+- All API endpoints are tested with real database (test database)
+- Authentication/authorization checks are verified
+- Error cases are tested (400, 401, 403, 404, 409, 410, 500)
+- Test database is cleaned up after each test
+
+### E2E Tests
+
+- [ ] T576 [ENH] Create E2E test in apps/web/app/settings/**tests**/users.e2e.test.ts for admin navigating to Settings → Users tab and verifying tab navigation works correctly
+- [ ] T577 [ENH] Create E2E test in apps/web/app/settings/**tests**/users.e2e.test.ts for admin creating user directly with all required fields and verifying user appears in list
+- [ ] T578 [ENH] Create E2E test in apps/web/app/settings/**tests**/users.e2e.test.ts for admin sending invitation with SMTP configured and verifying email is sent (or link is shown if SMTP unavailable)
+- [ ] T579 [ENH] Create E2E test in apps/web/app/invite/[token]/**tests**/page.e2e.test.ts for user accepting invitation and creating account with valid token
+- [ ] T580 [ENH] Create E2E test in apps/web/app/invite/[token]/**tests**/page.e2e.test.ts for handling expired/invalid invitation with appropriate error messages
+- [ ] T581 [ENH] Create E2E test in apps/web/app/settings/**tests**/users.e2e.test.ts for non-admin user accessing /settings/users and verifying redirect to /settings/account (Users tab not visible)
+- [ ] T582 [ENH] Create E2E test in apps/web/app/settings/**tests**/navigation.e2e.test.ts for verifying SettingsNavigation tabs: Account tab visible to all users, Users tab only visible to admins, active tab highlighting works correctly
+
+**Acceptance Criteria**:
+
+- Critical user flows are covered by E2E tests
+- Tests use Playwright with real browser automation
+- Tests verify UI interactions and state changes
+- Error states and edge cases are tested
+
+### Test Utilities
+
+- [ ] T583 [ENH] Create test utilities in apps/web/src/lib/test-utils/user-management.ts with helpers for creating test users, invitations, admin sessions, and cleaning up test data
+- [ ] T584 [ENH] Create mock email service for testing in apps/web/src/lib/services/**mocks**/email-service.ts that captures sent emails without actually sending
+- [ ] T585 [ENH] Set up test database configuration in vitest.config.ts and playwright.config.ts with separate test database URL and cleanup scripts
+
+**Acceptance Criteria**:
+
+- Test utilities simplify test setup and teardown
+- Mock services allow testing without external dependencies
+- Test database is isolated from development database
 
 ---
 

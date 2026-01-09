@@ -1030,11 +1030,11 @@ Where:
 
 ### Testing
 
-- [ ] T291 Write unit tests for RepositoryConnectionForm component in apps/web/src/components/features/projects/**tests**/RepositoryConnectionForm.test.tsx
-- [ ] T292 Write unit tests for RepositoryConnectionSettings component in apps/web/src/components/features/projects/**tests**/RepositoryConnectionSettings.test.tsx
-- [ ] T293 Write integration tests for settings page API calls in apps/web/app/projects/[projectId]/settings/integrations/**tests**/page.test.ts
-- [ ] T294 Write E2E test for OAuth connection flow in apps/web/**e2e**/repository-connection-oauth.spec.ts
-- [ ] T295 Write E2E test for manual token connection flow in apps/web/**e2e**/repository-connection-manual.spec.ts
+- [x] T291 Write unit tests for RepositoryConnectionForm component in apps/web/src/components/features/projects/**tests**/RepositoryConnectionForm.test.tsx
+- [x] T292 Write unit tests for RepositoryConnectionSettings component in apps/web/src/components/features/projects/**tests**/RepositoryConnectionSettings.test.tsx
+- [x] T293 Write integration tests for settings page API calls in apps/web/app/projects/[projectId]/settings/integrations/**tests**/page.test.ts
+- [x] T294 Write E2E test for OAuth connection flow in apps/web/**e2e**/repository-connection-oauth.spec.ts
+- [x] T295 Write E2E test for manual token connection flow in apps/web/**e2e**/repository-connection-manual.spec.ts
 
 **Acceptance Criteria**:
 
@@ -1159,12 +1159,12 @@ Where:
 
 ### Testing
 
-- [ ] T394 Write unit tests for useToast hook in packages/ui/src/hooks/**tests**/useToast.test.ts
-- [ ] T395 Write integration tests for toast notifications in apps/web/src/**tests**/integration/toast.test.ts
-- [ ] T396 Write accessibility tests for toast system in apps/web/src/**tests**/accessibility/toast.test.ts
-- [ ] T397 Write tests for documentation example validation in apps/web/scripts/**tests**/validate-docs.test.ts
-- [ ] T398 Write E2E test for toast notifications in apps/web/e2e/toast-notifications.spec.ts
-- [ ] T399 Write E2E test for documentation access in apps/web/e2e/documentation.spec.ts
+- [x] T394 Write unit tests for useToast hook in packages/ui/src/hooks/**tests**/useToast.test.ts
+- [x] T395 Write integration tests for toast notifications in apps/web/src/**tests**/integration/toast.test.ts
+- [x] T396 Write accessibility tests for toast system in apps/web/src/**tests**/accessibility/toast.test.ts
+- [x] T397 Write tests for documentation example validation in apps/web/scripts/**tests**/validate-docs.test.ts
+- [x] T398 Write E2E test for toast notifications in apps/web/e2e/toast-notifications.spec.ts
+- [x] T399 Write E2E test for documentation access in apps/web/e2e/documentation.spec.ts
 
 **Acceptance Criteria**:
 
@@ -1356,14 +1356,14 @@ Where:
 
 ### Testing
 
-- [ ] T434 [P] [US3] Create unit test for default config generation with reopened status in packages/yaml-config/src/**tests**/default-config.test.ts
-- [ ] T435 [P] [US3] Test default config allows closed → reopened transition in packages/yaml-config/src/**tests**/default-config.test.ts
-- [ ] T436 [US3] Verify default config has no required custom fields in packages/yaml-config/src/**tests**/default-config.test.ts
-- [ ] T437 [US3] Create integration test for board with new default config in apps/web/src/**tests**/integration/board-default-config.test.ts
-- [ ] T438 [US3] Test all default status transitions work correctly in apps/web/src/**tests**/integration/board-default-config.test.ts
-- [ ] T439 [US3] Verify backward compatibility with existing projects in apps/web/src/**tests**/integration/config-compatibility.test.ts
-- [ ] T440 [US3] Test documentation links resolve correctly in apps/web/src/**tests**/docs/links.test.ts
-- [ ] T441 [US3] Manual test: Create new project and verify default config works in TESTING_GUIDE.md
+- [x] T434 [P] [US3] Create unit test for default config generation with reopened status in packages/yaml-config/src/**tests**/default-config.test.ts
+- [x] T435 [P] [US3] Test default config allows closed → reopened transition in packages/yaml-config/src/**tests**/default-config.test.ts
+- [x] T436 [US3] Verify default config has no required custom fields in packages/yaml-config/src/**tests**/default-config.test.ts
+- [x] T437 [US3] Create integration test for board with new default config in apps/web/src/**tests**/integration/board-default-config.test.ts
+- [x] T438 [US3] Test all default status transitions work correctly in apps/web/src/**tests**/integration/board-default-config.test.ts
+- [x] T439 [US3] Verify backward compatibility with existing projects in apps/web/src/**tests**/integration/config-compatibility.test.ts
+- [x] T440 [US3] Test documentation links resolve correctly in apps/web/src/**tests**/docs/links.test.ts
+- [x] T441 [US3] Manual test: Create new project and verify default config works in TESTING_GUIDE.md
 
 **Acceptance Criteria**:
 

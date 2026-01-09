@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button, Input } from '@stride/ui';
-import { changePasswordSchema } from '@/lib/validation/user';
+import { changePasswordSchema } from '@/lib/validation/user-schemas';
 
 type PasswordFormData = z.infer<typeof changePasswordSchema>;
 

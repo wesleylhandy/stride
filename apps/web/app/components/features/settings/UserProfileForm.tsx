@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button, Input } from '@stride/ui';
-import { updateProfileSchema } from '@/lib/validation/user';
+import { updateProfileSchema } from '@/lib/validation/user-schemas';
 import type { User } from '@stride/types';
 
 const profileFormSchema = updateProfileSchema;

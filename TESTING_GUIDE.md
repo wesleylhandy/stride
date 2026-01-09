@@ -433,15 +433,119 @@ docker compose logs -f stride-postgres
 docker compose logs --tail=50 web
 ```
 
+## Manual Testing: Default Configuration
+
+### Test Default Configuration with Reopened Status
+
+This test verifies that the default configuration includes the "reopened" status and allows reopening closed issues.
+
+**Prerequisites**:
+- Application is running (see Quick Start above)
+- You have completed onboarding and created a project
+
+**Steps**:
+
+1. **Create a new project**:
+   ```bash
+   # Navigate to the application
+   http://localhost:3000
+   
+   # Complete onboarding if not already done
+   # Create a new project through the UI
+   ```
+
+2. **Verify default configuration includes reopened status**:
+   - Navigate to project settings: `/projects/[projectId]/settings/config`
+   - View the configuration YAML
+   - Verify the configuration includes a "reopened" status:
+     ```yaml
+     workflow:
+       statuses:
+         - key: todo
+           name: To Do
+           type: open
+         - key: in_progress
+           name: In Progress
+           type: in_progress
+         - key: in_review
+           name: In Review
+           type: in_progress
+         - key: done
+           name: Done
+           type: closed
+         - key: reopened  # Should be present
+           name: Reopened
+           type: in_progress
+     ```
+
+3. **Verify default configuration has no required custom fields**:
+   - In the configuration, check the `custom_fields` section
+   - All custom fields should have `required: false`
+   - Example:
+     ```yaml
+     custom_fields:
+       - key: priority
+         name: Priority
+         type: dropdown
+         options: [Low, Medium, High, Critical]
+         required: false  # Should be false
+     ```
+
+4. **Test status transitions on Kanban board**:
+   - Navigate to the Kanban board: `/projects/[projectId]/board`
+   - Create a new issue (if needed)
+   - Test moving issue between statuses:
+     - **todo → in_progress**: Should work
+     - **in_progress → in_review**: Should work
+     - **in_review → done**: Should work
+     - **done → reopened**: Should work (reopens closed issue)
+     - **reopened → todo**: Should work
+     - **reopened → in_progress**: Should work
+     - **reopened → done**: Should work
+
+5. **Test that direct closed → open transition is blocked**:
+   - Move an issue to "done" status
+   - Try to drag it directly to "todo" status
+   - **Expected**: Error message suggesting to use "reopened" status
+   - Move issue to "reopened" first, then to "todo"
+   - **Expected**: Should work without errors
+
+6. **Verify permissive defaults**:
+   - Move issues between any statuses (except closed → open)
+   - **Expected**: All transitions should work without requiring custom fields
+   - **Expected**: No errors about missing required fields
+
+7. **Test reopen workflow**:
+   - Move an issue through: `todo → in_progress → done`
+   - Then move: `done → reopened → in_progress`
+   - **Expected**: Should complete successfully
+   - **Expected**: Issue should be reopened and ready to work on again
+
+**Success Criteria**:
+- ✅ Default configuration includes "reopened" status
+- ✅ All custom fields have `required: false`
+- ✅ Status transitions work as expected
+- ✅ Closed → reopened transition works
+- ✅ Reopened → open/in_progress transitions work
+- ✅ Direct closed → open transition is blocked (with helpful error)
+- ✅ No errors when moving issues without filling custom fields
+
+**If tests fail**:
+- Check browser console for errors
+- Check server logs: `docker compose logs -f web`
+- Verify configuration matches expected structure
+- Review troubleshooting guide: `/docs/configuration-troubleshooting`
+
 ## Next Steps
 
 After verifying the application runs:
 
 1. **Test User Story 1**: Complete onboarding flow
 2. **Test User Story 2**: Create issues, use Kanban board
-3. **Check for Errors**: Review browser console and server logs
-4. **Performance**: Check page load times, API response times
-5. **Document Issues**: Note any bugs or missing features
+3. **Test Default Configuration**: Verify permissive defaults work (see above)
+4. **Check for Errors**: Review browser console and server logs
+5. **Performance**: Check page load times, API response times
+6. **Document Issues**: Note any bugs or missing features
 
 ## Additional Resources
 

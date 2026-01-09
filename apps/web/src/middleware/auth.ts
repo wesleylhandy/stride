@@ -16,7 +16,7 @@ export interface AuthenticatedRequest extends NextRequest {
 }
 
 /**
- * Middleware to verify authentication
+ * Middleware to verify authentication (for API routes)
  * Returns 401 if not authenticated
  */
 export async function requireAuth(
@@ -40,6 +40,24 @@ export async function requireAuth(
     );
   }
 
+  return session;
+}
+
+/**
+ * Server Component authentication helper
+ * Accepts Headers directly (from next/headers) instead of NextRequest
+ * Returns null if not authenticated (Server Components should redirect instead of returning errors)
+ */
+export async function requireAuthServer(
+  headers: Headers,
+): Promise<SessionPayload | null> {
+  const token = getTokenFromHeaders(headers);
+
+  if (!token) {
+    return null;
+  }
+
+  const session = await verifySession(token);
   return session;
 }
 
