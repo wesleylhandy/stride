@@ -56,14 +56,17 @@ export function FeatureHighlights() {
         <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
           <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-2 lg:gap-y-16">
             {features.map((feature) => (
-              <div key={feature.name} className="relative pl-16">
+              <div
+                key={feature.name}
+                className="group relative pl-16 transition-all duration-300 hover:translate-x-1"
+              >
                 <dt className="text-base font-semibold leading-7 text-foreground dark:text-foreground-dark">
-                  <div className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-white text-2xl">
+                  <div className="absolute left-0 top-0 flex h-12 w-12 items-center justify-center rounded-lg bg-accent text-white text-2xl shadow-md shadow-accent/20 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-accent/30 group-hover:bg-accent-hover">
                     {feature.icon}
                   </div>
                   {feature.name}
                 </dt>
-                <dd className="mt-2 text-base leading-7 text-foreground-secondary dark:text-foreground-dark-secondary">
+                <dd className="mt-2 text-base leading-7 text-foreground-secondary dark:text-foreground-dark-secondary transition-colors duration-300 group-hover:text-foreground dark:group-hover:text-foreground-dark">
                   {feature.description}
                 </dd>
               </div>

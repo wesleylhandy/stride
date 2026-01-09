@@ -73,11 +73,41 @@ Each status in the `statuses` array must have:
 #### `type` (required)
 
 - **Type**: Enum (`open`, `in_progress`, `closed`)
-- **Description**: Status type that controls transition rules
-- **Rules**:
-  - `open`: Initial status for new issues. Can transition to `in_progress` or `closed`
-  - `in_progress`: Active work status. Can transition to other `in_progress` statuses or `closed`
-  - `closed`: Terminal status. Cannot transition back to `open` or `in_progress`
+- **Description**: Status type that controls basic transition semantics
+- **Semantics**:
+  - `open`: Initial status for new issues
+  - `in_progress`: Active work status
+  - `closed`: Terminal status. Cannot transition back to `open` or `in_progress` (except via "reopened" status)
+- **Note**: By default, all transitions are allowed (permissive design). Use `transitions` field to restrict transitions.
+
+#### `transitions` (optional)
+
+- **Type**: Array of status keys (strings)
+- **Default**: `undefined` (all transitions allowed)
+- **Description**: Explicitly defines which statuses can be transitioned to from this status. If not defined, all transitions are allowed (permissive default). If defined as an empty array, no transitions are allowed. If defined with status keys, only transitions to those statuses are allowed.
+- **Use case**: Enforce workflow rules like "must go through review before done"
+
+**Example - Restrict "To Do" to only allow transitions to "In Progress" or "In Review":**
+```yaml
+workflow:
+  statuses:
+    - key: todo
+      name: To Do
+      type: open
+      transitions: [in_progress, in_review]  # Can only move to these statuses
+    - key: in_progress
+      name: In Progress
+      type: in_progress
+      # No transitions defined = can move to any status
+    - key: in_review
+      name: In Review
+      type: in_progress
+      transitions: [done, in_progress]  # Can only move to done or back to in_progress
+    - key: done
+      name: Done
+      type: closed
+      # No transitions defined = can move to other closed statuses or reopened
+```
 
 ```yaml
 workflow:
@@ -274,6 +304,83 @@ user_assignment:
 
 ## Complete Example
 
+### Permissive Configuration (Default - All Transitions Allowed)
+
+```yaml
+project_key: APP
+project_name: My Application
+
+workflow:
+  default_status: todo
+  statuses:
+    - key: todo
+      name: To Do
+      type: open
+      # No transitions defined = can move to any status
+    - key: in_progress
+      name: In Progress
+      type: in_progress
+      # No transitions defined = can move to any status
+    - key: in_review
+      name: In Review
+      type: in_progress
+      # No transitions defined = can move to any status
+    - key: done
+      name: Done
+      type: closed
+      # No transitions defined = can move to other closed statuses or reopened
+    - key: reopened
+      name: Reopened
+      type: in_progress
+
+custom_fields:
+  - key: priority
+    name: Priority
+    type: dropdown
+    options: [Low, Medium, High, Critical]
+    required: false
+```
+
+### Restricted Configuration (Enforced Workflow)
+
+```yaml
+project_key: APP
+project_name: My Application
+
+workflow:
+  default_status: todo
+  statuses:
+    - key: todo
+      name: To Do
+      type: open
+      transitions: [in_progress, in_review]  # Can only move to in_progress or in_review
+    - key: in_progress
+      name: In Progress
+      type: in_progress
+      transitions: [in_review, done]  # Can move to review or done (but not back to todo)
+    - key: in_review
+      name: In Review
+      type: in_progress
+      transitions: [done, in_progress]  # Can move to done, or back to in_progress for changes
+    - key: done
+      name: Done
+      type: closed
+      transitions: [reopened]  # Can only reopen, cannot go to other statuses
+    - key: reopened
+      name: Reopened
+      type: in_progress
+      transitions: [in_progress, in_review]  # Can go back to work
+
+custom_fields:
+  - key: priority
+    name: Priority
+    type: dropdown
+    options: [Low, Medium, High, Critical]
+    required: false
+```
+
+### Full Example with All Features
+
 ```yaml
 project_key: APP
 project_name: My Application
@@ -293,6 +400,9 @@ workflow:
     - key: done
       name: Done
       type: closed
+    - key: reopened
+      name: Reopened
+      type: in_progress
 
 custom_fields:
   - key: priority
@@ -346,10 +456,22 @@ user_assignment:
 
 ### Transition Rules
 
-- Cannot transition from `closed` to `open` or `in_progress`
-- Can transition from `open` to `in_progress` or `closed`
-- Can transition between `in_progress` statuses
+**Default Behavior (Permissive)**:
+- If `transitions` is not defined on a status, all transitions are allowed (permissive default)
+- This allows teams to get started quickly without configuration barriers
+
+**Built-in Restrictions**:
+- Cannot transition from `closed` to `open` or `in_progress` (except via "reopened" status)
+- This is the only hard-coded restriction
+
+**Explicit Transition Rules**:
+- If `transitions` array is defined on a status, only transitions to those statuses are allowed
+- Empty `transitions` array means no transitions are allowed from that status
+- Transition rules are checked before type-based restrictions
+
+**Other Validations**:
 - Required custom fields must be set before transitioning to statuses that require them
+- Assignee requirements are checked if configured
 
 ## Best Practices
 

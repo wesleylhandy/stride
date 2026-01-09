@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { requireAuth } from "@/middleware/auth";
 import { issueRepository, projectRepository } from "@stride/database";
 import type { Issue, IssueType, Priority } from "@stride/types";
-import { parseYamlConfig } from "@stride/yaml-config";
+import type { ProjectConfig } from "@stride/yaml-config";
 import {
   updateIssueStatusSchema,
 } from "@/lib/validation/issue";
@@ -72,66 +72,71 @@ export async function PATCH(
     const validated = updateIssueStatusSchema.parse(body);
 
     // Validate status change against workflow rules (T161-T163)
-    if (project.config) {
-      // Parse project config
-      const parseResult = parseYamlConfig(project.config as unknown as string);
-      if (!parseResult.success || !parseResult.data) {
-        return NextResponse.json(
-          { error: "Invalid project configuration" },
-          { status: 500 },
-        );
-      }
-      
-      // Convert Prisma issue to types Issue (null -> undefined, enum conversion)
-      const issueForValidation: Issue = {
-        ...existing,
-        description: existing.description ?? undefined,
-        assigneeId: existing.assigneeId ?? undefined,
-        cycleId: existing.cycleId ?? undefined,
-        closedAt: existing.closedAt ?? undefined,
-        type: existing.type as IssueType,
-        priority: existing.priority ? (existing.priority as Priority) : undefined,
-        customFields: (existing.customFields as Record<string, unknown>) || {},
-        storyPoints: existing.storyPoints ?? undefined,
-      };
-      const validationResult = validateStatusChange(
-        issueForValidation,
-        validated.status,
-        parseResult.data,
+    // Always fetch fresh config from database to ensure validation uses latest configuration
+    // This ensures rule enforcement is dynamic and responsive to configuration changes
+    const projectConfig = await projectRepository.getConfig(projectId);
+    if (!projectConfig || !projectConfig.config) {
+      return NextResponse.json(
+        { error: "Project configuration not found" },
+        { status: 500 },
       );
+    }
 
-      if (!validationResult.isValid) {
-        // Enhance error messages with configuration context
-        const enhancedErrors = validationResult.errors.map((err) => {
-          // If error already has good context, keep it
-          if (err.message && (err.message.includes('configuration') || err.message.includes('workflow') || err.message.includes('Required field'))) {
-            return err;
-          }
-          // Otherwise add context about checking configuration
-          return {
-            ...err,
-            message: err.message || `Validation failed for ${err.field || 'status'}. Please check your project configuration.`,
-          };
-        });
-        
-        return NextResponse.json(
-          {
-            error: 'Status transition validation failed',
-            details: enhancedErrors,
-            message: 'Cannot move issue to this status. See details for specific requirements from your project configuration.',
-            helpUrl: '/docs/configuration',
-          },
-          { status: 400 },
-        );
-      }
+    // project.config is stored as JSONB (already parsed) - cast directly to ProjectConfig
+    // No need to parse YAML - this ensures we use the exact config stored in database
+    const config = projectConfig.config as ProjectConfig;
+
+    // Convert Prisma issue to types Issue (null -> undefined, enum conversion)
+    const issueForValidation: Issue = {
+      ...existing,
+      description: existing.description ?? undefined,
+      assigneeId: existing.assigneeId ?? undefined,
+      cycleId: existing.cycleId ?? undefined,
+      closedAt: existing.closedAt ?? undefined,
+      type: existing.type as IssueType,
+      priority: existing.priority ? (existing.priority as Priority) : undefined,
+      customFields: (existing.customFields as Record<string, unknown>) || {},
+      storyPoints: existing.storyPoints ?? undefined,
+    };
+
+    // Validate using the fresh config from database - rules are dynamically enforced
+    const validationResult = validateStatusChange(
+      issueForValidation,
+      validated.status,
+      config,
+    );
+
+    if (!validationResult.isValid) {
+      // Enhance error messages with configuration context
+      const enhancedErrors = validationResult.errors.map((err) => {
+        // If error already has good context, keep it
+        if (err.message && (err.message.includes('configuration') || err.message.includes('workflow') || err.message.includes('Required field'))) {
+          return err;
+        }
+        // Otherwise add context about checking configuration
+        return {
+          ...err,
+          message: err.message || `Validation failed for ${err.field || 'status'}. Please check your project configuration.`,
+        };
+      });
+      
+      return NextResponse.json(
+        {
+          error: 'Status transition validation failed',
+          details: enhancedErrors,
+          message: 'Cannot move issue to this status. See details for specific requirements from your project configuration.',
+          helpUrl: '/docs/configuration-troubleshooting',
+        },
+        { status: 400 },
+      );
     }
 
     // Update only the status field
-    const issue = await issueRepository.update(existing.id, {
+    const updatedIssue = await issueRepository.update(existing.id, {
       status: validated.status,
     });
 
-    return NextResponse.json(issue);
+    return NextResponse.json(updatedIssue);
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -147,4 +152,3 @@ export async function PATCH(
     );
   }
 }
-

@@ -37,7 +37,7 @@ See [Status Not Found](#status-x-is-not-defined-in-workflow) below for detailed 
 
 ### "Cannot transition from closed status"
 
-**Quick Fix**: Add a "reopened" status with type `in_progress` to allow reopening closed issues:
+**Quick Fix**: The default configuration includes a "reopened" status that allows reopening closed issues. If your configuration doesn't have it, add:
 
 ```yaml
 workflow:
@@ -47,6 +47,8 @@ workflow:
       name: Reopened
       type: in_progress  # This allows moving from closed to reopened
 ```
+
+**Note**: The default configuration is designed to be permissive and includes this status automatically. If you're seeing this error, you may have a custom configuration that doesn't include it. See the [Configuration Migration](#configuration-migration) section for help updating your configuration.
 
 ## Validation Errors
 
@@ -72,7 +74,7 @@ project_key: WEB
 project_key: API123
 ```
 
-### "Status 'X' is not defined in workflow"
+### "Status 'X' is not defined in workflow" {#status-x-is-not-defined-in-workflow}
 
 **Problem**: Either:
 1. The `default_status` references a status key that doesn't exist in `workflow.statuses`, OR
@@ -117,18 +119,23 @@ workflow:
       type: open
 ```
 
-### "Cannot transition from closed status to open or in-progress status"
+### "Cannot transition from closed status to open or in-progress status" {#cannot-transition-from-closed-status}
 
 **Problem**: Attempting to move an issue from a `closed` status back to `open` or `in_progress`.
 
 **Solution**: 
-- Closed statuses are terminal - issues cannot transition back
-- Create a new issue or use a different workflow if you need to reopen issues
-- Consider using a status like "Reopened" with type `in_progress` if reopening is needed
+- The default configuration includes a "reopened" status (type: `in_progress`) that allows reopening closed issues
+- To reopen a closed issue, move it to the "Reopened" status instead of trying to move it to an `open` or other `in_progress` status
+- If your configuration doesn't have a "reopened" status, add it to enable reopening
+
+**Why this design?**
+- Closed statuses are terminal by default to prevent accidental reopening
+- The "reopened" status is a deliberate action that makes it clear the issue was previously closed
+- This follows common workflow patterns (GitHub Issues, Linear, Jira all use similar patterns)
 
 **Example Fix**:
 ```yaml
-# If you need to reopen issues, add a "reopened" status
+# The default configuration already includes this, but if you removed it:
 workflow:
   statuses:
     - key: done
@@ -136,10 +143,12 @@ workflow:
       type: closed
     - key: reopened
       name: Reopened
-      type: in_progress  # Allows reopening
+      type: in_progress  # Allows: done → reopened, then reopened → any in_progress status
 ```
 
-### "Required field 'X' must be set before changing status"
+**See also**: [Board Status Configuration Guide](/docs/board-status-configuration-guide) for detailed workflow transition rules.
+
+### "Required field 'X' must be set before changing status" {#required-field-x-must-be-set-before-changing-status}
 
 **Problem**: A custom field marked as `required: true` is missing when trying to change status.
 
@@ -261,6 +270,8 @@ custom_fields:
 
 ## Board Status Issues
 
+For comprehensive help with board and status configuration, see the [Board Status Configuration Guide](/docs/board-status-configuration-guide).
+
 ### "Cannot move issue between status blocks on the board"
 
 **Problem**: Validation is blocking the status change. Common causes:
@@ -270,12 +281,14 @@ custom_fields:
 4. Status keys don't match (case sensitivity)
 
 **Diagnostic Steps**:
-1. Check the error message - it will tell you which status is missing or what rule is violated
-2. Verify both the source and target statuses exist in your config
-3. Check if you're trying to reopen a closed issue (needs "reopened" status)
-4. Verify custom fields if you see "Required field" errors
+1. **Check the error message** - it will tell you which status is missing or what rule is violated, and show available statuses
+2. **Verify both statuses exist** - ensure both the source and target statuses exist in your `workflow.statuses` array
+3. **Check for closed → open transitions** - if trying to reopen a closed issue, use the "reopened" status instead (see [Cannot transition from closed status](#cannot-transition-from-closed-status))
+4. **Verify custom fields** - check if you see "Required field" errors and set those fields before changing status
+5. **Check status keys** - ensure status keys match exactly (case-sensitive, no extra spaces)
+6. **Review your configuration** - compare your config against the [default configuration](#migrating-from-old-default-configuration) to ensure all common statuses are included
 
-**Solution**: See specific error sections above for targeted fixes.
+**Solution**: See specific error sections above for targeted fixes, or review the [Board Status Configuration Guide](/docs/board-status-configuration-guide) for comprehensive help.
 
 ### "Status transition not allowed"
 
@@ -340,6 +353,40 @@ workflow:
 **Solution**: 
 - Verify `default_status` matches exactly (case-sensitive) one of the status keys
 - Check for typos or extra spaces
+
+## Transition Rules
+
+### "Status transition not allowed" - Explicit Transition Rules
+
+**Problem**: You've defined explicit `transitions` rules in your configuration that are blocking the transition.
+
+**Solution**: Review the `transitions` array on the source status. The `transitions` field defines which statuses can be transitioned to from that status. If a target status is not in the `transitions` array, the transition will be blocked.
+
+**Example - Restricting Workflow**:
+```yaml
+workflow:
+  statuses:
+    - key: todo
+      name: To Do
+      type: open
+      transitions: [in_progress, in_review]  # Can ONLY move to these statuses
+    - key: done
+      name: Done
+      type: closed
+      # No transitions = can move to other closed statuses or reopened
+```
+
+In this example, you cannot move from "To Do" directly to "Done" - you must go through "In Progress" or "In Review" first.
+
+**To make a status permissive (allow all transitions)**: Omit the `transitions` field entirely, or remove it from your configuration. The default behavior is permissive - all transitions are allowed unless explicitly restricted.
+
+**Example - Making a Status Permissive**:
+```yaml
+- key: todo
+  name: To Do
+  type: open
+  # No transitions field = can move to any status
+```
 
 ## Configuration Not Updating
 

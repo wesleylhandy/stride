@@ -10,6 +10,10 @@ export const StatusConfigSchema = z.strictObject({
   key: z.string().min(1),
   name: z.string().min(1),
   type: StatusTypeSchema,
+  // Optional: List of allowed status keys that can be transitioned to from this status
+  // If not defined or empty array, all transitions are allowed (permissive default)
+  // If defined, only transitions to statuses in this list are allowed
+  transitions: z.array(z.string()).optional(),
 });
 
 // Custom field type enum

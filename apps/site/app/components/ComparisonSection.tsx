@@ -54,31 +54,31 @@ export function ComparisonSection() {
           </p>
         </div>
         <div className="mx-auto mt-16 max-w-4xl">
-          <div className="overflow-hidden shadow ring-1 ring-border/20 md:rounded-lg dark:ring-border-dark/20">
+          <div className="overflow-hidden shadow-lg shadow-black/5 ring-1 ring-border/20 md:rounded-lg dark:ring-border-dark/20 transition-shadow duration-300 hover:shadow-xl hover:shadow-black/10">
             <table className="min-w-full divide-y divide-border dark:divide-border-dark">
               <thead className="bg-surface dark:bg-surface-dark">
                 <tr>
                   <th
                     scope="col"
-                    className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-foreground sm:pl-6 dark:text-foreground-dark"
+                    className="py-4 pl-4 pr-3 text-left text-sm font-semibold text-foreground sm:pl-6 dark:text-foreground-dark"
                   >
                     Feature
                   </th>
                   <th
                     scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-foreground dark:text-foreground-dark"
+                    className="px-3 py-4 text-left text-sm font-semibold text-foreground dark:text-foreground-dark"
                   >
                     Stride
                   </th>
                   <th
                     scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-foreground dark:text-foreground-dark"
+                    className="px-3 py-4 text-left text-sm font-semibold text-foreground dark:text-foreground-dark"
                   >
                     Linear
                   </th>
                   <th
                     scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-foreground dark:text-foreground-dark"
+                    className="px-3 py-4 text-left text-sm font-semibold text-foreground dark:text-foreground-dark"
                   >
                     Jira
                   </th>
@@ -86,11 +86,14 @@ export function ComparisonSection() {
               </thead>
               <tbody className="divide-y divide-border bg-surface dark:divide-border-dark dark:bg-surface-dark-secondary">
                 {comparisons.map((comparison) => (
-                  <tr key={comparison.feature}>
+                  <tr
+                    key={comparison.feature}
+                    className="transition-colors duration-200 hover:bg-surface-secondary dark:hover:bg-surface-dark"
+                  >
                     <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-foreground sm:pl-6 dark:text-foreground-dark">
                       {comparison.feature}
                     </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-foreground-secondary dark:text-foreground-dark-secondary">
+                    <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-accent dark:text-accent transition-colors duration-200">
                       {comparison.stride}
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-foreground-secondary dark:text-foreground-dark-secondary">

@@ -9,13 +9,21 @@ import type { ProjectConfig } from './schema';
  * - Common workflow statuses covering typical development patterns
  * - A "reopened" status to allow reopening closed issues
  * - No required custom fields that could block status transitions
+ * - No explicit transition rules (all transitions allowed by default)
  * 
- * Teams can customize this configuration later to add restrictions or
- * additional statuses as needed.
+ * Teams can customize this configuration later to add restrictions:
+ * - Add `transitions` arrays to status definitions to enforce workflow rules
+ *   Example: Prevent moving from "To Do" to "Done" without review:
+ *   ```yaml
+ *   - key: todo
+ *     transitions: [in_progress, in_review]  # Cannot skip to done
+ *   ```
+ * - Mark custom fields as required to enforce data collection
+ * - Add automation rules for Git integration
  * 
  * @param projectKey - Project key (e.g., "APP")
  * @param projectName - Project name
- * @returns Default configuration object
+ * @returns Default configuration object (permissive - all transitions allowed)
  */
 export function generateDefaultConfig(
   projectKey: string,

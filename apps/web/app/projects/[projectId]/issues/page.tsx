@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { requireAuth } from '@/middleware/auth';
 import { headers } from 'next/headers';
 import { projectRepository, issueRepository } from '@stride/database';
+import type { ProjectConfig, StatusConfig } from '@stride/types';
 
 interface PageParams {
   params: Promise<{
@@ -40,6 +41,18 @@ export default async function IssuesListPage({ params }: PageParams) {
   const issues = await issueRepository.findMany({
     projectId,
   });
+
+  // Helper function to get user-friendly status name from configuration
+  const getStatusDisplayName = (statusKey: string): string => {
+    if (!project.config) {
+      return statusKey;
+    }
+    const projectConfig = project.config as unknown as ProjectConfig;
+    const statusConfig = projectConfig.workflow.statuses.find(
+      (s: StatusConfig) => s.key === statusKey,
+    );
+    return statusConfig?.name || statusKey;
+  };
 
   return (
     <div className="py-6">
@@ -81,7 +94,7 @@ export default async function IssuesListPage({ params }: PageParams) {
                     )}
                   </div>
                   <span className="text-sm text-foreground-secondary dark:text-foreground-dark-secondary">
-                    {issue.status}
+                    {getStatusDisplayName(issue.status)}
                   </span>
                 </div>
               </a>

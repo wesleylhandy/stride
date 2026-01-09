@@ -1305,11 +1305,11 @@ Where:
 
 ### Default Configuration Enhancement
 
-- [ ] T415 [P] [US3] Add "reopened" status to default configuration in packages/yaml-config/src/default-config.ts
-- [ ] T416 [US3] Add documentation comments explaining permissive design philosophy in packages/yaml-config/src/default-config.ts
-- [ ] T417 [US3] Update generateDefaultConfig function documentation in packages/yaml-config/src/default-config.ts
-- [ ] T418 [US3] Verify priority field is optional (required: false) in packages/yaml-config/src/default-config.ts
-- [ ] T419 [US3] Verify default config passes Zod validation in packages/yaml-config/src/validator.ts
+- [x] T415 [P] [US3] Add "reopened" status to default configuration in packages/yaml-config/src/default-config.ts
+- [x] T416 [US3] Add documentation comments explaining permissive design philosophy in packages/yaml-config/src/default-config.ts
+- [x] T417 [US3] Update generateDefaultConfig function documentation in packages/yaml-config/src/default-config.ts
+- [x] T418 [US3] Verify priority field is optional (required: false) in packages/yaml-config/src/default-config.ts
+- [x] T419 [US3] Verify default config passes Zod validation in packages/yaml-config/src/validator.ts
 
 **Acceptance Criteria**:
 
@@ -1321,15 +1321,15 @@ Where:
 
 ### Troubleshooting Documentation Expansion
 
-- [ ] T420 [P] [US3] Add "Quick Fixes" section at top of troubleshooting guide in apps/web/content/docs/configuration-troubleshooting.md
-- [ ] T421 [P] [US3] Add "Board Status Issues" section with common board errors in apps/web/content/docs/configuration-troubleshooting.md
-- [ ] T422 [US3] Add "Cannot move issue between status blocks" troubleshooting in apps/web/content/docs/configuration-troubleshooting.md
-- [ ] T423 [US3] Add "Status 'X' is not defined" error troubleshooting in apps/web/content/docs/configuration-troubleshooting.md
-- [ ] T424 [US3] Add "Cannot transition from closed status" troubleshooting in apps/web/content/docs/configuration-troubleshooting.md
-- [ ] T425 [US3] Add diagnostic steps for each error type in apps/web/content/docs/configuration-troubleshooting.md
-- [ ] T426 [US3] Add "Configuration Migration" section for existing projects in apps/web/content/docs/configuration-troubleshooting.md
-- [ ] T427 [US3] Add cross-reference links to board status configuration guide in apps/web/content/docs/configuration-troubleshooting.md
-- [ ] T428 [US3] Add diagnostic checklist in "Getting Help" section in apps/web/content/docs/configuration-troubleshooting.md
+- [x] T420 [P] [US3] Add "Quick Fixes" section at top of troubleshooting guide in apps/web/content/docs/configuration-troubleshooting.md
+- [x] T421 [P] [US3] Add "Board Status Issues" section with common board errors in apps/web/content/docs/configuration-troubleshooting.md
+- [x] T422 [US3] Add "Cannot move issue between status blocks" troubleshooting in apps/web/content/docs/configuration-troubleshooting.md
+- [x] T423 [US3] Add "Status 'X' is not defined" error troubleshooting in apps/web/content/docs/configuration-troubleshooting.md
+- [x] T424 [US3] Add "Cannot transition from closed status" troubleshooting in apps/web/content/docs/configuration-troubleshooting.md
+- [x] T425 [US3] Add diagnostic steps for each error type in apps/web/content/docs/configuration-troubleshooting.md
+- [x] T426 [US3] Add "Configuration Migration" section for existing projects in apps/web/content/docs/configuration-troubleshooting.md
+- [x] T427 [US3] Add cross-reference links to board status configuration guide in apps/web/content/docs/configuration-troubleshooting.md
+- [x] T428 [US3] Add diagnostic checklist in "Getting Help" section in apps/web/content/docs/configuration-troubleshooting.md
 
 **Acceptance Criteria**:
 
@@ -1341,11 +1341,11 @@ Where:
 
 ### Validation Message Improvements
 
-- [ ] T429 [US3] Review validation error messages for helpful hints in packages/ui/src/organisms/KanbanBoard.tsx
-- [ ] T430 [US3] Ensure error messages suggest missing statuses when applicable in packages/ui/src/organisms/KanbanBoard.tsx
-- [ ] T431 [US3] Update validation messages to reference permissive defaults in packages/ui/src/organisms/KanbanBoard.tsx
-- [ ] T432 [US3] Review API validation error messages in apps/web/app/api/projects/[projectId]/issues/[issueKey]/status/route.ts
-- [ ] T433 [US3] Ensure API errors reference troubleshooting documentation in apps/web/app/api/projects/[projectId]/issues/[issueKey]/status/route.ts
+- [x] T429 [US3] Review validation error messages for helpful hints in packages/ui/src/organisms/KanbanBoard.tsx
+- [x] T430 [US3] Ensure error messages suggest missing statuses when applicable in packages/ui/src/organisms/KanbanBoard.tsx
+- [x] T431 [US3] Update validation messages to reference permissive defaults in packages/ui/src/organisms/KanbanBoard.tsx
+- [x] T432 [US3] Review API validation error messages in apps/web/app/api/projects/[projectId]/issues/[issueKey]/status/route.ts
+- [x] T433 [US3] Ensure API errors reference troubleshooting documentation in apps/web/app/api/projects/[projectId]/issues/[issueKey]/status/route.ts
 
 **Acceptance Criteria**:
 

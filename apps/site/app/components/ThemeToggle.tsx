@@ -39,7 +39,7 @@ export function ThemeToggle() {
   if (!mounted) {
     return (
       <button
-        className="rounded-md p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+        className="rounded-lg p-2.5 bg-surface/50 backdrop-blur-sm border border-border/20 text-foreground-secondary hover:bg-surface hover:border-border/40 transition-all duration-300 dark:bg-surface-dark/50 dark:border-border-dark/20 dark:text-foreground-dark-secondary dark:hover:bg-surface-dark dark:hover:border-border-dark/40"
         aria-label="Toggle theme"
       >
         <span className="sr-only">Toggle theme</span>
@@ -50,34 +50,34 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="rounded-md p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-400"
+      className="rounded-lg p-2.5 bg-surface/80 backdrop-blur-sm border border-border/20 text-foreground-secondary hover:bg-surface hover:border-border/40 hover:text-foreground hover:shadow-md transition-all duration-300 dark:bg-surface-dark/80 dark:border-border-dark/20 dark:text-foreground-dark-secondary dark:hover:bg-surface-dark dark:hover:border-border-dark/40 dark:hover:text-foreground-dark"
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
     >
       {isDark ? (
         <svg
-          className="h-5 w-5"
+          className="h-5 w-5 transition-transform duration-300 hover:rotate-90"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
+          strokeWidth={2}
         >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth={2}
             d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
           />
         </svg>
       ) : (
         <svg
-          className="h-5 w-5"
+          className="h-5 w-5 transition-transform duration-300 hover:-rotate-12"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
+          strokeWidth={2}
         >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth={2}
             d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
           />
         </svg>

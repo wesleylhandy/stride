@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { KanbanBoard } from '@stride/ui';
 import { projectRepository, issueRepository } from '@stride/database';
 import type { Issue, ProjectConfig, IssueType, Priority } from '@stride/types';
-import { parseYamlConfig } from '@stride/yaml-config';
+import type { ProjectConfig as YAMLProjectConfig } from '@stride/yaml-config';
 import { canUpdateIssue } from '@/lib/auth/permissions';
 import { requireAuth } from '@/middleware/auth';
 import { headers } from 'next/headers';
@@ -40,11 +40,28 @@ export default async function KanbanBoardPage({ params }: PageParams) {
 
   const session = authResult;
 
-  // Fetch project to get config (layout already fetched, but we need config)
+  // Verify project exists
   const project = await projectRepository.findById(projectId);
   if (!project) {
     notFound();
   }
+
+  // Always fetch fresh config from database to ensure rule enforcement is dynamic and responsive
+  // This ensures that when configuration changes, validation immediately reflects those changes
+  const projectConfigData = await projectRepository.getConfig(projectId);
+  if (!projectConfigData || !projectConfigData.config) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <p className="text-foreground-secondary dark:text-foreground-dark-secondary">
+          Project configuration not found
+        </p>
+      </div>
+    );
+  }
+
+  // project.config is stored as JSONB (already parsed) - cast directly to ProjectConfig
+  // No need to parse YAML - this ensures we use the exact config stored in database
+  const projectConfig = projectConfigData.config as YAMLProjectConfig;
 
   // Fetch all issues for the project
   const issues = await issueRepository.findMany({
@@ -64,15 +81,6 @@ export default async function KanbanBoardPage({ params }: PageParams) {
     storyPoints: issue.storyPoints ?? undefined,
   }));
 
-  // Parse project config
-  let projectConfig: ProjectConfig | undefined;
-  if (project.configYaml) {
-    const parseResult = parseYamlConfig(project.configYaml);
-    if (parseResult.success && parseResult.data) {
-      projectConfig = parseResult.data;
-    }
-  }
-
   // Check edit permissions
   const canEdit = canUpdateIssue(session.role);
 
@@ -81,7 +89,7 @@ export default async function KanbanBoardPage({ params }: PageParams) {
       <KanbanBoardClient
         projectId={projectId}
         initialIssues={typedIssues}
-        projectConfig={projectConfig}
+        projectConfig={projectConfig as ProjectConfig}
         canEdit={canEdit}
       />
     </div>

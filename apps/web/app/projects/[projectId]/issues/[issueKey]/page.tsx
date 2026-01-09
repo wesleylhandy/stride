@@ -2,7 +2,6 @@ import { notFound } from 'next/navigation';
 import { IssueDetailClient } from '@/components/IssueDetailClient';
 import { projectRepository, issueRepository, issueBranchRepository } from '@stride/database';
 import type { Issue, ProjectConfig, IssueType, Priority } from '@stride/types';
-import { parseYamlConfig } from '@stride/yaml-config';
 import { canUpdateIssue } from '@/lib/auth/permissions';
 import { requireAuth } from '@/middleware/auth';
 import { headers } from 'next/headers';
@@ -35,11 +34,21 @@ export default async function IssueDetailPage({ params }: PageParams) {
 
   const session = authResult;
 
-  // Fetch project to get config
+  // Fetch project to verify it exists
   const project = await projectRepository.findById(projectId);
   if (!project) {
     notFound();
   }
+
+  // Fetch project config (stored as JSONB, already parsed)
+  const projectConfigData = await projectRepository.getConfig(projectId);
+  if (!projectConfigData || !projectConfigData.config) {
+    notFound();
+  }
+
+  // project.config is stored as JSONB (already parsed) - cast through unknown first
+  // No need to parse YAML - this ensures we use the exact config stored in database
+  const projectConfig = projectConfigData.config as unknown as ProjectConfig;
 
   // Fetch issue directly from repository
   const issue = await issueRepository.findByKey(
@@ -66,15 +75,6 @@ export default async function IssueDetailPage({ params }: PageParams) {
     customFields: (issue.customFields as Record<string, unknown>) || {},
     storyPoints: issue.storyPoints ?? undefined,
   };
-
-  // Parse project config
-  let projectConfig: ProjectConfig | undefined;
-  if (project.config) {
-    const parseResult = parseYamlConfig(project.config as unknown as string);
-    if (parseResult.success && parseResult.data) {
-      projectConfig = parseResult.data;
-    }
-  }
 
   // Check edit permissions
   const canEdit = canUpdateIssue(session.role);

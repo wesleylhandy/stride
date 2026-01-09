@@ -15,15 +15,19 @@ export interface ValidationResult {
 /**
  * Validate status transition based on workflow rules
  * 
- * Rules:
- * - Can transition from 'open' to 'in_progress' or 'closed'
- * - Can transition from 'in_progress' to 'in_progress' (other statuses) or 'closed'
- * - Cannot transition from 'closed' to 'open' or 'in_progress' (closed is terminal)
- * - Status must exist in workflow configuration
+ * Rules are dynamically enforced based on the provided configuration:
+ * - Explicit transition rules: If `transitions` array is defined on a status, only those transitions are allowed
+ * - Built-in restrictions: Cannot transition from 'closed' to 'open' or 'in_progress' (except via "reopened" status)
+ * - Permissive default: If no explicit rules are defined, all transitions are allowed
+ * - Status existence: Status must exist in workflow configuration
+ * 
+ * This function reads rules from the config parameter - rules are not hardcoded.
+ * Always pass the latest configuration from the database to ensure rule enforcement
+ * is dynamic and responsive to configuration changes.
  * 
  * @param currentStatus - Current issue status
  * @param newStatus - Desired new status
- * @param config - Project configuration
+ * @param config - Project configuration (must be latest from database for dynamic enforcement)
  * @returns Validation result
  */
 export function validateStatusTransition(
@@ -43,16 +47,20 @@ export function validateStatusTransition(
 
   // Check if statuses exist in config
   if (!currentStatusConfig) {
+    const availableStatuses = config.workflow.statuses.map(s => `"${s.name}" (${s.key})`).join(', ');
     errors.push({
       field: 'status',
-      message: `Current status "${currentStatus}" is not defined in workflow`,
+      message: `Current status "${currentStatus}" is not defined in your project workflow configuration. Available statuses: ${availableStatuses}. Please update your project configuration to include this status.`,
+      helpUrl: '/docs/configuration-troubleshooting#status-x-is-not-defined-in-workflow',
     });
   }
 
   if (!newStatusConfig) {
+    const availableStatuses = config.workflow.statuses.map(s => `"${s.name}" (${s.key})`).join(', ');
     errors.push({
       field: 'status',
-      message: `Status "${newStatus}" is not defined in workflow`,
+      message: `Target status "${newStatus}" is not defined in your project workflow configuration. Available statuses: ${availableStatuses}. Please update your project configuration to include this status.`,
+      helpUrl: '/docs/configuration-troubleshooting#status-x-is-not-defined-in-workflow',
     });
   }
 
@@ -65,21 +73,71 @@ export function validateStatusTransition(
     return { isValid: true, errors: [] };
   }
 
-  // Validate transition based on status types
+  // Validate transition based on status types and explicit transition rules
+  // Permissive design: Allow all transitions except those explicitly blocked
   if (currentStatusConfig && newStatusConfig) {
-    // Cannot transition from closed to open or in_progress
-    if (currentStatusConfig.type === 'closed') {
-      if (newStatusConfig.type !== 'closed') {
+    // First, check if explicit transition rules are defined for the current status
+    // If transitions array is defined, only transitions to those statuses are allowed
+    if (currentStatusConfig.transitions !== undefined && currentStatusConfig.transitions.length > 0) {
+      if (!currentStatusConfig.transitions.includes(newStatus)) {
+        const allowedStatusNames = currentStatusConfig.transitions
+          .map(key => {
+            const status = config.workflow.statuses.find(s => s.key === key);
+            return status ? `"${status.name}" (${key})` : key;
+          })
+          .join(', ');
+        
         errors.push({
           field: 'status',
-          message: 'Cannot transition from a closed status to an open or in-progress status',
+          message: `Cannot move from "${currentStatusConfig.name}" to "${newStatusConfig.name}". Allowed transitions from "${currentStatusConfig.name}": ${allowedStatusNames}. See your project configuration for transition rules.`,
+          helpUrl: '/docs/configuration-troubleshooting#status-transition-not-allowed',
         });
+        return { isValid: false, errors };
       }
     }
 
-    // Can transition from open to in_progress or closed
-    // Can transition from in_progress to in_progress (other) or closed
-    // These are allowed, so no additional validation needed
+    // Second, apply built-in type-based restrictions
+    // Only restriction: Cannot transition from closed to open/in_progress (except via "reopened")
+    // Exception: Can transition to "reopened" status (type: in_progress) if configured
+    if (currentStatusConfig.type === 'closed') {
+      if (newStatusConfig.type !== 'closed') {
+        // Check if target is a "reopened" status (common pattern for reopening closed issues)
+        const isReopenedStatus = newStatusConfig.key === 'reopened' || newStatusConfig.name.toLowerCase() === 'reopened';
+        
+        if (isReopenedStatus) {
+          // This is allowed - reopening closed issues via "reopened" status
+          // No error needed
+        } else {
+          // Suggest using "reopened" status if available, or adding it to config
+          const hasReopenedStatus = config.workflow.statuses.some(
+            s => s.key === 'reopened' || s.name.toLowerCase() === 'reopened'
+          );
+          
+          if (hasReopenedStatus) {
+            errors.push({
+              field: 'status',
+              message: `Cannot move from "${currentStatusConfig.name}" (closed status) to "${newStatusConfig.name}". To reopen closed issues, move to the "Reopened" status instead. See configuration troubleshooting guide for details.`,
+              helpUrl: '/docs/configuration-troubleshooting#cannot-transition-from-closed-status',
+            });
+          } else {
+            errors.push({
+              field: 'status',
+              message: `Cannot move from "${currentStatusConfig.name}" (closed status) to "${newStatusConfig.name}". Closed issues can only move to other closed statuses. To enable reopening, add a "reopened" status with type "in_progress" to your configuration. See configuration troubleshooting guide for details.`,
+              helpUrl: '/docs/configuration-troubleshooting#cannot-transition-from-closed-status',
+            });
+          }
+        }
+      }
+      // If target is also closed, allow the transition (closed → closed)
+      // No error needed
+    }
+
+    // All other transitions are allowed in permissive design:
+    // - open ↔ in_progress (any status, bidirectional)
+    // - open → closed
+    // - in_progress ↔ in_progress (any status, bidirectional)
+    // - in_progress → closed
+    // These are all allowed, so no additional validation needed
   }
 
   return {
@@ -145,7 +203,8 @@ export function validateRequiredCustomFields(
     if (fieldValue === undefined || fieldValue === null || fieldValue === '') {
       errors.push({
         field: `customFields.${field.key}`,
-        message: `Required field "${field.name}" must be set before changing status to "${newStatusConfig.name}"`,
+        message: `Required field "${field.name}" must be set before changing status to "${newStatusConfig.name}". You can set this field in the issue details, or modify your configuration to make this field optional. See the [configuration troubleshooting guide](/docs/configuration-troubleshooting#required-field-x-must-be-set-before-changing-status) for details.`,
+        helpUrl: '/docs/configuration-troubleshooting#required-field-x-must-be-set-before-changing-status',
       });
     }
 
