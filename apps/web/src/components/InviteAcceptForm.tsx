@@ -72,7 +72,7 @@ export function InviteAcceptForm({
     formState: { errors },
     setError: setFormError,
   } = useForm<InviteAcceptFormData>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema as any),
     defaultValues: {
       username: '',
       password: '',

@@ -33,7 +33,7 @@ export function UserProfileForm({ user, onSuccess }: UserProfileFormProps) {
     formState: { errors },
     reset,
   } = useForm<ProfileFormData>({
-    resolver: zodResolver(profileFormSchema),
+    resolver: zodResolver(profileFormSchema as any),
     defaultValues: {
       name: user.name || '',
       username: user.username,

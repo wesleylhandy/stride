@@ -16,7 +16,8 @@
     "react-dom": "19.2.3",
     "@next/mdx": "^16.0.10",
     "@mdx-js/loader": "^3.0.1",
-    "@mdx-js/react": "^3.0.1"
+    "@mdx-js/react": "^3.0.1",
+    "highlight.js": "^11.9.0"
   },
   "devDependencies": {
     "@types/node": "^24",

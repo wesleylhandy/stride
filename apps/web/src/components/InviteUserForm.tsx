@@ -42,7 +42,7 @@ export function InviteUserForm({
     control,
     reset,
   } = useForm<InviteUserFormData>({
-    resolver: zodResolver(inviteUserSchema),
+    resolver: zodResolver(inviteUserSchema as any),
     defaultValues: {
       email: '',
       role: 'Member',

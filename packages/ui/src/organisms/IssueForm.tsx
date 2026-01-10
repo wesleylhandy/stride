@@ -277,7 +277,7 @@ export function IssueForm({
     watch,
     setValue,
   } = useForm<CreateIssueInput>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema as any),
     defaultValues: {
       projectId,
       ...initialValues,

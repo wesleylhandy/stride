@@ -63,7 +63,7 @@ export function CreateUserForm({
     control,
     setError,
   } = useForm<CreateUserFormData>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema as any),
     mode: 'onBlur',
     defaultValues: {
       email: '',
