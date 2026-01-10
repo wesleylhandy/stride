@@ -1,5 +1,6 @@
 import { withSentryConfig } from '@sentry/nextjs';
 import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -24,6 +25,12 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "2mb",
     },
+  },
+  // Explicitly set Turbopack root to silence workspace root warning
+  // The monorepo root is two directories up from apps/web
+  // Using path.resolve for reliable absolute path resolution
+  turbopack: {
+    root: path.resolve(__dirname, "../../"),
   },
   // Bundle size optimization
   compiler: {

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@stride/ui";
-import { PageContainer } from "@/components/templates/PageContainer";
+import { PageContainer } from "@stride/ui";
 import {
   ProjectSettingsContent,
   type SettingsTab,

@@ -9,11 +9,12 @@ import { join } from 'path';
  * are valid and can be resolved.
  */
 describe('Documentation Links', () => {
-  const docsDir = join(process.cwd(), 'content', 'docs');
+  // Read from centralized source of truth: docs/configuration/ at repo root
+  const docsDir = join(process.cwd(), '..', '..', 'docs', 'configuration');
 
   describe('Configuration Troubleshooting Links', () => {
-    it('should have valid anchor links in configuration-troubleshooting.md', async () => {
-      const filePath = join(docsDir, 'configuration-troubleshooting.md');
+    it('should have valid anchor links in troubleshooting.md', async () => {
+      const filePath = join(docsDir, 'troubleshooting.md');
       const content = await readFile(filePath, 'utf-8');
 
       // Check for anchor links (should start with #)
@@ -46,7 +47,7 @@ describe('Documentation Links', () => {
     });
 
     it('should have valid cross-reference links to configuration reference', async () => {
-      const filePath = join(docsDir, 'configuration-troubleshooting.md');
+      const filePath = join(docsDir, 'troubleshooting.md');
       const content = await readFile(filePath, 'utf-8');
 
       // Check for links to configuration reference
@@ -61,7 +62,7 @@ describe('Documentation Links', () => {
     });
 
     it('should have valid links to board status configuration guide', async () => {
-      const filePath = join(docsDir, 'configuration-troubleshooting.md');
+      const filePath = join(docsDir, 'troubleshooting.md');
       const content = await readFile(filePath, 'utf-8');
 
       // Check for references to board status configuration
@@ -76,7 +77,7 @@ describe('Documentation Links', () => {
     });
 
     it('should have valid error-specific anchor links', async () => {
-      const filePath = join(docsDir, 'configuration-troubleshooting.md');
+      const filePath = join(docsDir, 'troubleshooting.md');
       const content = await readFile(filePath, 'utf-8');
 
       // Common error anchors that should exist
@@ -105,8 +106,8 @@ describe('Documentation Links', () => {
   });
 
   describe('Configuration Reference Links', () => {
-    it('should have valid links in configuration-reference.md', async () => {
-      const filePath = join(docsDir, 'configuration-reference.md');
+    it('should have valid links in reference.md', async () => {
+      const filePath = join(docsDir, 'reference.md');
       
       try {
         const content = await readFile(filePath, 'utf-8');
@@ -141,8 +142,8 @@ describe('Documentation Links', () => {
   });
 
   describe('Configuration Examples Links', () => {
-    it('should have valid links in configuration-examples.md', async () => {
-      const filePath = join(docsDir, 'configuration-examples.md');
+    it('should have valid links in examples.md', async () => {
+      const filePath = join(docsDir, 'examples.md');
       
       try {
         const content = await readFile(filePath, 'utf-8');
@@ -169,9 +170,9 @@ describe('Documentation Links', () => {
   describe('Cross-Reference Links', () => {
     it('should have consistent link format across documentation', async () => {
       const files = [
-        'configuration-troubleshooting.md',
-        'configuration-reference.md',
-        'configuration-examples.md',
+        'troubleshooting.md',
+        'reference.md',
+        'examples.md',
       ];
 
       for (const filename of files) {
@@ -221,7 +222,7 @@ describe('Documentation Links', () => {
     });
 
     it('should have corresponding sections in troubleshooting guide', async () => {
-      const filePath = join(docsDir, 'configuration-troubleshooting.md');
+      const filePath = join(docsDir, 'troubleshooting.md');
       const content = await readFile(filePath, 'utf-8');
       const contentLower = content.toLowerCase();
 
@@ -243,9 +244,9 @@ describe('Documentation Links', () => {
   describe('Documentation File Structure', () => {
     it('should have all required documentation files', async () => {
       const requiredFiles = [
-        'configuration-troubleshooting.md',
-        'configuration-reference.md',
-        'configuration-examples.md',
+        'troubleshooting.md',
+        'reference.md',
+        'examples.md',
       ];
 
       for (const filename of requiredFiles) {
@@ -262,7 +263,7 @@ describe('Documentation Links', () => {
     });
 
     it('should have proper markdown structure in documentation files', async () => {
-      const filePath = join(docsDir, 'configuration-troubleshooting.md');
+      const filePath = join(docsDir, 'troubleshooting.md');
       const content = await readFile(filePath, 'utf-8');
 
       // Should have at least one heading

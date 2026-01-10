@@ -11,8 +11,9 @@ import { Breadcrumbs } from '@stride/ui';
  * Structure: Documentation > [Section] > [Subsection]
  * 
  * Examples:
- * - /docs/configuration → Documentation > Configuration
- * - /docs/install → Documentation > Installation
+ * - /docs → Documentation (not clickable, terminal)
+ * - /docs/configuration → Documentation (clickable) > Configuration (not clickable)
+ * - /docs/install → Documentation (clickable) > Installation (not clickable)
  */
 export function DocsBreadcrumbs() {
   const pathname = usePathname();

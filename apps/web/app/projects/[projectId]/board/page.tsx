@@ -7,7 +7,7 @@ import { canUpdateIssue } from '@/lib/auth/permissions';
 import { requireAuth } from '@/middleware/auth';
 import { headers } from 'next/headers';
 import { KanbanBoardClient } from '@/components/KanbanBoardClient';
-import { PageContainer } from '@/components/templates/PageContainer';
+import { PageContainer } from '@stride/ui';
 
 interface PageParams {
   params: Promise<{

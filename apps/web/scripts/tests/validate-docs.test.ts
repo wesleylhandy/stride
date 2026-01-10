@@ -51,11 +51,12 @@ function extractYamlBlocks(markdown: string): string[] {
 }
 
 describe('Documentation Example Validation', () => {
-  const docsDir = join(process.cwd(), 'content', 'docs');
+  // Read from centralized source of truth: docs/configuration/ at repo root
+  const docsDir = join(process.cwd(), '..', '..', 'docs', 'configuration');
 
   describe('Configuration Examples File', () => {
-    it('should validate all YAML examples in configuration-examples.md', async () => {
-      const examplesPath = join(docsDir, 'configuration-examples.md');
+    it('should validate all YAML examples in examples.md', async () => {
+      const examplesPath = join(docsDir, 'examples.md');
       const content = await readFile(examplesPath, 'utf-8');
       const yamlBlocks = extractYamlBlocks(content);
 
@@ -68,7 +69,7 @@ describe('Documentation Example Validation', () => {
     });
 
     it('should have valid YAML syntax in all code blocks', async () => {
-      const examplesPath = join(docsDir, 'configuration-examples.md');
+      const examplesPath = join(docsDir, 'examples.md');
       const content = await readFile(examplesPath, 'utf-8');
       const yamlBlocks = extractYamlBlocks(content);
 
@@ -80,8 +81,8 @@ describe('Documentation Example Validation', () => {
   });
 
   describe('Configuration Reference File', () => {
-    it('should validate YAML examples in configuration-reference.md', async () => {
-      const referencePath = join(docsDir, 'configuration-reference.md');
+    it('should validate YAML examples in reference.md', async () => {
+      const referencePath = join(docsDir, 'reference.md');
       const content = await readFile(referencePath, 'utf-8');
       const yamlBlocks = extractYamlBlocks(content);
 
@@ -96,8 +97,8 @@ describe('Documentation Example Validation', () => {
   });
 
   describe('Configuration Troubleshooting File', () => {
-    it('should validate YAML examples in configuration-troubleshooting.md', async () => {
-      const troubleshootingPath = join(docsDir, 'configuration-troubleshooting.md');
+    it('should validate YAML examples in troubleshooting.md', async () => {
+      const troubleshootingPath = join(docsDir, 'troubleshooting.md');
       const content = await readFile(troubleshootingPath, 'utf-8');
       const yamlBlocks = extractYamlBlocks(content);
 
@@ -219,20 +220,20 @@ project_key: TEST
   });
 
   describe('Documentation File Existence', () => {
-    it('should have configuration-examples.md file', async () => {
-      const examplesPath = join(docsDir, 'configuration-examples.md');
+    it('should have examples.md file', async () => {
+      const examplesPath = join(docsDir, 'examples.md');
       const content = await readFile(examplesPath, 'utf-8');
       expect(content.length).toBeGreaterThan(0);
     });
 
-    it('should have configuration-reference.md file', async () => {
-      const referencePath = join(docsDir, 'configuration-reference.md');
+    it('should have reference.md file', async () => {
+      const referencePath = join(docsDir, 'reference.md');
       const content = await readFile(referencePath, 'utf-8');
       expect(content.length).toBeGreaterThan(0);
     });
 
-    it('should have configuration-troubleshooting.md file', async () => {
-      const troubleshootingPath = join(docsDir, 'configuration-troubleshooting.md');
+    it('should have troubleshooting.md file', async () => {
+      const troubleshootingPath = join(docsDir, 'troubleshooting.md');
       const content = await readFile(troubleshootingPath, 'utf-8');
       expect(content.length).toBeGreaterThan(0);
     });

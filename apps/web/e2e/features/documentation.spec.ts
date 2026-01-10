@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+import { mockAuthRoute, mockProjectRoute, mockProjectsListRoute } from '../utils/api-helpers';
+import { testProjects } from '../fixtures/projects';
 
 /**
  * E2E Tests for Documentation Access
@@ -12,18 +14,12 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Documentation Access', () => {
   test.beforeEach(async ({ page }) => {
-    // Mock authentication
-    await page.route('/api/auth/me', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 'user-123',
-          email: 'test@example.com',
-          username: 'testuser',
-          role: 'Admin',
-        }),
-      });
+    // Mock authentication using shared utility
+    await mockAuthRoute(page, {
+      id: 'user-123',
+      email: 'test@example.com',
+      username: 'testuser',
+      role: 'Admin',
     });
   });
 
@@ -107,38 +103,14 @@ test.describe('Documentation Access', () => {
   });
 
   test('documentation link works from error toast', async ({ page }) => {
-    // Mock projects
-    await page.route('/api/projects', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          total: 1,
-          items: [{ id: 'project-123', key: 'TEST', name: 'Test Project' }],
-        }),
-      });
-    });
+    // Mock projects using shared utilities
+    const project = testProjects.withOnboarding();
+    project.id = 'project-123';
+    project.key = 'TEST';
+    project.name = 'Test Project';
 
-    await page.route('/api/projects/project-123', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 'project-123',
-          key: 'TEST',
-          name: 'Test Project',
-          config: {
-            workflow: {
-              default_status: 'todo',
-              statuses: [
-                { key: 'todo', name: 'To Do', type: 'open' },
-                { key: 'done', name: 'Done', type: 'closed' },
-              ],
-            },
-          },
-        }),
-      });
-    });
+    await mockProjectsListRoute(page, [project]);
+    await mockProjectRoute(page, project);
 
     // Mock status update failure with help URL
     await page.route('/api/projects/project-123/issues*', async (route) => {
@@ -206,35 +178,14 @@ test.describe('Documentation Access', () => {
   });
 
   test('documentation is accessible from help tooltips', async ({ page }) => {
-    // Navigate to project settings configuration page
-    await page.route('/api/projects', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          total: 1,
-          items: [{ id: 'project-123', key: 'TEST', name: 'Test Project' }],
-        }),
-      });
-    });
+    // Mock projects using shared utilities
+    const project = testProjects.withOnboarding();
+    project.id = 'project-123';
+    project.key = 'TEST';
+    project.name = 'Test Project';
 
-    await page.route('/api/projects/project-123', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 'project-123',
-          key: 'TEST',
-          name: 'Test Project',
-          config: {
-            workflow: {
-              default_status: 'todo',
-              statuses: [{ key: 'todo', name: 'To Do', type: 'open' }],
-            },
-          },
-        }),
-      });
-    });
+    await mockProjectsListRoute(page, [project]);
+    await mockProjectRoute(page, project);
 
     await page.route('/api/projects/project-123/config', async (route) => {
       if (route.request().method() === 'GET') {

@@ -1,4 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { mockLoginRoute, mockProjectsListRoute } from '../utils/api-helpers';
+import { fillForm, submitForm } from '../utils/page-helpers';
+import { testProjects } from '../fixtures/projects';
 
 /**
  * E2E Tests for Login Page
@@ -16,37 +19,16 @@ test.describe('Login Flow', () => {
   });
 
   test('user with completed onboarding logs in and goes to dashboard', async ({ page }) => {
-    // Mock: User has projects (onboarding complete)
-    // In a real E2E test, you would:
-    // 1. Set up test database with a user and projects
-    // 2. Use actual authentication flow
+    // Mock API responses using shared utilities
+    await mockLoginRoute(page, { success: true });
+    await mockProjectsListRoute(page, [testProjects.withOnboarding()], { pageSize: 1 });
     
-    // For now, we'll test the flow assuming the backend is set up correctly
-    // In a real scenario, you'd seed the database first
-    
-    // Fill login form
-    await page.fill('input[name="email"]', 'test@example.com');
-    await page.fill('input[name="password"]', 'password123');
-    
-    // Mock API responses
-    await page.route('/api/auth/login', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ success: true }),
-      });
+    // Fill and submit login form using shared utilities
+    await fillForm(page, {
+      email: 'test@example.com',
+      password: 'password123',
     });
-    
-    await page.route('/api/projects?pageSize=1', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ total: 1, items: [{ id: '1', key: 'APP', name: 'Test Project' }] }),
-      });
-    });
-    
-    // Submit form
-    await page.click('button[type="submit"]');
+    await submitForm(page);
     
     // Should redirect to dashboard (not onboarding)
     await page.waitForURL('/dashboard', { timeout: 5000 });
@@ -57,29 +39,16 @@ test.describe('Login Flow', () => {
   });
 
   test('user without projects logs in and goes to onboarding', async ({ page }) => {
-    // Fill login form
-    await page.fill('input[name="email"]', 'test@example.com');
-    await page.fill('input[name="password"]', 'password123');
+    // Mock API responses using shared utilities
+    await mockLoginRoute(page, { success: true });
+    await mockProjectsListRoute(page, [], { pageSize: 1 });
     
-    // Mock API responses
-    await page.route('/api/auth/login', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ success: true }),
-      });
+    // Fill and submit login form using shared utilities
+    await fillForm(page, {
+      email: 'test@example.com',
+      password: 'password123',
     });
-    
-    await page.route('/api/projects?pageSize=1', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ total: 0, items: [] }),
-      });
-    });
-    
-    // Submit form
-    await page.click('button[type="submit"]');
+    await submitForm(page);
     
     // Should redirect to onboarding (not dashboard)
     await page.waitForURL('/onboarding', { timeout: 5000 });

@@ -158,7 +158,7 @@ The Kanban board is the primary interface for visualizing and managing work.
 
 Your Kanban board columns are defined by your project's workflow configuration. See [Configuration](#configuration) for details on customizing workflows.
 
-**Note**: If you see "invalid configuration" errors when moving issues, check the [Board Status Configuration Guide](../../board-status-configuration-guide.md).
+**Note**: If you see "invalid configuration" errors when moving issues, check the [Board Status Configuration Guide](/docs/configuration?section=board-status).
 
 ## Sprints and Cycles
 
@@ -270,7 +270,7 @@ automation_rules:
       value: ${issue.reporterId}
 ```
 
-For detailed configuration documentation, see the [Board Status Configuration Guide](../../board-status-configuration-guide.md).
+For detailed configuration documentation, see the [Board Status Configuration Guide](/docs/configuration?section=board-status).
 
 ## Keyboard Shortcuts
 
@@ -346,7 +346,7 @@ Your role determines what actions you can perform. If you need additional permis
 
 **Can't move issues on Kanban board**:
 - Check your workflow configuration matches your issue statuses
-- See [Board Status Configuration Guide](../../board-status-configuration-guide.md)
+- See [Board Status Configuration Guide](/docs/configuration?section=board-status)
 
 **Can't create issues**:
 - Verify you have Member or Admin role

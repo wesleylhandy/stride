@@ -13,8 +13,15 @@ node_modules/
 # testing
 coverage/
 *.log
-*.test
-*.spec
+
+# Playwright test outputs
+**/test-results/
+**/playwright-report/
+**/playwright/.cache/
+
+# Vitest/Jest test outputs
+.vitest/
+.jest/
 
 # next.js
 .next/

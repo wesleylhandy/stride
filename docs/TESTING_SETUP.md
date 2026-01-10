@@ -111,17 +111,42 @@ pnpm --filter @stride/web test
 ### Playwright Configuration
 
 - **Config file**: `apps/web/playwright.config.ts`
-- **Test files**: `**/*.e2e.spec.ts`
+- **Test directory**: `apps/web/e2e/`
+- **Test files**: `**/*.spec.ts` (all E2E tests use `.spec.ts` extension)
 
 ## Test File Locations
+
+### E2E Tests (Playwright)
+
+All E2E tests are organized in `apps/web/e2e/`:
+
+```
+apps/web/e2e/
+├── auth/
+│   ├── login.spec.ts                  # Login flow tests
+│   └── onboarding.spec.ts             # Onboarding flow tests
+├── features/
+│   ├── documentation.spec.ts          # Documentation tests
+│   ├── toast-notifications.spec.ts    # Toast notification tests
+│   ├── repository-connection-manual.spec.ts   # Manual repository connection tests
+│   └── repository-connection-oauth.spec.ts    # OAuth repository connection tests
+├── fixtures/
+│   ├── auth.ts                        # Authentication fixtures
+│   └── projects.ts                    # Project test data factories
+└── utils/
+    ├── api-helpers.ts                 # API route mocking utilities
+    ├── page-helpers.ts                # Page interaction helpers
+    └── test-helpers.ts                # General test utilities
+```
+
+### Unit and Integration Tests
 
 ```
 apps/web/
 ├── app/
 │   ├── login/
 │   │   ├── page.test.tsx              # Unit tests
-│   │   ├── page.integration.test.tsx  # Integration tests
-│   │   └── login.e2e.spec.ts          # E2E tests
+│   │   └── page.integration.test.tsx  # Integration tests
 │   └── ...
 └── src/
     └── lib/
@@ -160,19 +185,146 @@ describe('Login Integration', () => {
 });
 ```
 
-### E2E Test Example
+### E2E Test Examples
+
+#### Basic E2E Test (Using Shared Utilities)
 
 ```typescript
 import { test, expect } from '@playwright/test';
+import { mockAuthRoute, mockLoginRoute, mockProjectsListRoute } from '../utils/api-helpers';
+import { fillForm, submitForm } from '../utils/page-helpers';
+import { testProjects } from '../fixtures/projects';
 
 test('user can login', async ({ page }) => {
+  // Mock authentication endpoints using shared utilities
+  await mockLoginRoute(page, { success: true });
+  await mockProjectsListRoute(page, [testProjects.withOnboarding()], { pageSize: 1 });
+  
+  // Navigate to login page
   await page.goto('/login');
-  await page.fill('input[name="email"]', 'test@example.com');
-  await page.fill('input[name="password"]', 'password123');
-  await page.click('button[type="submit"]');
+  
+  // Fill and submit form using shared helpers
+  await fillForm(page, {
+    email: 'test@example.com',
+    password: 'password123',
+  });
+  await submitForm(page);
+  
+  // Wait for navigation
   await page.waitForURL('/dashboard');
+  expect(page.url()).toContain('/dashboard');
 });
 ```
+
+#### Using Authentication Fixtures
+
+```typescript
+import { test, expect } from '../fixtures/auth';
+
+test('authenticated user can access dashboard', async ({ authenticatedPage }) => {
+  // authenticatedPage is pre-authenticated and ready to use
+  await authenticatedPage.goto('/dashboard');
+  await expect(authenticatedPage.locator('text=Dashboard')).toBeVisible();
+});
+```
+
+#### Using Project Fixtures
+
+```typescript
+import { test, expect } from '@playwright/test';
+import { mockProjectRoute, mockProjectsListRoute } from '../utils/api-helpers';
+import { testProjects } from '../fixtures/projects';
+
+test('user can view project board', async ({ page }) => {
+  // Create test project data using factory
+  const project = testProjects.withOnboarding();
+  project.id = 'project-123';
+  
+  // Mock project endpoints using shared utilities
+  await mockProjectRoute(page, project);
+  await mockProjectsListRoute(page, [project]);
+  
+  // Navigate to project board
+  await page.goto('/projects/project-123/board');
+  await expect(page.locator('text=Kanban Board')).toBeVisible();
+});
+```
+
+## E2E Test Fixtures and Utilities
+
+The E2E test suite includes shared fixtures and utilities to reduce code duplication and improve maintainability.
+
+### Available Fixtures
+
+#### Authentication Fixtures (`e2e/fixtures/auth.ts`)
+
+- **`authenticatedPage`**: Pre-authenticated page fixture ready for testing
+- **`mockAuth(user?)`**: Mock `/api/auth/me` endpoint
+- **`mockLogin(options?)`**: Mock `/api/auth/login` endpoint
+- **`loginAsUser(email, password)`**: Programmatic login helper
+
+Example:
+```typescript
+import { test, expect } from '../fixtures/auth';
+
+test('uses authenticated page', async ({ authenticatedPage }) => {
+  await authenticatedPage.goto('/dashboard');
+  // Page is already authenticated
+});
+```
+
+#### Project Fixtures (`e2e/fixtures/projects.ts`)
+
+- **`testProjects.withOnboarding()`**: Create project with complete onboarding
+- **`testProjects.withoutOnboarding()`**: Create empty project (new user)
+- **`mockProjectRoute(page, project)`**: Mock single project endpoint
+- **`mockProjectsListRoute(page, projects, options?)`**: Mock projects list endpoint
+
+Example:
+```typescript
+import { testProjects } from '../fixtures/projects';
+import { mockProjectRoute } from '../utils/api-helpers';
+
+const project = testProjects.withOnboarding();
+project.id = 'project-123';
+await mockProjectRoute(page, project);
+```
+
+### Available Utilities
+
+#### API Helpers (`e2e/utils/api-helpers.ts`)
+
+- **`mockAuthRoute(page, user?)`**: Mock authentication endpoint
+- **`mockLoginRoute(page, options?)`**: Mock login endpoint
+- **`mockProjectRoute(page, project)`**: Mock single project endpoint
+- **`mockProjectsListRoute(page, projects, options?)`**: Mock projects list with pagination
+- **`mockJsonResponse(page, url, data, status?)`**: Generic JSON response mock
+
+#### Page Helpers (`e2e/utils/page-helpers.ts`)
+
+- **`fillForm(page, fields)`**: Fill form fields by name
+- **`submitForm(page, selector?)`**: Submit form and wait for navigation
+- **`clickAndWait(page, selector, waitFor?)`**: Click element and wait for navigation
+- **`waitForNavigation(page, url?, timeout?)`**: Wait for page navigation
+
+Example:
+```typescript
+import { fillForm, submitForm } from '../utils/page-helpers';
+
+await fillForm(page, {
+  email: 'user@example.com',
+  password: 'password123',
+});
+await submitForm(page);
+```
+
+#### Test Helpers (`e2e/utils/test-helpers.ts`)
+
+- **`retry(fn, options?)`**: Retry function with exponential backoff
+- **`generateEmail(prefix?)`**: Generate unique email addresses
+- **`generateProjectKey(prefix?)`**: Generate unique project keys
+
+For more examples, see the test files in `apps/web/e2e/`.
 
 ## Common Issues
 

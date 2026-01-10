@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+import { mockAuthRoute, mockProjectRoute, mockProjectsListRoute } from '../utils/api-helpers';
+import { testProjects } from '../fixtures/projects';
 
 /**
  * E2E Tests for Toast Notifications
@@ -13,61 +15,24 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Toast Notifications', () => {
   test.beforeEach(async ({ page }) => {
-    // Mock authentication
-    await page.route('/api/auth/me', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 'user-123',
-          email: 'test@example.com',
-          username: 'testuser',
-          role: 'Admin',
-        }),
-      });
+    // Mock authentication using shared utility
+    await mockAuthRoute(page, {
+      id: 'user-123',
+      email: 'test@example.com',
+      username: 'testuser',
+      role: 'Admin',
     });
   });
 
   test('success toast appears after successful issue creation', async ({ page }) => {
-    // Mock projects
-    await page.route('/api/projects', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          total: 1,
-          items: [
-            {
-              id: 'project-123',
-              key: 'TEST',
-              name: 'Test Project',
-            },
-          ],
-        }),
-      });
-    });
+    // Mock projects using shared utilities
+    const project = testProjects.withOnboarding();
+    project.id = 'project-123';
+    project.key = 'TEST';
+    project.name = 'Test Project';
 
-    // Mock project fetch
-    await page.route('/api/projects/project-123', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 'project-123',
-          key: 'TEST',
-          name: 'Test Project',
-          config: {
-            workflow: {
-              default_status: 'todo',
-              statuses: [
-                { key: 'todo', name: 'To Do', type: 'open' },
-                { key: 'done', name: 'Done', type: 'closed' },
-              ],
-            },
-          },
-        }),
-      });
-    });
+    await mockProjectsListRoute(page, [project]);
+    await mockProjectRoute(page, project);
 
     // Mock users fetch
     await page.route('/api/users', async (route) => {
@@ -141,39 +106,14 @@ test.describe('Toast Notifications', () => {
   });
 
   test('error toast appears after failed issue status update', async ({ page }) => {
-    // Mock projects
-    await page.route('/api/projects', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          total: 1,
-          items: [{ id: 'project-123', key: 'TEST', name: 'Test Project' }],
-        }),
-      });
-    });
+    // Mock projects using shared utilities
+    const project = testProjects.withOnboarding();
+    project.id = 'project-123';
+    project.key = 'TEST';
+    project.name = 'Test Project';
 
-    // Mock project fetch
-    await page.route('/api/projects/project-123', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 'project-123',
-          key: 'TEST',
-          name: 'Test Project',
-          config: {
-            workflow: {
-              default_status: 'todo',
-              statuses: [
-                { key: 'todo', name: 'To Do', type: 'open' },
-                { key: 'done', name: 'Done', type: 'closed' },
-              ],
-            },
-          },
-        }),
-      });
-    });
+    await mockProjectsListRoute(page, [project]);
+    await mockProjectRoute(page, project);
 
     // Mock issues with initial issue
     await page.route('/api/projects/project-123/issues*', async (route) => {
@@ -240,38 +180,14 @@ test.describe('Toast Notifications', () => {
   });
 
   test('error toast shows action button for help', async ({ page }) => {
-    // Mock projects and setup similar to above
-    await page.route('/api/projects', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          total: 1,
-          items: [{ id: 'project-123', key: 'TEST', name: 'Test Project' }],
-        }),
-      });
-    });
+    // Mock projects using shared utilities
+    const project = testProjects.withOnboarding();
+    project.id = 'project-123';
+    project.key = 'TEST';
+    project.name = 'Test Project';
 
-    await page.route('/api/projects/project-123', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 'project-123',
-          key: 'TEST',
-          name: 'Test Project',
-          config: {
-            workflow: {
-              default_status: 'todo',
-              statuses: [
-                { key: 'todo', name: 'To Do', type: 'open' },
-                { key: 'done', name: 'Done', type: 'closed' },
-              ],
-            },
-          },
-        }),
-      });
-    });
+    await mockProjectsListRoute(page, [project]);
+    await mockProjectRoute(page, project);
 
     await page.route('/api/projects/project-123/issues*', async (route) => {
       if (route.request().url().includes('/status')) {
@@ -339,35 +255,14 @@ test.describe('Toast Notifications', () => {
   });
 
   test('toast can be dismissed', async ({ page }) => {
-    // Mock projects
-    await page.route('/api/projects', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          total: 1,
-          items: [{ id: 'project-123', key: 'TEST', name: 'Test Project' }],
-        }),
-      });
-    });
+    // Mock projects using shared utilities
+    const project = testProjects.withOnboarding();
+    project.id = 'project-123';
+    project.key = 'TEST';
+    project.name = 'Test Project';
 
-    await page.route('/api/projects/project-123', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 'project-123',
-          key: 'TEST',
-          name: 'Test Project',
-          config: {
-            workflow: {
-              default_status: 'todo',
-              statuses: [{ key: 'todo', name: 'To Do', type: 'open' }],
-            },
-          },
-        }),
-      });
-    });
+    await mockProjectsListRoute(page, [project]);
+    await mockProjectRoute(page, project);
 
     await page.route('/api/projects/project-123/issues*', async (route) => {
       if (route.request().method() === 'POST') {
@@ -442,37 +337,14 @@ test.describe('Toast Notifications', () => {
   });
 
   test('toast disappears after default duration', async ({ page }) => {
-    // This test would verify auto-dismiss functionality
-    // It requires waiting for the duration and checking toast disappears
-    // For now, we verify toast appears
-    await page.route('/api/projects', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          total: 1,
-          items: [{ id: 'project-123', key: 'TEST', name: 'Test Project' }],
-        }),
-      });
-    });
+    // Mock projects using shared utilities
+    const project = testProjects.withOnboarding();
+    project.id = 'project-123';
+    project.key = 'TEST';
+    project.name = 'Test Project';
 
-    await page.route('/api/projects/project-123', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 'project-123',
-          key: 'TEST',
-          name: 'Test Project',
-          config: {
-            workflow: {
-              default_status: 'todo',
-              statuses: [{ key: 'todo', name: 'To Do', type: 'open' }],
-            },
-          },
-        }),
-      });
-    });
+    await mockProjectsListRoute(page, [project]);
+    await mockProjectRoute(page, project);
 
     await page.route('/api/projects/project-123/issues*', async (route) => {
       if (route.request().method() === 'POST') {

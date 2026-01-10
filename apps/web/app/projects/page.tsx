@@ -5,7 +5,7 @@ import { headers } from 'next/headers';
 import { ProjectCard } from '@/components/ProjectCard';
 import { ProjectsEmptyState } from '@/components/ProjectsEmptyState';
 import { PaginationControls } from '@/components/PaginationControls';
-import { PageContainer } from '@/components/templates/PageContainer';
+import { PageContainer } from '@stride/ui';
 
 interface ProjectsPageProps {
   searchParams: Promise<{

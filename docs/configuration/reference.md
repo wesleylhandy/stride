@@ -481,4 +481,3 @@ user_assignment:
 4. **Version control your config**: Store configuration files in Git to track changes over time
 5. **Test transitions**: Verify that your workflow allows the transitions your team needs
 6. **Use automation rules sparingly**: Start simple and add automation as needed
-

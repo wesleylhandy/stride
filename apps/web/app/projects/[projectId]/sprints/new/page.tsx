@@ -6,7 +6,7 @@ import { requireAuth } from '@/middleware/auth';
 import { headers } from 'next/headers';
 import { SprintPlanningClient } from '@/components/SprintPlanningClient';
 import { BurndownChartClient } from '@/components/BurndownChartClient';
-import { PageContainer } from '@/components/templates/PageContainer';
+import { PageContainer } from '@stride/ui';
 
 interface PageParams {
   params: Promise<{

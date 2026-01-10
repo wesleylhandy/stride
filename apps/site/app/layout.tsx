@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { ThemeToggle } from "./components/ThemeToggle";
 import "./globals.css";
+import "@stride/ui/styles";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -55,7 +56,31 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className="scroll-smooth">
-      <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased bg-background dark:bg-background-dark`}>
+        {/* Blocking script to initialize dark mode before React hydration */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const savedTheme = localStorage.getItem('theme');
+                  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  const shouldBeDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+                  const html = document.documentElement;
+                  if (shouldBeDark) {
+                    html.classList.add('dark');
+                    html.setAttribute('data-theme', 'dark');
+                  } else {
+                    html.classList.remove('dark');
+                    html.setAttribute('data-theme', 'light');
+                  }
+                } catch (e) {
+                  document.documentElement.setAttribute('data-theme', 'light');
+                }
+              })();
+            `,
+          }}
+        />
         <div className="fixed top-4 right-4 z-50">
           <ThemeToggle />
         </div>

@@ -5,6 +5,12 @@ import type { BreadcrumbItem } from '@stride/ui';
  * 
  * Generates breadcrumb items for documentation pages.
  * Structure: Documentation > [Section] > [Subsection]
+ * 
+ * Rules:
+ * - "Documentation" is clickable if there are child segments (parent page)
+ * - "Documentation" is not clickable if on /docs (terminal)
+ * - Child segments are clickable if there are more segments after them
+ * - Last segment is never clickable (current page)
  */
 
 /**
@@ -25,29 +31,38 @@ const DOCS_SEGMENT_LABELS: Record<string, string> = {
 export function generateDocsBreadcrumbs(pathname: string): BreadcrumbItem[] {
   const items: BreadcrumbItem[] = [];
   
-  // Always start with Documentation (not clickable - it's the base)
-  items.push({
-    label: 'Documentation',
-    // No href - not clickable since we're in docs
-  });
-  
   // Parse pathname
   const segments = pathname.split('/').filter(Boolean);
   
   // Find 'docs' segment
   const docsIndex = segments.indexOf('docs');
   if (docsIndex === -1) {
-    // Not a docs route, return just Documentation
+    // Not a docs route, return just Documentation (not clickable)
+    items.push({
+      label: 'Documentation',
+    });
     return items;
   }
   
   // Process segments after 'docs'
   const docsSegments = segments.slice(docsIndex + 1);
   
+  // Documentation is clickable if there are child segments (we're on a child page)
+  // This allows navigation back to /docs from child pages
   if (docsSegments.length === 0) {
-    // Just /docs - return Documentation only
+    // Just /docs - Documentation is terminal (not clickable)
+    items.push({
+      label: 'Documentation',
+      // No href - not clickable (current page)
+    });
     return items;
   }
+  
+  // Has child segments - Documentation is clickable (parent page)
+  items.push({
+    label: 'Documentation',
+    href: '/docs',
+  });
   
   // Add each documentation section
   docsSegments.forEach((segment, index) => {

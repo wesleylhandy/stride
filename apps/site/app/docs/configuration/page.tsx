@@ -1,146 +1,119 @@
+import { readFile } from "fs/promises";
+import { join } from "path";
+import type { Metadata } from "next";
 import Link from "next/link";
-import { CodeBlock } from "../../components/docs/CodeBlock";
+import dynamic from "next/dynamic";
+import { PageContainer } from "@stride/ui";
 
-export default function ConfigurationPage() {
-  return (
-    <>
-      <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl dark:text-foreground-dark">
-        Configuration Guide
-      </h1>
-      <p className="mt-6 text-lg leading-8 text-foreground-secondary dark:text-foreground-dark-secondary">
-        Learn how to configure your Stride projects with YAML configuration
-        files.
-      </p>
-
-      <div className="mt-10 space-y-8">
-        <section>
-          <h2 className="text-2xl font-semibold text-foreground dark:text-foreground-dark">
-            Overview
-          </h2>
+// Dynamically import DocumentationPageContent to code-split heavy markdown rendering dependencies
+const DynamicDocumentationPageContent = dynamic(
+  () =>
+    import("@stride/ui").then((mod) => ({
+      default: mod.DocumentationPageContent,
+    })),
+  {
+    ssr: true, // Keep SSR for SEO since this is documentation content
+    loading: () => (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
           <p className="mt-4 text-foreground-secondary dark:text-foreground-dark-secondary">
-            Stride uses YAML configuration files to define project workflows,
-            custom fields, and automation rules. This configuration-as-code
-            approach allows you to version control your project settings and
-            customize workflows to match your team&apos;s processes.
+            Loading documentation...
           </p>
-        </section>
-
-        <section>
-          <h2 className="text-2xl font-semibold text-foreground dark:text-foreground-dark">
-            Quick Start
-          </h2>
-          <p className="mt-4 text-foreground-secondary dark:text-foreground-dark-secondary">
-            Here&apos;s a minimal configuration example to get you started:
-          </p>
-          <div className="mt-4">
-            <CodeBlock
-              code={`project_key: APP
-project_name: My Application
-
-workflow:
-  default_status: todo
-  statuses:
-    - key: todo
-      name: To Do
-      type: open
-    - key: in_progress
-      name: In Progress
-      type: in_progress
-    - key: done
-      name: Done
-      type: closed
-
-custom_fields: []`}
-              language="yaml"
-            />
-          </div>
-        </section>
-
-        <section>
-          <h2 className="text-2xl font-semibold text-foreground dark:text-foreground-dark">
-            Common Patterns
-          </h2>
-
-          <div className="mt-4 space-y-6">
-            <div>
-              <h3 className="text-xl font-semibold text-foreground dark:text-foreground-dark">
-                Workflow Setup
-              </h3>
-              <p className="mt-2 text-foreground-secondary dark:text-foreground-dark-secondary">
-                Define your workflow statuses and their types. Status types
-                control transition rules:
-              </p>
-              <ul className="mt-2 list-disc space-y-1 pl-6 text-foreground-secondary dark:text-foreground-dark-secondary">
-                <li>
-                  <code className="rounded bg-surface-secondary dark:bg-surface-dark-secondary px-1.5 py-0.5 text-sm font-mono border border-border dark:border-border-dark">
-                    open
-                  </code>{" "}
-                  - Initial status for new issues
-                </li>
-                <li>
-                  <code className="rounded bg-surface-secondary dark:bg-surface-dark-secondary px-1.5 py-0.5 text-sm font-mono border border-border dark:border-border-dark">
-                    in_progress
-                  </code>{" "}
-                  - Active work status
-                </li>
-                <li>
-                  <code className="rounded bg-surface-secondary dark:bg-surface-dark-secondary px-1.5 py-0.5 text-sm font-mono border border-border dark:border-border-dark">
-                    closed
-                  </code>{" "}
-                  - Terminal status (cannot transition back)
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-xl font-semibold text-foreground dark:text-foreground-dark">
-                Custom Fields
-              </h3>
-              <p className="mt-2 text-foreground-secondary dark:text-foreground-dark-secondary">
-                Add custom fields to capture additional information:
-              </p>
-              <div className="mt-2">
-                <CodeBlock
-                  code={`custom_fields:
-  - key: priority
-    name: Priority
-    type: dropdown
-    options: [Low, Medium, High, Critical]
-    required: true
-  - key: estimate
-    name: Story Points
-    type: number
-    required: false`}
-                  language="yaml"
-                />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section>
-          <h2 className="text-2xl font-semibold text-foreground dark:text-foreground-dark">
-            Full Documentation
-          </h2>
-          <p className="mt-4 text-foreground-secondary dark:text-foreground-dark-secondary">
-            For complete configuration reference, including all available
-            options, validation rules, and advanced features, see the{" "}
-            <Link
-              href={
-                process.env.NEXT_PUBLIC_GITHUB_REPOSITORY_URL
-                  ? `${process.env.NEXT_PUBLIC_GITHUB_REPOSITORY_URL}/docs/configuration`
-                  : "https://github.com/your-org/stride/docs/configuration"
-              }
-              className="text-accent hover:text-accent-hover dark:text-accent dark:hover:text-accent-hover underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              full documentation
-            </Link>{" "}
-            in the repository.
-          </p>
-        </section>
+        </div>
       </div>
-    </>
+    ),
+  }
+);
+
+export const metadata: Metadata = {
+  title: "Configuration Documentation - Stride",
+  description: "Complete reference for Stride YAML configuration files",
+};
+
+interface DocPageProps {
+  searchParams: Promise<{ section?: string }>;
+}
+
+/**
+ * Get documentation content from centralized source of truth
+ *
+ * Reads from docs/configuration/ or docs/ at repository root (single source of truth)
+ * Path resolution: from apps/site, go up 2 levels to repo root, then into docs/configuration/ or docs/
+ */
+async function getDocContent(section: string): Promise<string> {
+  // Path from apps/site to repo root
+  const repoRoot = join(process.cwd(), "..", "..");
+  let filePath: string;
+
+  switch (section) {
+    case "reference":
+      filePath = join(repoRoot, "docs", "configuration", "reference.md");
+      break;
+    case "troubleshooting":
+      filePath = join(repoRoot, "docs", "configuration", "troubleshooting.md");
+      break;
+    case "examples":
+      filePath = join(repoRoot, "docs", "configuration", "examples.md");
+      break;
+    case "board-status":
+      filePath = join(repoRoot, "docs", "board-status-configuration-guide.md");
+      break;
+    default:
+      filePath = join(repoRoot, "docs", "configuration", "reference.md");
+  }
+
+  try {
+    const content = await readFile(filePath, "utf-8");
+    return content;
+  } catch (error) {
+    console.error(`Failed to read doc file from ${filePath}:`, error);
+    return `# Documentation Not Found\n\nThe requested documentation section could not be loaded.\n\nPlease check that the documentation file exists at the repository root.`;
+  }
+}
+
+export default async function ConfigurationPage({
+  searchParams,
+}: DocPageProps) {
+  const params = await searchParams;
+  const section = params.section || "reference";
+  const content = await getDocContent(section);
+
+  const sections = [
+    {
+      key: "reference",
+      label: "Reference",
+      href: "/docs/configuration?section=reference",
+    },
+    {
+      key: "troubleshooting",
+      label: "Troubleshooting",
+      href: "/docs/configuration?section=troubleshooting",
+    },
+    {
+      key: "examples",
+      label: "Examples",
+      href: "/docs/configuration?section=examples",
+    },
+    {
+      key: "board-status",
+      label: "Board Status Guide",
+      href: "/docs/configuration?section=board-status",
+    },
+  ];
+
+  return (
+    <PageContainer variant="constrained">
+      <DynamicDocumentationPageContent
+        title="Configuration Documentation"
+        description="Complete reference for Stride YAML configuration files"
+        sections={sections}
+        activeSection={section}
+        content={content}
+        enableMermaid={false}
+        enableLinkPreviews={false}
+        LinkComponent={Link}
+      />
+    </PageContainer>
   );
 }

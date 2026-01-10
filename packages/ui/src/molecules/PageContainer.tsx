@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { cn } from '@stride/ui';
+import { cn } from '../utils/cn';
 
 export type PageContainerVariant = 'full' | 'constrained' | 'custom';
 

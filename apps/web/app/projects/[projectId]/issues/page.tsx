@@ -3,7 +3,7 @@ import { requireAuth } from '@/middleware/auth';
 import { headers } from 'next/headers';
 import { projectRepository, issueRepository, prisma } from '@stride/database';
 import type { ProjectConfig, StatusConfig } from '@stride/types';
-import { PageContainer } from '@/components/templates/PageContainer';
+import { PageContainer } from '@stride/ui';
 import { Badge } from '@stride/ui';
 
 interface PageParams {

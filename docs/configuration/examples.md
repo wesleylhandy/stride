@@ -314,4 +314,3 @@ All examples above:
 - ✅ Use valid custom field types
 
 You can copy any of these examples and customize them for your project needs.
-

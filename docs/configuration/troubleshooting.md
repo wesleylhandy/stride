@@ -2,7 +2,7 @@
 
 Common configuration errors and how to resolve them.
 
-> **Quick Tip**: The default configuration is designed to be permissive and allow all common operations. If you're getting errors when moving issues, check that your configuration includes all statuses that your issues use. See the [Board Status Configuration Guide](/docs/board-status-configuration-guide) for detailed help.
+> **Quick Tip**: The default configuration is designed to be permissive and allow all common operations. If you're getting errors when moving issues, check that your configuration includes all statuses that your issues use. See the [Board Status Configuration Guide](/docs/configuration?section=board-status) for detailed help.
 
 ## Quick Fixes
 
@@ -146,7 +146,7 @@ workflow:
       type: in_progress  # Allows: done → reopened, then reopened → any in_progress status
 ```
 
-**See also**: [Board Status Configuration Guide](/docs/board-status-configuration-guide) for detailed workflow transition rules.
+**See also**: [Board Status Configuration Guide](/docs/configuration?section=board-status) for detailed workflow transition rules.
 
 ### "Required field 'X' must be set before changing status" {#required-field-x-must-be-set-before-changing-status}
 
@@ -270,7 +270,7 @@ custom_fields:
 
 ## Board Status Issues
 
-For comprehensive help with board and status configuration, see the [Board Status Configuration Guide](/docs/board-status-configuration-guide).
+For comprehensive help with board and status configuration, see the [Board Status Configuration Guide](/docs/configuration?section=board-status).
 
 ### "Cannot move issue between status blocks on the board"
 
@@ -288,7 +288,7 @@ For comprehensive help with board and status configuration, see the [Board Statu
 5. **Check status keys** - ensure status keys match exactly (case-sensitive, no extra spaces)
 6. **Review your configuration** - compare your config against the [default configuration](#migrating-from-old-default-configuration) to ensure all common statuses are included
 
-**Solution**: See specific error sections above for targeted fixes, or review the [Board Status Configuration Guide](/docs/board-status-configuration-guide) for comprehensive help.
+**Solution**: See specific error sections above for targeted fixes, or review the [Board Status Configuration Guide](/docs/configuration?section=board-status) for comprehensive help.
 
 ### "Status transition not allowed"
 
@@ -437,10 +437,10 @@ If you have issues with status values that don't match your configuration:
 If you're still experiencing issues:
 
 1. **Check the error message**: Error messages include the field path and specific issue, and often show available statuses
-2. **Review the Board Status Configuration Guide**: See [Board Status Configuration Guide](/docs/board-status-configuration-guide) for comprehensive help with board and status issues
+2. **Review the Board Status Configuration Guide**: See [Board Status Configuration Guide](/docs/configuration?section=board-status) for comprehensive help with board and status issues
 3. **Validate your YAML**: Use an online YAML validator to check syntax
-4. **Review examples**: See the [Configuration Examples](/docs/configuration?section=examples) for working examples
-5. **Check the reference**: See the [Configuration Reference](/docs/configuration?section=reference) for complete schema details
+4. **Review examples**: See the [Configuration Examples](./examples.md) for working examples
+5. **Check the reference**: See the [Configuration Reference](./reference.md) for complete schema details
 
 ### Diagnostic Checklist
 
@@ -451,4 +451,3 @@ Before asking for help, check:
 - [ ] YAML syntax is valid (check indentation, colons, etc.)
 - [ ] Status keys match exactly (case-sensitive)
 - [ ] Configuration is saved and page is refreshed
-

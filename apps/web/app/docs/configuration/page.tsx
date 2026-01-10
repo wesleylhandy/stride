@@ -3,11 +3,11 @@ import { join } from 'path';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { PageContainer } from '@/components/templates/PageContainer';
+import { PageContainer } from '@stride/ui';
 
-// Dynamically import MarkdownRenderer to code-split heavy markdown rendering dependencies
-const MarkdownRenderer = dynamic(
-  () => import('@stride/ui').then((mod) => ({ default: mod.MarkdownRenderer })),
+// Dynamically import DocumentationPageContent to code-split heavy markdown rendering dependencies
+const DynamicDocumentationPageContent = dynamic(
+  () => import('@stride/ui').then((mod) => ({ default: mod.DocumentationPageContent })),
   {
     ssr: true, // Keep SSR for SEO since this is documentation content
     loading: () => (
@@ -32,31 +32,40 @@ interface DocPageProps {
   searchParams: Promise<{ section?: string }>;
 }
 
+/**
+ * Get documentation content from centralized source of truth
+ * 
+ * Reads from docs/configuration/ or docs/ at repository root (single source of truth)
+ * Path resolution: from apps/web, go up 2 levels to repo root, then into docs/configuration/ or docs/
+ */
 async function getDocContent(section: string): Promise<string> {
-  const contentDir = join(process.cwd(), 'content', 'docs');
-  let filename: string;
+  // Path from apps/web to repo root
+  const repoRoot = join(process.cwd(), '..', '..');
+  let filePath: string;
 
   switch (section) {
     case 'reference':
-      filename = 'configuration-reference.md';
+      filePath = join(repoRoot, 'docs', 'configuration', 'reference.md');
       break;
     case 'troubleshooting':
-      filename = 'configuration-troubleshooting.md';
+      filePath = join(repoRoot, 'docs', 'configuration', 'troubleshooting.md');
       break;
     case 'examples':
-      filename = 'configuration-examples.md';
+      filePath = join(repoRoot, 'docs', 'configuration', 'examples.md');
+      break;
+    case 'board-status':
+      filePath = join(repoRoot, 'docs', 'board-status-configuration-guide.md');
       break;
     default:
-      filename = 'configuration-reference.md';
+      filePath = join(repoRoot, 'docs', 'configuration', 'reference.md');
   }
 
   try {
-    const filePath = join(contentDir, filename);
     const content = await readFile(filePath, 'utf-8');
     return content;
   } catch (error) {
-    console.error(`Failed to read doc file ${filename}:`, error);
-    return `# Documentation Not Found\n\nThe requested documentation section could not be loaded.`;
+    console.error(`Failed to read doc file from ${filePath}:`, error);
+    return `# Documentation Not Found\n\nThe requested documentation section could not be loaded.\n\nPlease check that the documentation file exists at the repository root.`;
   }
 }
 
@@ -69,43 +78,21 @@ export default async function ConfigurationDocsPage({ searchParams }: DocPagePro
     { key: 'reference', label: 'Reference', href: '/docs/configuration?section=reference' },
     { key: 'troubleshooting', label: 'Troubleshooting', href: '/docs/configuration?section=troubleshooting' },
     { key: 'examples', label: 'Examples', href: '/docs/configuration?section=examples' },
+    { key: 'board-status', label: 'Board Status Guide', href: '/docs/configuration?section=board-status' },
   ];
 
   return (
     <PageContainer variant="constrained">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold tracking-tight text-foreground dark:text-foreground-dark">
-          Configuration Documentation
-        </h1>
-        <p className="mt-4 text-lg text-foreground-secondary dark:text-foreground-dark-secondary">
-          Complete reference for Stride YAML configuration files
-        </p>
-      </div>
-
-      {/* Navigation Tabs */}
-      <div className="mb-8 border-b border-border dark:border-border-dark">
-        <nav className="-mb-px flex space-x-8">
-          {sections.map((sec) => (
-            <Link
-              key={sec.key}
-              href={sec.href}
-              className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors ${
-                section === sec.key
-                  ? 'border-primary text-primary dark:border-primary-dark dark:text-primary-dark'
-                  : 'border-transparent text-foreground-secondary hover:border-border hover:text-foreground dark:text-foreground-dark-secondary dark:hover:border-border-dark dark:hover:text-foreground-dark'
-              }`}
-            >
-              {sec.label}
-            </Link>
-          ))}
-        </nav>
-      </div>
-
-      {/* Content */}
-      <div className="prose prose-lg dark:prose-invert max-w-none">
-        <MarkdownRenderer content={content} enableMermaid={false} enableLinkPreviews={false} />
-      </div>
+      <DynamicDocumentationPageContent
+        title="Configuration Documentation"
+        description="Complete reference for Stride YAML configuration files"
+        sections={sections}
+        activeSection={section}
+        content={content}
+        enableMermaid={false}
+        enableLinkPreviews={false}
+        LinkComponent={Link}
+      />
     </PageContainer>
   );
 }

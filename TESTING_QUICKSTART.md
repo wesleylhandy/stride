@@ -38,13 +38,49 @@ pnpm --filter @stride/web test:integration
 ```
 
 ### E2E Tests (Optional - requires Playwright setup)
+
+All E2E tests are located in `apps/web/e2e/`:
+
 ```bash
-# Run E2E tests (starts dev server automatically)
+# List all E2E tests
+pnpm --filter @stride/web test:e2e --list
+
+# Run all E2E tests (starts dev server automatically)
 # Note: Requires Playwright browsers to be installed first
 pnpm --filter @stride/web test:e2e
 
-# With UI mode (recommended for first run)
+# Run specific test file
+pnpm --filter @stride/web test:e2e e2e/auth/login.spec.ts
+
+# With UI mode (recommended for debugging)
 pnpm --filter @stride/web test:e2e:ui
+
+# Run in headed mode (see browser)
+pnpm --filter @stride/web test:e2e:headed
+
+# Run tests for specific browser
+pnpm --filter @stride/web test:e2e --project=chromium
+```
+
+**Test Structure:**
+- `e2e/auth/` - Authentication tests (login, onboarding)
+- `e2e/features/` - Feature tests (documentation, toasts, repository connections)
+- `e2e/fixtures/` - Shared fixtures (auth, projects)
+- `e2e/utils/` - Shared utilities (API helpers, page helpers)
+
+**Using Shared Utilities:**
+```typescript
+import { mockAuthRoute, mockLoginRoute } from '../utils/api-helpers';
+import { fillForm, submitForm } from '../utils/page-helpers';
+import { testProjects } from '../fixtures/projects';
+
+// Mock endpoints
+await mockLoginRoute(page, { success: true });
+await mockProjectsListRoute(page, [testProjects.withOnboarding()]);
+
+// Fill and submit forms
+await fillForm(page, { email: 'user@example.com', password: 'pass' });
+await submitForm(page);
 ```
 
 ### All Tests
@@ -66,7 +102,10 @@ pnpm --filter @stride/web test:coverage
 | `pnpm --filter @stride/web test` | Run all tests (unit + integration) |
 | `pnpm --filter @stride/web test:watch` | Run tests in watch mode |
 | `pnpm --filter @stride/web test:coverage` | Generate coverage report |
-| `pnpm --filter @stride/web test:e2e` | Run E2E tests |
-| `pnpm --filter @stride/web test:e2e:ui` | Run E2E tests with UI |
+| `pnpm --filter @stride/web test:e2e` | Run all E2E tests |
+| `pnpm --filter @stride/web test:e2e --list` | List all E2E tests |
+| `pnpm --filter @stride/web test:e2e:ui` | Run E2E tests with UI (interactive) |
+| `pnpm --filter @stride/web test:e2e:headed` | Run E2E tests with visible browser |
+| `pnpm --filter @stride/web test:e2e e2e/auth/login.spec.ts` | Run specific test file |
 
 For more details, see [docs/TESTING_SETUP.md](./docs/TESTING_SETUP.md)

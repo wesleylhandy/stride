@@ -5,7 +5,7 @@ import type { Issue, ProjectConfig, IssueType, Priority } from '@stride/types';
 import { canUpdateIssue } from '@/lib/auth/permissions';
 import { requireAuth } from '@/middleware/auth';
 import { headers } from 'next/headers';
-import { PageContainer } from '@/components/templates/PageContainer';
+import { PageContainer } from '@stride/ui';
 
 interface PageParams {
   params: Promise<{

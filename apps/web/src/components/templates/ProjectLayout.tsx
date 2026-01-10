@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { ProjectHeader } from '../features/projects/ProjectHeader';
 import { ProjectTabs } from '@stride/ui';
-import { PageContainer } from './PageContainer';
+import { PageContainer } from '@stride/ui';
 import { ProjectBreadcrumbs } from '../features/projects/ProjectBreadcrumbs';
 
 export interface ProjectLayoutProps {

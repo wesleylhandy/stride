@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+import { mockAuthRoute, mockProjectRoute } from '../utils/api-helpers';
+import { testProjects } from '../fixtures/projects';
 
 /**
  * E2E Tests for Repository Connection Manual Token Flow
@@ -12,32 +14,21 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Repository Connection Manual Token Flow', () => {
   test.beforeEach(async ({ page }) => {
-    // Mock authentication
-    await page.route('/api/auth/me', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 'user-123',
-          email: 'admin@example.com',
-          username: 'admin',
-          role: 'Admin',
-        }),
-      });
+    // Mock authentication using shared utility
+    await mockAuthRoute(page, {
+      id: 'user-123',
+      email: 'admin@example.com',
+      username: 'admin',
+      role: 'Admin',
     });
 
-    // Mock project fetch
-    await page.route('/api/projects/test-project-id', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 'test-project-id',
-          key: 'TEST',
-          name: 'Test Project',
-        }),
-      });
-    });
+    // Mock project fetch using shared utility
+    const project = testProjects.withoutOnboarding();
+    project.id = 'test-project-id';
+    project.key = 'TEST';
+    project.name = 'Test Project';
+
+    await mockProjectRoute(page, project);
 
     // Mock repository connection fetch (no connection exists initially)
     await page.route('/api/projects/test-project-id/repositories', async (route) => {
@@ -51,6 +42,7 @@ test.describe('Repository Connection Manual Token Flow', () => {
     });
   });
 
+  // ... existing tests remain the same - only beforeEach was refactored ...
   test('admin user can connect repository with manual GitHub token', async ({ page }) => {
     let connectionCreated = false;
 
