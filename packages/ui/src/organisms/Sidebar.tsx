@@ -59,11 +59,10 @@ const navItems: NavItem[] = [
  */
 export function Sidebar({ currentProjectId: propProjectId, className }: SidebarProps) {
   const pathname = usePathname();
-  const [collapsed, setCollapsedState] = React.useState(() => {
-    if (typeof window === 'undefined') return false;
-    return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true';
-  });
+  // Always initialize to false for SSR/client match, then sync from localStorage after mount
+  const [collapsed, setCollapsedState] = React.useState(false);
   const [isMobile, setIsMobile] = React.useState(false);
+  const hasHydrated = React.useRef(false);
 
   const setCollapsed = React.useCallback((value: boolean) => {
     setCollapsedState(value);
@@ -79,16 +78,36 @@ export function Sidebar({ currentProjectId: propProjectId, className }: SidebarP
     return match ? match[1] : null;
   })();
 
-  // Detect mobile
+  // Hydrate collapsed state from localStorage after mount to avoid SSR mismatch
+  React.useEffect(() => {
+    if (hasHydrated.current) return;
+    hasHydrated.current = true;
+    
+    const mobile = window.innerWidth < 768;
+    setIsMobile(mobile);
+    
+    if (mobile) {
+      // On mobile, always collapse
+      setCollapsed(true);
+    } else {
+      // On desktop, respect localStorage preference
+      const savedCollapsed = localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true';
+      setCollapsedState(savedCollapsed);
+    }
+  }, [setCollapsed]);
+
+  // Handle mobile detection on resize
   React.useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-      if (window.innerWidth < 768) {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      
+      // Auto-collapse on mobile, but don't override user preference when resizing to desktop
+      if (mobile) {
         setCollapsed(true);
       }
     };
 
-    checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, [setCollapsed]);
@@ -121,7 +140,10 @@ export function Sidebar({ currentProjectId: propProjectId, className }: SidebarP
     >
       <div className="flex flex-col h-full">
         {/* Header with collapse button */}
-        <div className="flex items-center justify-between p-4 border-b border-border dark:border-border-dark">
+        <div className={cn(
+          'flex items-center border-b border-border dark:border-border-dark',
+          collapsed ? 'justify-center p-2' : 'justify-between p-4'
+        )}>
           {!collapsed && (
             <h2 className="text-lg font-semibold text-foreground dark:text-foreground-dark">
               Stride
@@ -171,8 +193,11 @@ export function Sidebar({ currentProjectId: propProjectId, className }: SidebarP
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto p-4" aria-label="Main navigation">
-          <ul className="space-y-1">
+        <nav className={cn(
+          'flex-1 overflow-y-auto',
+          collapsed ? 'p-2' : 'p-4'
+        )} aria-label="Main navigation">
+          <ul className={cn('space-y-1', collapsed && 'space-y-2')}>
             {navItems.map((item) => {
               const active = isActive(item.href);
               return (
@@ -180,14 +205,17 @@ export function Sidebar({ currentProjectId: propProjectId, className }: SidebarP
                   <Link
                     href={item.href}
                     className={cn(
-                      'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium',
-                      'transition-colors',
+                      'flex items-center rounded-md text-sm font-medium transition-colors',
                       'focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 dark:focus:ring-offset-surface-dark',
+                      collapsed
+                        ? 'justify-center p-2'
+                        : 'gap-3 px-3 py-2',
                       active
                         ? 'bg-accent/10 text-accent'
                         : 'text-foreground-secondary dark:text-foreground-dark-secondary hover:bg-background-secondary dark:hover:bg-background-dark-secondary hover:text-foreground dark:hover:text-foreground-dark'
                     )}
                     aria-current={active ? 'page' : undefined}
+                    title={collapsed ? item.name : undefined}
                   >
                     <span className="flex-shrink-0">{item.icon}</span>
                     {!collapsed && <span>{item.name}</span>}

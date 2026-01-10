@@ -82,7 +82,7 @@ export function MarkdownEditor({
       {error && (
         <p
           id="markdown-editor-error"
-          className="mt-1 text-sm text-error"
+          className="mt-1 text-sm text-error dark:text-error-dark"
           role="alert"
         >
           {error}

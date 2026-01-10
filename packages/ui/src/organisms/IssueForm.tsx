@@ -176,9 +176,9 @@ function renderCustomFieldInput(
             type="checkbox"
             checked={(value as boolean) || false}
             onChange={(e) => onChange(e.target.checked)}
-            className="h-4 w-4 rounded border-border"
+            className="h-4 w-4 rounded border-border dark:border-border-dark bg-background dark:bg-background-dark text-accent focus:ring-accent focus:ring-offset-0"
           />
-          <label htmlFor={fieldId} className="text-sm font-medium">
+          <label htmlFor={fieldId} className="text-sm font-medium text-foreground dark:text-foreground-dark">
             {field.name}
             {field.required && <span className="text-error">*</span>}
           </label>
@@ -206,7 +206,7 @@ function renderCustomFieldInput(
     case 'dropdown':
       return (
         <div>
-          <label htmlFor={fieldId} className="block text-sm font-medium mb-1">
+          <label htmlFor={fieldId} className="block text-sm font-medium mb-1 text-foreground dark:text-foreground-dark">
             {field.name}
             {field.required && <span className="text-error">*</span>}
           </label>
@@ -215,11 +215,12 @@ function renderCustomFieldInput(
             value={(value as string) || ''}
             onChange={(e) => onChange(e.target.value)}
             className={cn(
-              'flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm',
+              'flex h-10 w-full rounded-md border bg-background dark:bg-background-dark px-3 py-2 text-sm',
+              'text-foreground dark:text-foreground-dark',
               'transition-colors focus-ring',
               error
                 ? 'border-error focus-visible:ring-error'
-                : 'border-border hover:border-border-hover focus-visible:border-border-focus'
+                : 'border-border dark:border-border-dark hover:border-border-hover dark:hover:border-border-dark-hover focus-visible:border-border-focus'
             )}
             required={field.required}
           >
@@ -322,7 +323,7 @@ export function IssueForm({
     >
       {/* Title */}
       <div>
-        <label htmlFor="title" className="block text-sm font-medium mb-1">
+        <label htmlFor="title" className="block text-sm font-medium mb-1 text-foreground dark:text-foreground-dark">
           Title <span className="text-error">*</span>
         </label>
         <Input
@@ -335,7 +336,7 @@ export function IssueForm({
 
       {/* Description */}
       <div>
-        <label htmlFor="description" className="block text-sm font-medium mb-1">
+        <label htmlFor="description" className="block text-sm font-medium mb-1 text-foreground dark:text-foreground-dark">
           Description
         </label>
         <MarkdownEditor
@@ -347,7 +348,7 @@ export function IssueForm({
 
       {/* Type */}
       <div>
-        <label htmlFor="type" className="block text-sm font-medium mb-1">
+        <label htmlFor="type" className="block text-sm font-medium mb-1 text-foreground dark:text-foreground-dark">
           Type
         </label>
         <select
@@ -378,7 +379,7 @@ export function IssueForm({
       {/* Status */}
       {availableStatuses.length > 0 && (
         <div>
-          <label htmlFor="status" className="block text-sm font-medium mb-1">
+          <label htmlFor="status" className="block text-sm font-medium mb-1 text-foreground dark:text-foreground-dark">
             Status
           </label>
           <select
@@ -386,11 +387,12 @@ export function IssueForm({
             {...register('status')}
             defaultValue={defaultStatus}
             className={cn(
-              'flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm',
+              'flex h-10 w-full rounded-md border bg-background dark:bg-background-dark px-3 py-2 text-sm',
+              'text-foreground dark:text-foreground-dark',
               'transition-colors focus-ring',
               errors.status
                 ? 'border-error focus-visible:ring-error'
-                : 'border-border hover:border-border-hover focus-visible:border-border-focus'
+                : 'border-border dark:border-border-dark hover:border-border-hover dark:hover:border-border-dark-hover focus-visible:border-border-focus'
             )}
           >
             {availableStatuses.map((status) => (
@@ -409,18 +411,19 @@ export function IssueForm({
 
       {/* Priority */}
       <div>
-        <label htmlFor="priority" className="block text-sm font-medium mb-1">
+        <label htmlFor="priority" className="block text-sm font-medium mb-1 text-foreground dark:text-foreground-dark">
           Priority
         </label>
         <select
           id="priority"
           {...register('priority')}
           className={cn(
-            'flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm',
+            'flex h-10 w-full rounded-md border bg-background dark:bg-background-dark px-3 py-2 text-sm',
+            'text-foreground dark:text-foreground-dark',
             'transition-colors focus-ring',
             errors.priority
               ? 'border-error focus-visible:ring-error'
-              : 'border-border hover:border-border-hover focus-visible:border-border-focus'
+              : 'border-border dark:border-border-dark hover:border-border-hover dark:hover:border-border-dark-hover focus-visible:border-border-focus'
           )}
         >
           <option value="">Select priority</option>
@@ -439,7 +442,7 @@ export function IssueForm({
       {/* Assignee */}
       {users && (
         <div>
-          <label htmlFor="assignee" className="block text-sm font-medium mb-1">
+          <label htmlFor="assignee" className="block text-sm font-medium mb-1 text-foreground dark:text-foreground-dark">
             Assignee
           </label>
           <Controller
@@ -453,11 +456,12 @@ export function IssueForm({
                 value={field.value || ''}
                 onChange={(e) => field.onChange(e.target.value || undefined)}
                 className={cn(
-                  'flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm',
+                  'flex h-10 w-full rounded-md border bg-background dark:bg-background-dark px-3 py-2 text-sm',
+                  'text-foreground dark:text-foreground-dark',
                   'transition-colors focus-ring',
                   errors.assigneeId
                     ? 'border-error focus-visible:ring-error'
-                    : 'border-border hover:border-border-hover focus-visible:border-border-focus'
+                    : 'border-border dark:border-border-dark hover:border-border-hover dark:hover:border-border-dark-hover focus-visible:border-border-focus'
                 )}
               >
                 <option value="">Unassigned</option>
@@ -485,7 +489,7 @@ export function IssueForm({
 
       {/* Story Points */}
       <div>
-        <label htmlFor="storyPoints" className="block text-sm font-medium mb-1">
+        <label htmlFor="storyPoints" className="block text-sm font-medium mb-1 text-foreground dark:text-foreground-dark">
           Story Points
         </label>
         <Input
@@ -500,7 +504,7 @@ export function IssueForm({
       {/* Custom Fields */}
       {projectConfig?.custom_fields && projectConfig.custom_fields.length > 0 && (
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Custom Fields</h3>
+          <h3 className="text-lg font-semibold text-foreground dark:text-foreground-dark">Custom Fields</h3>
           {projectConfig.custom_fields.map((field) => {
             const fieldValue = customFields[field.key];
             const fieldError = errors.customFields?.[field.key]?.message as
@@ -526,7 +530,7 @@ export function IssueForm({
       )}
 
       {/* Form Actions */}
-      <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
+      <div className="flex items-center justify-end gap-3 pt-4 border-t border-border dark:border-border-dark">
         {onCancel && (
           <Button type="button" variant="ghost" onClick={onCancel}>
             Cancel

@@ -33,6 +33,30 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased bg-background dark:bg-background-dark`}
       >
+        {/* Blocking script to initialize dark mode before React hydration */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const savedTheme = localStorage.getItem('theme');
+                  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  const shouldBeDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+                  const html = document.documentElement;
+                  if (shouldBeDark) {
+                    html.classList.add('dark');
+                    html.setAttribute('data-theme', 'dark');
+                  } else {
+                    html.classList.remove('dark');
+                    html.setAttribute('data-theme', 'light');
+                  }
+                } catch (e) {
+                  document.documentElement.setAttribute('data-theme', 'light');
+                }
+              })();
+            `,
+          }}
+        />
         <ErrorSuppressor />
         <CommandPaletteProvider>{children}</CommandPaletteProvider>
         <Toaster

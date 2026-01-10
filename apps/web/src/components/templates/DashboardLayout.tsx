@@ -36,15 +36,17 @@ export function DashboardLayout({
 
         {/* Main content */}
         <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+          {/* DashboardLayout provides structure only - no width constraints */}
+          {/* Pages should use PageContainer for width management */}
+          <div className="py-6">
             {/* Breadcrumbs */}
             {breadcrumbs && breadcrumbs.length > 0 && (
-              <div className="mb-4">
+              <div className="px-4 sm:px-6 lg:px-8 mb-4">
                 <Breadcrumbs items={breadcrumbs} />
               </div>
             )}
 
-            {/* Page content */}
+            {/* Page content - pages control their own width via PageContainer */}
             {children}
           </div>
         </main>

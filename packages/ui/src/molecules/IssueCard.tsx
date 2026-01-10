@@ -4,6 +4,7 @@ import * as React from 'react';
 import { cn } from '../utils/cn';
 import { Badge, type BadgeProps } from '../atoms/Badge';
 import type { Issue, IssueType, Priority } from '@stride/types';
+import type { ProjectConfig } from '@stride/yaml-config';
 
 export interface IssueCardProps {
   /**
@@ -32,6 +33,10 @@ export interface IssueCardProps {
     name: string | null;
     avatarUrl: string | null;
   }>;
+  /**
+   * Optional project configuration for status-based coloring
+   */
+  projectConfig?: ProjectConfig;
 }
 
 /**
@@ -149,6 +154,7 @@ export function IssueCard({
   onClick,
   className,
   users,
+  projectConfig,
 }: IssueCardProps) {
   const getTypeVariant = (type: IssueType): BadgeProps['variant'] => {
     switch (type) {
@@ -171,8 +177,47 @@ export function IssueCard({
         return 'warning';
       case 'Medium':
         return 'info';
+      case 'Low':
+        return 'success';
       default:
         return 'default';
+    }
+  };
+
+  // Find status config to get type for coloring
+  const statusConfig = projectConfig?.workflow.statuses.find(
+    (s) => s.key === issue.status,
+  );
+
+  // Get border color class based on status type
+  const getStatusBorderClass = (): string => {
+    if (!statusConfig) return 'border-l-4 border-l-border dark:border-l-border-dark';
+    
+    switch (statusConfig.type) {
+      case 'open':
+        return 'border-l-4 border-l-info/60 dark:border-l-info/80';
+      case 'in_progress':
+        return 'border-l-4 border-l-warning/60 dark:border-l-warning/80';
+      case 'closed':
+        return 'border-l-4 border-l-success/60 dark:border-l-success/80';
+      default:
+        return 'border-l-4 border-l-border dark:border-l-border-dark';
+    }
+  };
+
+  // Get background tint style based on status type
+  const getStatusBackgroundStyle = (): React.CSSProperties | undefined => {
+    if (!statusConfig) return undefined;
+    
+    switch (statusConfig.type) {
+      case 'open':
+        return { backgroundColor: 'rgba(179, 136, 255, 0.08)' }; // info with low opacity
+      case 'in_progress':
+        return { backgroundColor: 'rgba(255, 171, 0, 0.08)' }; // warning with low opacity
+      case 'closed':
+        return { backgroundColor: 'rgba(0, 230, 118, 0.08)' }; // success with low opacity
+      default:
+        return undefined;
     }
   };
 
@@ -181,12 +226,14 @@ export function IssueCard({
       onClick={onClick}
       className={cn(
         'group cursor-pointer rounded-lg border border-border dark:border-border-dark',
+        getStatusBorderClass(),
         'bg-background dark:bg-background-dark p-3 shadow-sm',
-        'transition-all hover:shadow-md',
+        'transition-all hover:shadow-md hover:scale-[1.01]',
         'focus-ring focus-visible:outline-none',
         isDragging && 'opacity-50 shadow-lg',
         className
       )}
+      style={getStatusBackgroundStyle()}
       role="button"
       tabIndex={0}
       aria-label={`Issue ${issue.key}: ${issue.title}`}

@@ -81,22 +81,35 @@ interface ColumnProps {
     name: string | null;
     avatarUrl: string | null;
   }>;
+  projectConfig?: ProjectConfig;
 }
 
 /**
  * Kanban column component (droppable)
+ * 
+ * Optimized for performance with memoization and conditional rendering
  */
-function KanbanColumn({ status, issues, onIssueClick, isFiltered: _isFiltered, isValidDrop, users }: ColumnProps) {
+const KanbanColumn = React.memo(function KanbanColumn({ status, issues, onIssueClick, isFiltered: _isFiltered, isValidDrop, users, projectConfig }: ColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: status.key,
   });
 
   const sortedIssues = React.useMemo(() => {
     // Sort issues by updated date (most recent first)
+    // Only sort if we have issues and it's actually necessary
+    if (issues.length === 0) return [];
+    if (issues.length === 1) return issues;
+    
     return [...issues].sort(
       (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
     );
   }, [issues]);
+
+  // Memoize issue IDs for SortableContext to prevent unnecessary re-renders
+  const issueIds = React.useMemo(() => 
+    sortedIssues.map((issue) => issue.id),
+    [sortedIssues]
+  );
 
   return (
     <div
@@ -123,21 +136,23 @@ function KanbanColumn({ status, issues, onIssueClick, isFiltered: _isFiltered, i
           </Badge>
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto p-3 space-y-2">
-        <SortableContext
-          items={sortedIssues.map((issue) => issue.id)}
-          strategy={verticalListSortingStrategy}
-        >
-          {sortedIssues.map((issue) => (
-            <SortableIssueCard
-              key={issue.id}
-              issue={issue}
-              onClick={() => onIssueClick?.(issue)}
-              users={users}
-            />
-          ))}
-        </SortableContext>
-        {sortedIssues.length === 0 && (
+      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        {sortedIssues.length > 0 ? (
+          <SortableContext
+            items={issueIds}
+            strategy={verticalListSortingStrategy}
+          >
+            {sortedIssues.map((issue) => (
+              <SortableIssueCard
+                key={issue.id}
+                issue={issue}
+                onClick={() => onIssueClick?.(issue)}
+                users={users}
+                projectConfig={projectConfig}
+              />
+            ))}
+          </SortableContext>
+        ) : (
           <div className="text-sm text-foreground-secondary dark:text-foreground-dark-secondary text-center py-8">
             No issues
           </div>
@@ -145,15 +160,29 @@ function KanbanColumn({ status, issues, onIssueClick, isFiltered: _isFiltered, i
       </div>
     </div>
   );
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison for column memoization
+  // Only re-render if issues array reference changed or status/config changed
+  return (
+    prevProps.status.key === nextProps.status.key &&
+    prevProps.issues === nextProps.issues &&
+        prevProps.isValidDrop === nextProps.isValidDrop &&
+        prevProps.onIssueClick === nextProps.onIssueClick &&
+        prevProps.users === nextProps.users &&
+        prevProps.projectConfig === nextProps.projectConfig
+  );
+});
 
 /**
  * Sortable issue card wrapper
+ * 
+ * Memoized to prevent unnecessary re-renders when parent re-renders
  */
-function SortableIssueCard({
+const SortableIssueCard = React.memo(function SortableIssueCard({
   issue,
   onClick,
   users,
+  projectConfig,
 }: {
   issue: Issue;
   onClick?: () => void;
@@ -163,6 +192,7 @@ function SortableIssueCard({
     name: string | null;
     avatarUrl: string | null;
   }>;
+  projectConfig?: ProjectConfig;
 }) {
   const {
     attributes,
@@ -248,11 +278,25 @@ function SortableIssueCard({
           isDragging={isDragging}
           onClick={handleClick}
           users={users}
+          projectConfig={projectConfig}
         />
       </div>
     </div>
   );
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison function for React.memo
+  // Only re-render if issue data actually changed
+  return (
+    prevProps.issue.id === nextProps.issue.id &&
+    prevProps.issue.status === nextProps.issue.status &&
+    prevProps.issue.updatedAt === nextProps.issue.updatedAt &&
+    prevProps.issue.title === nextProps.issue.title &&
+        prevProps.issue.assigneeId === nextProps.issue.assigneeId &&
+        prevProps.onClick === nextProps.onClick &&
+        prevProps.users === nextProps.users &&
+        prevProps.projectConfig === nextProps.projectConfig
+    );
+});
 
 /**
  * KanbanBoard component
@@ -702,22 +746,23 @@ export function KanbanBoard({
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex gap-4 overflow-x-auto pb-4">
-          {visibleStatuses.map((status) => (
-            <KanbanColumn
-              key={status.key}
-              status={status}
-              issues={issuesByStatus[status.key] || []}
-              onIssueClick={onIssueClick}
-              isValidDrop={getIsValidDrop(status.key)}
-              users={users}
-            />
-          ))}
-        </div>
+      <div className="flex gap-4 overflow-x-auto pb-4 pr-4">
+        {visibleStatuses.map((status) => (
+          <KanbanColumn
+            key={status.key}
+            status={status}
+            issues={issuesByStatus[status.key] || []}
+            onIssueClick={onIssueClick}
+            isValidDrop={getIsValidDrop(status.key)}
+            users={users}
+            projectConfig={projectConfig}
+          />
+        ))}
+      </div>
         <DragOverlay>
           {activeIssue ? (
             <div className="rotate-3 opacity-90">
-              <IssueCard issue={activeIssue} isDragging />
+              <IssueCard issue={activeIssue} isDragging projectConfig={projectConfig} />
             </div>
           ) : null}
         </DragOverlay>

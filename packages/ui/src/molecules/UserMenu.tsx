@@ -32,20 +32,30 @@ export function UserMenu({ user: initialUser, className }: UserMenuProps) {
   // Fetch user data if not provided
   React.useEffect(() => {
     if (!initialUser) {
-      fetch('/api/auth/me')
+      fetch('/api/auth/me', {
+        credentials: 'include',
+      })
         .then((res) => {
           if (res.ok) {
             return res.json();
+          }
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('[UserMenu] Failed to fetch user:', res.status, res.statusText);
           }
           return null;
         })
         .then((data) => {
           if (data?.user) {
             setUser(data.user);
+          } else if (process.env.NODE_ENV === 'development') {
+            console.warn('[UserMenu] No user data received');
           }
           setLoading(false);
         })
-        .catch(() => {
+        .catch((error) => {
+          if (process.env.NODE_ENV === 'development') {
+            console.error('[UserMenu] Error fetching user:', error);
+          }
           setLoading(false);
         });
     }
@@ -72,6 +82,7 @@ export function UserMenu({ user: initialUser, className }: UserMenuProps) {
     try {
       const response = await fetch('/api/auth/logout', {
         method: 'POST',
+        credentials: 'include',
       });
 
       if (response.ok) {

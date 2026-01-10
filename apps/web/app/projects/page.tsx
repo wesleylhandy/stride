@@ -5,6 +5,7 @@ import { headers } from 'next/headers';
 import { ProjectCard } from '@/components/ProjectCard';
 import { ProjectsEmptyState } from '@/components/ProjectsEmptyState';
 import { PaginationControls } from '@/components/PaginationControls';
+import { PageContainer } from '@/components/templates/PageContainer';
 
 interface ProjectsPageProps {
   searchParams: Promise<{
@@ -71,14 +72,15 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
 
     // Render projects list (T015)
     // Note: Layout provides header and breadcrumbs
+    // Uses full-width container for better grid layout on large screens
     return (
-      <div>
+      <PageContainer variant="full" className="py-6">
         <div className="mb-6">
           <p className="text-sm text-foreground-secondary dark:text-foreground-dark-secondary">
             {projects.total} {projects.total === 1 ? 'project' : 'projects'}
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {projects.items.map((project) => (
             <ProjectCard key={project.id} project={project} />
           ))}
@@ -96,7 +98,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
             />
           </div>
         )}
-      </div>
+      </PageContainer>
     );
   } catch (error) {
     // Error logging for debugging (T031)

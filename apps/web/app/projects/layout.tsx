@@ -30,7 +30,10 @@ export default async function ProjectsLayout({
     redirect('/login');
   }
 
-  // Default breadcrumbs - will be overridden by child layouts if needed
+  // Check if we're on a board page to enable full-width layout
+  // Note: In Next.js, we can't directly access pathname in server components,
+  // so we'll use a client component wrapper for this specific case
+  // For now, we'll let the board page handle its own width extension
   const breadcrumbs: BreadcrumbItem[] = [{ label: 'Projects' }];
 
   return (

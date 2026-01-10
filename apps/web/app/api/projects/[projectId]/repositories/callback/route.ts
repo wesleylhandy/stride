@@ -23,6 +23,36 @@ interface RouteParams {
 }
 
 /**
+ * Validate returnTo URL to prevent open redirect attacks
+ * Only allows internal URLs (same origin)
+ */
+function validateReturnToUrl(returnTo: string, requestUrl: string): string | null {
+  try {
+    const url = new URL(returnTo, requestUrl);
+    const requestHost = new URL(requestUrl).host;
+
+    // Only allow same-origin redirects
+    if (url.host !== requestHost) {
+      return null;
+    }
+
+    // Only allow relative paths or same-origin absolute paths
+    if (url.origin !== new URL(requestUrl).origin) {
+      return null;
+    }
+
+    return url.pathname + url.search;
+  } catch {
+    // Invalid URL format - treat as relative path
+    // Check if it starts with / (relative path)
+    if (returnTo.startsWith('/')) {
+      return returnTo;
+    }
+    return null;
+  }
+}
+
+/**
  * GET /api/projects/[projectId]/repositories/callback
  * OAuth callback handler for repository connections
  * 
@@ -40,7 +70,11 @@ export async function GET(
     const searchParams = request.nextUrl.searchParams;
     const code = searchParams.get('code');
     const state = searchParams.get('state');
-    const returnTo = searchParams.get('returnTo') || '/onboarding/complete';
+    const returnToRaw = searchParams.get('returnTo') || '/onboarding/complete';
+    
+    // Validate returnTo to prevent open redirect
+    const returnTo = validateReturnToUrl(returnToRaw, request.url) || '/onboarding/complete';
+    
     const error = searchParams.get('error');
     const errorDescription = searchParams.get('error_description');
 
@@ -194,7 +228,8 @@ export async function GET(
     return redirect(successUrl.toString());
   } catch (error) {
     console.error('OAuth callback error:', error);
-    const returnTo = request.nextUrl.searchParams.get('returnTo') || '/onboarding/complete';
+    const returnToRaw = request.nextUrl.searchParams.get('returnTo') || '/onboarding/complete';
+    const returnTo = validateReturnToUrl(returnToRaw, request.url) || '/onboarding/complete';
     const errorUrl = new URL(returnTo, request.url);
     errorUrl.searchParams.set('error', 'oauth_failed');
     errorUrl.searchParams.set('error_description', error instanceof Error ? error.message : 'OAuth callback failed');

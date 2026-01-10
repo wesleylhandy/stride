@@ -6,10 +6,19 @@ import type { SessionPayload } from "@/lib/auth/session";
 
 export async function GET(request: NextRequest) {
   try {
+    // Debug: Log cookie status in development
+    if (process.env.NODE_ENV === 'development') {
+      const sessionCookie = request.cookies.get('session');
+      console.log('[GET /api/auth/me] Session cookie:', sessionCookie ? 'present' : 'missing');
+    }
+
     const authResult = await requireAuth(request);
 
     if (authResult instanceof NextResponse) {
       // Auth failed
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[GET /api/auth/me] Auth failed, status:', authResult.status);
+      }
       return authResult;
     }
 

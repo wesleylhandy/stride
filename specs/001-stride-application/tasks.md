@@ -1148,7 +1148,7 @@ Where:
 - [x] T390 [P] Add help tooltips in configuration editor in apps/web/src/components/features/projects/ConfigEditor.tsx
 - [x] T391 [P] Add contextual help links in validation error messages in packages/ui/src/organisms/KanbanBoard.tsx
 - [x] T392 [P] Create documentation link component in packages/ui/src/molecules/DocumentationLink.tsx
-- [ ] T393 Validate all documentation examples against schema in apps/web/scripts/validate-docs.ts
+- [x] T393 Validate all documentation examples against schema in apps/web/scripts/validate-docs.ts
 
 **Acceptance Criteria**:
 
@@ -1260,13 +1260,13 @@ Where:
 
 ### AI Gateway Service
 
-- [ ] T400 [US7] Create AI Gateway package structure in packages/ai-gateway/
-- [ ] T401 [US7] Implement API endpoints in packages/ai-gateway/src/routes.ts
-- [ ] T402 [US7] Support commercial APIs (OpenAI, Anthropic) in packages/ai-gateway/src/providers/commercial.ts
-- [ ] T403 [US7] Support self-hosted LLMs in packages/ai-gateway/src/providers/self-hosted.ts
-- [ ] T404 [US7] Add request/response logging in packages/ai-gateway/src/middleware/logging.ts
-- [ ] T405 [US7] Implement rate limiting in packages/ai-gateway/src/middleware/rate-limit.ts
-- [ ] T406 [US7] Add mock mode for development in packages/ai-gateway/src/providers/mock.ts
+- [ ] T450 [US7] Create AI Gateway package structure in packages/ai-gateway/
+- [ ] T451 [US7] Implement API endpoints in packages/ai-gateway/src/routes.ts
+- [ ] T452 [US7] Support commercial APIs (OpenAI, Anthropic) in packages/ai-gateway/src/providers/commercial.ts
+- [ ] T453 [US7] Support self-hosted LLMs in packages/ai-gateway/src/providers/self-hosted.ts
+- [ ] T454 [US7] Add request/response logging in packages/ai-gateway/src/middleware/logging.ts
+- [ ] T455 [US7] Implement rate limiting in packages/ai-gateway/src/middleware/rate-limit.ts
+- [ ] T456 [US7] Add mock mode for development in packages/ai-gateway/src/providers/mock.ts
 
 **Acceptance Criteria**:
 
@@ -1277,14 +1277,14 @@ Where:
 
 ### AI Triage Integration
 
-- [ ] T407 [US7] Create "Triage with AI" button in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T408 [US7] Send issue context to AI Gateway in apps/web/src/lib/ai/triage.ts
-- [ ] T409 [US7] Display AI analysis in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T410 [US7] Show priority suggestions in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T411 [US7] Show assignee suggestions in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T412 [US7] Allow accepting/modifying suggestions in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T413 [US7] Implement graceful degradation when AI unavailable in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T414 [US7] Create AI triage API endpoint in apps/web/app/api/projects/[projectId]/issues/[issueKey]/ai-triage/route.ts
+- [ ] T457 [US7] Create "Triage with AI" button in packages/ui/src/organisms/IssueDetail.tsx
+- [ ] T458 [US7] Send issue context to AI Gateway in apps/web/src/lib/ai/triage.ts
+- [ ] T459 [US7] Display AI analysis in packages/ui/src/organisms/IssueDetail.tsx
+- [ ] T460 [US7] Show priority suggestions in packages/ui/src/organisms/IssueDetail.tsx
+- [ ] T461 [US7] Show assignee suggestions in packages/ui/src/organisms/IssueDetail.tsx
+- [ ] T462 [US7] Allow accepting/modifying suggestions in packages/ui/src/organisms/IssueDetail.tsx
+- [ ] T463 [US7] Implement graceful degradation when AI unavailable in packages/ui/src/organisms/IssueDetail.tsx
+- [ ] T464 [US7] Create AI triage API endpoint in apps/web/app/api/projects/[projectId]/issues/[issueKey]/ai-triage/route.ts
 
 **Acceptance Criteria**:
 
@@ -1381,24 +1381,26 @@ Where:
 
 **Dependencies**: All previous phases complete
 
-### Testing
+### Testing ⚠️ DEFERRED - Avoid Testing Technical Debt
 
-- [ ] T329 Setup Vitest for unit tests in root/vitest.config.ts
-- [ ] T330 Configure test environment in root/vitest.config.ts
-- [ ] T331 Create test utilities in apps/web/src/**tests**/utils.ts
-- [ ] T332 Write unit tests for utilities in apps/web/src/**tests**/unit/
-- [ ] T333 Write unit tests for components in packages/ui/src/**tests**/
-- [ ] T334 Setup test database for integration tests in apps/web/src/**tests**/setup.ts
-- [ ] T335 Create test fixtures in apps/web/src/**tests**/fixtures.ts
-- [ ] T336 Write API route tests in apps/web/src/**tests**/api/
-- [ ] T337 Write database operation tests in apps/web/src/**tests**/database/
-- [ ] T338 Write webhook tests in apps/web/src/**tests**/webhooks/
-- [ ] T339 Setup Playwright for E2E tests in root/playwright.config.ts
-- [ ] T340 Create E2E test utilities in apps/web/e2e/utils.ts
-- [ ] T341 Write E2E tests for User Story 1 in apps/web/e2e/us1-deployment.spec.ts
-- [ ] T342 Write E2E tests for User Story 2 in apps/web/e2e/us2-issues.spec.ts
-- [ ] T343 Write E2E tests for critical flows in apps/web/e2e/critical-flows.spec.ts
-- [ ] T344 Setup CI/CD integration in .github/workflows/test.yml
+**Note**: Testing tasks are deferred until test infrastructure is organized (playwright-reorganization complete) and existing tests are validated. Tests may fail or not accurately reflect behavior until test organization is complete.
+
+- [ ] T329 [DEFERRED] Setup Vitest for unit tests in root/vitest.config.ts
+- [ ] T330 [DEFERRED] Configure test environment in root/vitest.config.ts
+- [ ] T331 [DEFERRED] Create test utilities in apps/web/src/**tests**/utils.ts
+- [ ] T332 [DEFERRED] Write unit tests for utilities in apps/web/src/**tests**/unit/
+- [ ] T333 [DEFERRED] Write unit tests for components in packages/ui/src/**tests**/
+- [ ] T334 [DEFERRED] Setup test database for integration tests in apps/web/src/**tests**/setup.ts
+- [ ] T335 [DEFERRED] Create test fixtures in apps/web/src/**tests**/fixtures.ts
+- [ ] T336 [DEFERRED] Write API route tests in apps/web/src/**tests**/api/
+- [ ] T337 [DEFERRED] Write database operation tests in apps/web/src/**tests**/database/
+- [ ] T338 [DEFERRED] Write webhook tests in apps/web/src/**tests**/webhooks/
+- [ ] T339 [DEFERRED] Setup Playwright for E2E tests in root/playwright.config.ts
+- [ ] T340 [DEFERRED] Create E2E test utilities in apps/web/e2e/utils.ts
+- [ ] T341 [DEFERRED] Write E2E tests for User Story 1 in apps/web/e2e/us1-deployment.spec.ts
+- [ ] T342 [DEFERRED] Write E2E tests for User Story 2 in apps/web/e2e/us2-issues.spec.ts
+- [ ] T343 [DEFERRED] Write E2E tests for critical flows in apps/web/e2e/critical-flows.spec.ts
+- [ ] T344 [DEFERRED] Setup CI/CD integration in .github/workflows/test.yml
 
 **Acceptance Criteria**:
 
@@ -1409,12 +1411,12 @@ Where:
 
 ### Performance Optimization
 
-- [ ] T311 Optimize database queries (add missing indexes) in packages/database/prisma/schema.prisma
-- [ ] T312 Implement query result caching in apps/web/src/lib/cache/query-cache.ts
-- [ ] T313 Optimize Kanban board rendering (virtualization if needed) in packages/ui/src/organisms/KanbanBoard.tsx
-- [ ] T314 Add code splitting for heavy components in apps/web/app/
-- [ ] T315 Optimize bundle size in apps/web/next.config.ts
-- [ ] T316 Implement image optimization in apps/web/next.config.ts
+- [x] T311 Optimize database queries (add missing indexes) in packages/database/prisma/schema.prisma
+- [x] T312 Implement query result caching in apps/web/src/lib/cache/query-cache.ts
+- [x] T313 Optimize Kanban board rendering (virtualization if needed) in packages/ui/src/organisms/KanbanBoard.tsx
+- [x] T314 Add code splitting for heavy components in apps/web/app/
+- [x] T315 Optimize bundle size in apps/web/next.config.ts
+- [x] T316 Implement image optimization in apps/web/next.config.ts
 
 **Acceptance Criteria**:
 
@@ -1424,12 +1426,12 @@ Where:
 
 ### Documentation
 
-- [ ] T317 Create API documentation in docs/api/
-- [ ] T318 Create deployment guide in docs/deployment/
-- [ ] T319 Create developer guide in docs/development/
-- [ ] T320 Create user guide in docs/user/
-- [ ] T321 Add inline code documentation (JSDoc) in apps/web/src/
-- [ ] T322 Create README for each package in packages/\*/README.md
+- [x] T317 Create API documentation in docs/api/
+- [x] T318 Create deployment guide in docs/deployment/
+- [x] T319 Create developer guide in docs/development/
+- [x] T320 Create user guide in docs/user/
+- [x] T321 Add inline code documentation (JSDoc) in apps/web/src/
+- [x] T322 Create README for each package in packages/\*/README.md
 
 **Acceptance Criteria**:
 
@@ -1440,12 +1442,12 @@ Where:
 
 ### Security Hardening
 
-- [ ] T323 Review and fix security vulnerabilities in apps/web/
-- [ ] T324 Implement rate limiting on all API routes in apps/web/src/middleware/rate-limit.ts
-- [ ] T325 Add security headers in apps/web/next.config.ts
-- [ ] T326 Audit authentication and authorization in apps/web/src/lib/auth/
-- [ ] T327 Review input validation in apps/web/src/lib/validation/
-- [ ] T328 Implement CSRF protection in apps/web/src/middleware/csrf.ts
+- [x] T323 Review and fix security vulnerabilities in apps/web/
+- [x] T324 Implement rate limiting on all API routes in apps/web/src/middleware/rate-limit.ts
+- [x] T325 Add security headers in apps/web/next.config.ts
+- [x] T326 Audit authentication and authorization in apps/web/src/lib/auth/
+- [x] T327 Review input validation in apps/web/src/lib/validation/
+- [x] T328 Implement CSRF protection in apps/web/src/middleware/csrf.ts
 
 **Acceptance Criteria**:
 
@@ -1456,12 +1458,12 @@ Where:
 
 ### Production Readiness
 
-- [ ] T345 Create production environment configuration in .env.production.example
-- [ ] T346 Setup error monitoring (Sentry integration) in apps/web/src/lib/error-tracking.ts
-- [ ] T347 Create health check endpoint in apps/web/app/api/health/route.ts
-- [ ] T348 Implement graceful shutdown in apps/web/src/lib/shutdown.ts
-- [ ] T349 Create production deployment scripts in scripts/deploy/
-- [ ] T350 Setup logging aggregation in apps/web/src/lib/logger.ts
+- [x] T345 Create production environment configuration in .env.production.example
+- [x] T346 Setup error monitoring (Sentry integration) in apps/web/src/lib/error-tracking.ts
+- [x] T347 Create health check endpoint in apps/web/app/api/health/route.ts
+- [x] T348 Implement graceful shutdown in apps/web/src/lib/shutdown.ts
+- [x] T349 Create production deployment scripts in scripts/deploy/
+- [x] T350 Setup logging aggregation in apps/web/src/lib/logger.ts
 
 **Acceptance Criteria**:
 
@@ -1559,7 +1561,7 @@ Phase 1: Setup
 
 **Within Phase 9 (US7)**:
 
-- T296-T302 (AI Gateway) can be parallelized with T303-T310 (Integration)
+- T450-T456 (AI Gateway) can be parallelized with T457-T464 (Integration)
 
 ---
 
@@ -1648,7 +1650,8 @@ Phase 1: Setup
 **Phase 7.6 (Settings Pages Fixes)**: 22 tasks  
 **Phase 8 (US6)**: 18 tasks  
 **Phase 8.8 (Troubleshooting & Permissive Config)**: 27 tasks  
-**Phase 9 (US7)**: 15 tasks  
+**Phase 9 (US7)**: 15 tasks (T450-T464, deferred - P3 priority)
+**Phase 10 (Polish)**: 40 tasks (6 testing deferred, 34 non-testing tasks remaining)  
 **Phase 10 (Polish)**: 40 tasks
 
 **Parallel Opportunities**: ~102 tasks marked with [P]

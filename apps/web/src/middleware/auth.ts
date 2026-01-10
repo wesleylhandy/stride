@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { cookies } from "next/headers";
 import {
   verifySession,
   getTokenFromHeaders,
@@ -18,11 +19,22 @@ export interface AuthenticatedRequest extends NextRequest {
 /**
  * Middleware to verify authentication (for API routes)
  * Returns 401 if not authenticated
+ * Also handles Server Components calling with { headers: Headers }
  */
 export async function requireAuth(
-  request: NextRequest,
+  request: NextRequest | { headers: Headers },
 ): Promise<NextResponse | SessionPayload> {
-  const token = getTokenFromHeaders(request.headers);
+  let token: string | null = null;
+
+  // Check if this is a NextRequest (API route) - has cookies property
+  if ('cookies' in request && request.cookies && typeof request.cookies.get === 'function') {
+    // NextRequest from API route - use cookies API
+    const sessionCookie = request.cookies.get('session');
+    token = sessionCookie?.value || getTokenFromHeaders(request.headers);
+  } else if ('headers' in request && request.headers instanceof Headers) {
+    // Plain object with headers (Server Component) - use headers directly
+    token = getTokenFromHeaders(request.headers);
+  }
 
   if (!token) {
     return NextResponse.json(
@@ -51,7 +63,10 @@ export async function requireAuth(
 export async function requireAuthServer(
   headers: Headers,
 ): Promise<SessionPayload | null> {
-  const token = getTokenFromHeaders(headers);
+  // In Server Components, use cookies() from next/headers for better cookie handling
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get('session');
+  const token = sessionCookie?.value || getTokenFromHeaders(headers);
 
   if (!token) {
     return null;
@@ -68,7 +83,9 @@ export async function requireAuthServer(
 export async function optionalAuth(
   request: NextRequest,
 ): Promise<SessionPayload | null> {
-  const token = getTokenFromHeaders(request.headers);
+  // In Next.js App Router, use request.cookies to read cookies
+  const sessionCookie = request.cookies.get('session');
+  const token = sessionCookie?.value || getTokenFromHeaders(request.headers);
 
   if (!token) {
     return null;

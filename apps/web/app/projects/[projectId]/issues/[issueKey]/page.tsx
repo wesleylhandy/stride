@@ -5,6 +5,7 @@ import type { Issue, ProjectConfig, IssueType, Priority } from '@stride/types';
 import { canUpdateIssue } from '@/lib/auth/permissions';
 import { requireAuth } from '@/middleware/auth';
 import { headers } from 'next/headers';
+import { PageContainer } from '@/components/templates/PageContainer';
 
 interface PageParams {
   params: Promise<{
@@ -83,7 +84,7 @@ export default async function IssueDetailPage({ params }: PageParams) {
   // For now, we'll pass undefined and let the component handle client-side API calls
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <PageContainer variant="constrained" className="py-6" maxWidth="56rem">
       <IssueDetailClient
         issue={typedIssue}
         projectId={projectId}
@@ -91,7 +92,7 @@ export default async function IssueDetailPage({ params }: PageParams) {
         branches={branches}
         canEdit={canEdit}
       />
-    </div>
+    </PageContainer>
   );
 }
 

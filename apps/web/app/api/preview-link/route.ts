@@ -1,12 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/middleware/auth';
 import { getLinkPreview } from '@/lib/integrations/link-preview';
 
 /**
  * GET /api/preview-link
  * Get link preview metadata (oembed/og:meta)
+ * Requires authentication to prevent abuse
  */
 export async function GET(request: NextRequest) {
   try {
+    // Require authentication to prevent abuse
+    const authResult = await requireAuth(request);
+
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+
     const searchParams = request.nextUrl.searchParams;
     const url = searchParams.get('url');
 

@@ -6,6 +6,7 @@ import { requireAuth } from '@/middleware/auth';
 import { headers } from 'next/headers';
 import { SprintPlanningClient } from '@/components/SprintPlanningClient';
 import { BurndownChartClient } from '@/components/BurndownChartClient';
+import { PageContainer } from '@/components/templates/PageContainer';
 
 interface PageParams {
   params: Promise<{
@@ -115,17 +116,21 @@ export default async function SprintPlanningPage({
   const canEdit = canUpdateCycle(session.role);
 
   return (
-    <div className="container mx-auto px-4 py-8 h-full">
+    <PageContainer variant="full" className="py-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold">Sprint Planning</h1>
-        <p className="text-foreground-secondary mt-1">
+        <h1 className="text-3xl font-bold text-foreground dark:text-foreground-dark">
+          Sprint Planning
+        </h1>
+        <p className="text-foreground-secondary dark:text-foreground-dark-secondary mt-1">
           {project.name} - {cycle.name}
         </p>
       </div>
       
       {/* Burndown Chart */}
-      <div className="mb-6 bg-background-secondary rounded-lg p-6 border border-border">
-        <h2 className="text-xl font-semibold mb-4">Burndown Chart</h2>
+      <div className="mb-6 bg-background-secondary dark:bg-background-dark-secondary rounded-lg p-6 border border-border dark:border-border-dark">
+        <h2 className="text-xl font-semibold mb-4 text-foreground dark:text-foreground-dark">
+          Burndown Chart
+        </h2>
         <BurndownChartClient
           projectId={projectId}
           cycleId={cycle.id}
@@ -133,7 +138,7 @@ export default async function SprintPlanningPage({
       </div>
 
       {/* Sprint Planning Interface */}
-      <div className="h-[calc(100vh-32rem)]">
+      <div className="h-[calc(100vh-20rem)]">
         <SprintPlanningClient
           projectId={projectId}
           cycle={typedCycle}
@@ -142,7 +147,7 @@ export default async function SprintPlanningPage({
           canEdit={canEdit}
         />
       </div>
-    </div>
+    </PageContainer>
   );
 }
 

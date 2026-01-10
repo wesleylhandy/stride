@@ -1,10 +1,10 @@
 /**
  * Error tracking setup
  *
- * Provides error tracking integration with external services (Sentry, etc.)
- * and fallback error logging.
+ * Provides error tracking integration with Sentry and fallback error logging.
  */
 
+import * as Sentry from '@sentry/nextjs';
 import { logger } from './logger';
 
 export interface ErrorTrackingOptions {
@@ -32,16 +32,17 @@ class ErrorTracker {
    * Initializes error tracking
    */
   async initialize(): Promise<void> {
-    if (!this.options.enabled) {
-      await logger.info('Error tracking disabled');
+    if (!this.options.enabled || !this.options.dsn) {
+      await logger.info('Error tracking disabled or DSN not configured');
       return;
     }
 
-    // TODO: Initialize Sentry or other error tracking service
-    // For now, just log that tracking is enabled
+    // Sentry is initialized via sentry.client.config.ts, sentry.server.config.ts, and sentry.edge.config.ts
+    // This method just verifies that tracking is enabled
     await logger.info('Error tracking initialized', {
       environment: this.options.environment,
       release: this.options.release,
+      dsnConfigured: !!this.options.dsn,
     });
 
     this.initialized = true;
@@ -71,15 +72,34 @@ class ErrorTracker {
       return;
     }
 
-    // TODO: Send to Sentry or other error tracking service
-    // Example:
-    // if (this.sentryClient) {
-    //   this.sentryClient.captureException(error, {
-    //     tags: context?.tags,
-    //     extra: context?.extra,
-    //     user: context?.userId ? { id: context.userId } : undefined,
-    //   });
-    // }
+    // Capture error in Sentry
+    try {
+      Sentry.captureException(error, {
+        tags: context?.tags,
+        extra: {
+          ...context?.extra,
+          requestId: context?.requestId,
+        },
+        user: context?.userId
+          ? {
+              id: context.userId,
+              ...(this.userContext || {}),
+            }
+          : this.userContext
+            ? {
+                id: this.userContext.userId,
+                email: this.userContext.email,
+                username: this.userContext.username,
+              }
+            : undefined,
+      });
+    } catch (sentryError) {
+      // Fallback: log if Sentry capture fails
+      await logger.warn('Failed to capture error in Sentry', {
+        error: sentryError instanceof Error ? sentryError.message : String(sentryError),
+        stack: sentryError instanceof Error ? sentryError.stack : undefined,
+      });
+    }
   }
 
   /**
@@ -123,7 +143,38 @@ class ErrorTracker {
       return;
     }
 
-    // TODO: Send to Sentry or other error tracking service
+    // Capture message in Sentry
+    try {
+      const sentryLevel: Sentry.SeverityLevel =
+        level === 'error' ? 'error' : level === 'warning' ? 'warning' : 'info';
+
+      Sentry.captureMessage(message, {
+        level: sentryLevel,
+        tags: context?.tags,
+        extra: {
+          ...context?.extra,
+          requestId: context?.requestId,
+        },
+        user: context?.userId
+          ? {
+              id: context.userId,
+              ...(this.userContext || {}),
+            }
+          : this.userContext
+            ? {
+                id: this.userContext.userId,
+                email: this.userContext.email,
+                username: this.userContext.username,
+              }
+            : undefined,
+      });
+    } catch (sentryError) {
+      // Fallback: log if Sentry capture fails
+      await logger.warn('Failed to capture message in Sentry', {
+        error: sentryError instanceof Error ? sentryError.message : String(sentryError),
+        stack: sentryError instanceof Error ? sentryError.stack : undefined,
+      });
+    }
   }
 
   /**
@@ -134,19 +185,23 @@ class ErrorTracker {
       return;
     }
 
-    // Store user context for later use (will be used when Sentry is integrated)
+    // Store user context
     this.userContext = { userId, email, username };
 
-    // TODO: Set user context in Sentry
-    // When Sentry is integrated, use: this.userContext
-    // Example:
-    // if (this.sentryClient) {
-    //   this.sentryClient.setUser({
-    //     id: userId,
-    //     email,
-    //     username,
-    //   });
-    // }
+    // Set user context in Sentry
+    try {
+      Sentry.setUser({
+        id: userId,
+        email,
+        username,
+      });
+    } catch (sentryError) {
+      // Fallback: log if Sentry setUser fails
+      logger.warn('Failed to set user context in Sentry', {
+        error: sentryError instanceof Error ? sentryError.message : String(sentryError),
+        stack: sentryError instanceof Error ? sentryError.stack : undefined,
+      });
+    }
   }
 
   /**
@@ -157,7 +212,18 @@ class ErrorTracker {
       return;
     }
 
-    // TODO: Clear user context in Sentry
+    this.userContext = undefined;
+
+    // Clear user context in Sentry
+    try {
+      Sentry.setUser(null);
+    } catch (sentryError) {
+      // Fallback: log if Sentry clearUser fails
+      logger.warn('Failed to clear user context in Sentry', {
+        error: sentryError instanceof Error ? sentryError.message : String(sentryError),
+        stack: sentryError instanceof Error ? sentryError.stack : undefined,
+      });
+    }
   }
 }
 

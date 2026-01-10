@@ -1,12 +1,31 @@
 'use client';
 
 import * as React from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { KanbanBoard, Button, useToast } from '@stride/ui';
+import { Button, useToast } from '@stride/ui';
 import type { Issue } from '@stride/types';
 import type { ProjectConfig } from '@stride/yaml-config';
 import { addRecentItem } from '@/lib/commands/recent';
 import { CreateIssueModal } from './CreateIssueModal';
+
+// Dynamically import KanbanBoard to code-split the heavy drag-and-drop component
+const KanbanBoard = dynamic(
+  () => import('@stride/ui').then((mod) => ({ default: mod.KanbanBoard })),
+  {
+    ssr: false, // Disable SSR since it's an interactive component
+    loading: () => (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
+          <p className="mt-4 text-foreground-secondary dark:text-foreground-dark-secondary">
+            Loading board...
+          </p>
+        </div>
+      </div>
+    ),
+  }
+);
 
 export interface KanbanBoardClientProps {
   /**
@@ -224,7 +243,7 @@ export function KanbanBoardClient({
 
   return (
     <>
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-6 flex items-center justify-between">
         <p className="text-sm text-foreground-secondary dark:text-foreground-dark-secondary">
           Drag and drop issues to change their status
         </p>
@@ -232,7 +251,7 @@ export function KanbanBoardClient({
           Create New Issue
         </Button>
       </div>
-      <div className="h-[calc(100vh-12rem)]">
+      <div className="h-[calc(100vh-16rem)]">
         <KanbanBoard
           issues={issues}
           projectConfig={projectConfig}

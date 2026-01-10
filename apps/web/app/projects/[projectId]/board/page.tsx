@@ -7,6 +7,7 @@ import { canUpdateIssue } from '@/lib/auth/permissions';
 import { requireAuth } from '@/middleware/auth';
 import { headers } from 'next/headers';
 import { KanbanBoardClient } from '@/components/KanbanBoardClient';
+import { PageContainer } from '@/components/templates/PageContainer';
 
 interface PageParams {
   params: Promise<{
@@ -85,14 +86,17 @@ export default async function KanbanBoardPage({ params }: PageParams) {
   const canEdit = canUpdateIssue(session.role);
 
   return (
-    <div className="py-6">
+    // Kanban board uses full-width container for optimal column visibility
+    // This allows 6-7+ columns (at 280-320px each) to be visible on large screens
+    // before horizontal scrolling occurs, following UX best practices for kanban boards
+    <PageContainer variant="full" className="py-6">
       <KanbanBoardClient
         projectId={projectId}
         initialIssues={typedIssues}
         projectConfig={projectConfig as ProjectConfig}
         canEdit={canEdit}
       />
-    </div>
+    </PageContainer>
   );
 }
 

@@ -126,9 +126,17 @@ model Issue {
   @@unique([projectId, key])
   @@index([projectId])
   @@index([status])
+  @@index([type])
+  @@index([priority])
+  @@index([reporterId])
   @@index([assigneeId])
   @@index([cycleId])
   @@index([createdAt])
+  @@index([updatedAt])
+  @@index([projectId, status])
+  @@index([projectId, type])
+  @@index([projectId, priority])
+  @@index([projectId, updatedAt])
   @@index([customFields], type: Gin)
   @@map("issues")
 }
@@ -170,6 +178,7 @@ model Comment {
   @@index([issueId])
   @@index([userId])
   @@index([createdAt])
+  @@index([issueId, createdAt])
   @@map("comments")
 }
 
@@ -189,6 +198,7 @@ model Attachment {
 
   @@index([issueId])
   @@index([userId])
+  @@index([issueId, createdAt])
   @@map("attachments")
 }
 
