@@ -30,11 +30,14 @@ export default async function ProjectsLayout({
     redirect('/login');
   }
 
-  // Check if we're on a board page to enable full-width layout
-  // Note: In Next.js, we can't directly access pathname in server components,
-  // so we'll use a client component wrapper for this specific case
-  // For now, we'll let the board page handle its own width extension
-  const breadcrumbs: BreadcrumbItem[] = [{ label: 'Projects' }];
+  // Breadcrumbs for projects listing page only
+  // Note: For project detail pages (/projects/[projectId]/...), breadcrumbs are rendered
+  // directly in ProjectLayoutWrapper to avoid React Context hierarchy issues.
+  // Project pages will render their own breadcrumbs, so we don't pass breadcrumbs here
+  // to avoid conflicts. DashboardLayout's BreadcrumbWrapperClient will handle the listing page.
+  const breadcrumbs: BreadcrumbItem[] = [
+    { label: 'Projects' }, // Not clickable since we're already on this page
+  ];
 
   return (
     <DashboardLayout breadcrumbs={breadcrumbs}>

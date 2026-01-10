@@ -1,13 +1,15 @@
 import { ReactNode } from 'react';
 import { TopBar } from '@stride/ui';
 import { Sidebar } from '@stride/ui';
-import { Breadcrumbs, BreadcrumbItem } from '@stride/ui';
+import { BreadcrumbItem } from '@stride/ui';
+import { BreadcrumbWrapperClient } from '@/components/features/projects/BreadcrumbWrapperClient';
 
 export interface DashboardLayoutProps {
   children: ReactNode;
   currentProjectId?: string | null;
-  breadcrumbs?: BreadcrumbItem[];
+  breadcrumbs?: BreadcrumbItem[] | ReactNode;
 }
+
 
 /**
  * DashboardLayout component
@@ -40,11 +42,8 @@ export function DashboardLayout({
           {/* Pages should use PageContainer for width management */}
           <div className="py-6">
             {/* Breadcrumbs */}
-            {breadcrumbs && breadcrumbs.length > 0 && (
-              <div className="px-4 sm:px-6 lg:px-8 mb-4">
-                <Breadcrumbs items={breadcrumbs} />
-              </div>
-            )}
+            {/* Priority: Project breadcrumbs (from context) > explicit breadcrumbs prop */}
+            <BreadcrumbWrapperClient breadcrumbs={breadcrumbs} />
 
             {/* Page content - pages control their own width via PageContainer */}
             {children}

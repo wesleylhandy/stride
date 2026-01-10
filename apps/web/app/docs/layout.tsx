@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { requireAuth } from '@/middleware/auth';
 import { headers } from 'next/headers';
 import { DashboardLayout } from '@/components/templates/DashboardLayout';
-import { BreadcrumbItem } from '@stride/ui';
+import { DocsBreadcrumbs } from '@/components/features/docs/DocsBreadcrumbs';
 
 interface DocsLayoutProps {
   children: ReactNode;
@@ -14,6 +14,11 @@ interface DocsLayoutProps {
  * 
  * Wraps all /docs routes with DashboardLayout for consistent navigation.
  * Provides authentication check and breadcrumbs.
+ * 
+ * Breadcrumbs are generated dynamically based on the current route:
+ * - Documentation > Configuration
+ * - Documentation > Installation
+ * etc.
  */
 export default async function DocsLayout({ 
   children,
@@ -29,14 +34,13 @@ export default async function DocsLayout({
     redirect('/login');
   }
 
-  // Breadcrumbs for documentation
-  const breadcrumbs: BreadcrumbItem[] = [
-    { label: 'Projects', href: '/projects' },
-    { label: 'Documentation' },
-  ];
+  // Breadcrumbs are generated client-side via DocsBreadcrumbs component
+  // Since DocsBreadcrumbs is a client component, we need to pass it as a ReactNode
+  // DashboardLayout will handle rendering it via BreadcrumbWrapperClient
+  const docsBreadcrumbsComponent = <DocsBreadcrumbs />;
 
   return (
-    <DashboardLayout breadcrumbs={breadcrumbs}>
+    <DashboardLayout breadcrumbs={docsBreadcrumbsComponent}>
       {children}
     </DashboardLayout>
   );

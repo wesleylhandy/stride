@@ -9,7 +9,13 @@ import type { BreadcrumbItem } from '@stride/ui';
  * Rules:
  * - "Projects" is always clickable (level 1)
  * - Project name is never clickable (current location, level 2)
- * - Routes at level 3+ are clickable only if they have children routes
+ * - Routes at level 3+ are clickable if there are more segments after them
+ *   (i.e., if we're on a deeper page, we can navigate back to the parent landing page)
+ * 
+ * General Rule: A breadcrumb segment is clickable if:
+ *   - There are more segments in the pathname after it (we're on a child page)
+ *   - This allows navigation back to landing pages (e.g., from /projects/[id]/issues/KEY-1 
+ *     back to /projects/[id]/issues)
  * 
  * Detection Strategy (Hybrid):
  * 1. Check override map for explicit configurations
@@ -105,15 +111,16 @@ export function routeHasChildren(
     return true;
   }
 
-  // Check if it's a dynamic segment pattern (e.g., [issueKey])
-  // Dynamic segments might have children if pathname continues beyond them
-  // Conservative: only if it looks like a dynamic route segment
-  // In practice, we detect this by checking if pathname continues
-  if (currentSegments.length > routeSegments.length + 1) {
-    // Pathname continues beyond next segment, so it might have children
-    // Be conservative - only return true if we have strong signal
-    // For now, we'll be conservative and return false for unknown patterns
-    // Can be enhanced with more heuristics as needed
+  // Check if it's a dynamic segment (UUID or issue key format)
+  // Dynamic segments indicate children if pathname continues beyond them
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const issueKeyPattern = /^[A-Z]+-\d+$/;
+  
+  const isDynamicSegment = uuidPattern.test(nextSegment) || issueKeyPattern.test(nextSegment);
+  
+  // If it's a dynamic segment and pathname continues, it likely has children
+  if (isDynamicSegment && currentSegments.length > routeSegments.length + 1) {
+    return true;
   }
 
   return false;
@@ -219,19 +226,25 @@ export function generateProjectBreadcrumbs(
   const segments = pathname.split('/').filter(Boolean);
   
   // Find project segment index
+  // Project ID should be at index 1 (segments[0] = 'projects', segments[1] = projectId)
   const projectIndex = segments.findIndex((seg, idx) => {
-    // Project ID is usually at index 1 (after 'projects')
-    // But be flexible - check if it's a UUID
+    // Project ID is at index 1 (after 'projects')
+    // Check if it matches the provided projectId (UUID format)
     const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    return idx === 1 && uuidPattern.test(seg) && seg === projectId;
+    if (idx === 1 && uuidPattern.test(seg)) {
+      // Match by ID if provided, or just check UUID format
+      return projectId ? seg === projectId : true;
+    }
+    return false;
   });
   
   if (projectIndex === -1) {
     // Project not found in pathname, return just Projects
+    // This shouldn't happen if we're on a project page, but handle gracefully
     return items;
   }
   
-  // Add project name (never clickable - it's where you are)
+  // Always add project name (never clickable - it's where you are)
   items.push({
     label: projectName,
     // No href - not clickable
@@ -250,24 +263,31 @@ export function generateProjectBreadcrumbs(
     const nextSegment = segments[i + 1];
     
     // Determine label for this segment
-    const label = SEGMENT_LABELS[segment] || segment;
+    // Handle issue keys specially - use the key as-is
+    let label: string;
+    if (/^[A-Z]+-\d+$/.test(segment)) {
+      // Issue key format (PROJ-123) - use as-is
+      label = segment;
+    } else {
+      // Use segment label mapping or format the segment name
+      label = SEGMENT_LABELS[segment] || getSegmentLabel(segment);
+    }
     
     // Build the route path up to this segment
     const segmentRoutePath = `${currentRoutePath}/${segment}`;
     
-    // Check if this segment has children
-    const hasChildren = nextSegment !== undefined 
-      ? routeHasChildren(pathname, segmentRoutePath)
-      : false;
+    // General rule: Segment is clickable if there are more segments after it
+    // This allows navigation back to landing pages (e.g., from /issues/KEY-1 back to /issues)
+    // If there's a next segment, we're on a deeper page and can navigate back
+    const isClickable = nextSegment !== undefined;
     
-    // If it has children, make it clickable
-    if (hasChildren) {
+    if (isClickable) {
       items.push({
         label,
         href: segmentRoutePath,
       });
     } else {
-      // Terminal segment - not clickable
+      // Terminal segment (last segment in pathname) - not clickable
       items.push({
         label,
         // No href - not clickable

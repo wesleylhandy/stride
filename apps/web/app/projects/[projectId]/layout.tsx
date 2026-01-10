@@ -4,6 +4,7 @@ import { requireAuth } from '@/middleware/auth';
 import { headers } from 'next/headers';
 import { projectRepository } from '@stride/database';
 import { ProjectLayout } from '@/components/templates/ProjectLayout';
+import { ProjectBreadcrumbs } from '@/components/features/projects/ProjectBreadcrumbs';
 
 interface ProjectLayoutWrapperProps {
   children: ReactNode;
@@ -18,6 +19,9 @@ interface ProjectLayoutWrapperProps {
  * Wraps all /projects/[projectId] routes with project-specific layout.
  * Note: Parent layout (/projects/layout.tsx) already provides DashboardLayout,
  * so we only add project-specific header and tabs here.
+ * 
+ * Renders breadcrumbs directly above ProjectLayout to avoid React Context
+ * hierarchy issues (context can't flow upward to DashboardLayout).
  */
 export default async function ProjectLayoutWrapper({
   children,
@@ -43,13 +47,20 @@ export default async function ProjectLayoutWrapper({
   }
 
   return (
-    <ProjectLayout
-      projectId={projectId}
-      projectKey={project.key}
-      projectName={project.name}
-    >
-      {children}
-    </ProjectLayout>
+    <>
+      {/* Render breadcrumbs directly here - they'll appear above ProjectLayout */}
+      {/* Positioned to match DashboardLayout breadcrumb container */}
+      <div className="px-4 sm:px-6 lg:px-8 mb-4">
+        <ProjectBreadcrumbs projectId={projectId} projectName={project.name} />
+      </div>
+      <ProjectLayout
+        projectId={projectId}
+        projectKey={project.key}
+        projectName={project.name}
+      >
+        {children}
+      </ProjectLayout>
+    </>
   );
 }
 
