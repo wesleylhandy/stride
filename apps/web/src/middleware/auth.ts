@@ -17,22 +17,20 @@ export interface AuthenticatedRequest extends NextRequest {
 }
 
 /**
- * Middleware to verify authentication (for API routes)
+ * Middleware to verify authentication (for API routes only)
  * Returns 401 if not authenticated
- * Also handles Server Components calling with { headers: Headers }
+ * 
+ * NOTE: For server components, use requireAuthServer() instead.
  */
 export async function requireAuth(
-  request: NextRequest | { headers: Headers },
+  request: NextRequest,
 ): Promise<NextResponse | SessionPayload> {
-  let token: string | null = null;
+  // Check cookie first (primary auth method for API routes)
+  const sessionCookie = request.cookies.get('session');
+  let token = sessionCookie?.value || null;
 
-  // Check if this is a NextRequest (API route) - has cookies property
-  if ('cookies' in request && request.cookies && typeof request.cookies.get === 'function') {
-    // NextRequest from API route - use cookies API
-    const sessionCookie = request.cookies.get('session');
-    token = sessionCookie?.value || getTokenFromHeaders(request.headers);
-  } else if ('headers' in request && request.headers instanceof Headers) {
-    // Plain object with headers (Server Component) - use headers directly
+  // Fallback to Authorization header (for programmatic API access)
+  if (!token) {
     token = getTokenFromHeaders(request.headers);
   }
 
@@ -57,16 +55,20 @@ export async function requireAuth(
 
 /**
  * Server Component authentication helper
- * Accepts Headers directly (from next/headers) instead of NextRequest
+ * Uses cookies() API from next/headers (Next.js 16+ best practice)
  * Returns null if not authenticated (Server Components should redirect instead of returning errors)
+ * 
+ * @param headers - Headers from next/headers (used for type compatibility, cookies() is primary)
+ * @returns Session payload or null if not authenticated
  */
 export async function requireAuthServer(
-  headers: Headers,
+  _headers: Headers,
 ): Promise<SessionPayload | null> {
-  // In Server Components, use cookies() from next/headers for better cookie handling
+  // Use cookies() API from next/headers (Next.js 16+ recommended approach)
+  // This avoids manual cookie parsing and handles edge cases properly
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get('session');
-  const token = sessionCookie?.value || getTokenFromHeaders(headers);
+  const token = sessionCookie?.value;
 
   if (!token) {
     return null;
@@ -77,15 +79,20 @@ export async function requireAuthServer(
 }
 
 /**
- * Optional auth middleware
+ * Optional auth middleware (for API routes)
  * Attaches user info if authenticated, but doesn't require it
  */
 export async function optionalAuth(
   request: NextRequest,
 ): Promise<SessionPayload | null> {
-  // In Next.js App Router, use request.cookies to read cookies
+  // Check cookie first
   const sessionCookie = request.cookies.get('session');
-  const token = sessionCookie?.value || getTokenFromHeaders(request.headers);
+  let token = sessionCookie?.value || null;
+
+  // Fallback to Authorization header
+  if (!token) {
+    token = getTokenFromHeaders(request.headers);
+  }
 
   if (!token) {
     return null;

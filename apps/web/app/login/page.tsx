@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Input, AuthForm, useToast } from "@stride/ui";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { getCsrfHeaders } from "@/lib/utils/csrf";
 
 // Email validation regex
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -152,6 +153,7 @@ export default function LoginPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...getCsrfHeaders(),
         },
         body: JSON.stringify({
           email: formData.email,

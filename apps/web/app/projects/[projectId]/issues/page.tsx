@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { requireAuth } from '@/middleware/auth';
+import { requireAuthServer } from '@/middleware/auth';
 import { headers } from 'next/headers';
 import { projectRepository, issueRepository, prisma } from '@stride/database';
 import type { ProjectConfig, StatusConfig } from '@stride/types';
@@ -25,11 +25,9 @@ export default async function IssuesListPage({ params }: PageParams) {
 
   // Authenticate user
   const headersList = await headers();
-  const authResult = await requireAuth({
-    headers: headersList,
-  } as any);
+  const session = await requireAuthServer(headersList);
 
-  if (!authResult || 'status' in authResult) {
+  if (!session) {
     notFound();
   }
 

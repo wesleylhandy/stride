@@ -4,7 +4,7 @@ import { projectRepository, issueRepository } from '@stride/database';
 import type { Issue, ProjectConfig, IssueType, Priority } from '@stride/types';
 import type { ProjectConfig as YAMLProjectConfig } from '@stride/yaml-config';
 import { canUpdateIssue } from '@/lib/auth/permissions';
-import { requireAuth } from '@/middleware/auth';
+import { requireAuthServer } from '@/middleware/auth';
 import { headers } from 'next/headers';
 import { KanbanBoardClient } from '@/components/KanbanBoardClient';
 import { PageContainer } from '@stride/ui';
@@ -31,15 +31,11 @@ export default async function KanbanBoardPage({ params }: PageParams) {
 
   // Get auth (layout handles redirect, but we need session for permissions)
   const headersList = await headers();
-  const authResult = await requireAuth({
-    headers: headersList,
-  } as any);
+  const session = await requireAuthServer(headersList);
 
-  if (!authResult || 'status' in authResult) {
+  if (!session) {
     notFound();
   }
-
-  const session = authResult;
 
   // Verify project exists
   const project = await projectRepository.findById(projectId);

@@ -3,7 +3,7 @@ import { IssueDetailClient } from '@/components/IssueDetailClient';
 import { projectRepository, issueRepository, issueBranchRepository } from '@stride/database';
 import type { Issue, ProjectConfig, IssueType, Priority } from '@stride/types';
 import { canUpdateIssue } from '@/lib/auth/permissions';
-import { requireAuth } from '@/middleware/auth';
+import { requireAuthServer } from '@/middleware/auth';
 import { headers } from 'next/headers';
 import { PageContainer } from '@stride/ui';
 
@@ -25,15 +25,11 @@ export default async function IssueDetailPage({ params }: PageParams) {
 
   // Get auth (this will redirect if not authenticated)
   const headersList = await headers();
-  const authResult = await requireAuth({
-    headers: headersList,
-  } as any);
+  const session = await requireAuthServer(headersList);
 
-  if (!authResult || 'status' in authResult) {
+  if (!session) {
     notFound();
   }
-
-  const session = authResult;
 
   // Fetch project to verify it exists
   const project = await projectRepository.findById(projectId);

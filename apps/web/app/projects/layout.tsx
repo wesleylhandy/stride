@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
-import { requireAuth } from '@/middleware/auth';
+import { requireAuthServer } from '@/middleware/auth';
 import { headers } from 'next/headers';
 import { DashboardLayout } from '@/components/templates/DashboardLayout';
 import { BreadcrumbItem } from '@stride/ui';
@@ -21,12 +21,10 @@ export default async function ProjectsLayout({
 }: ProjectsLayoutProps) {
   // Authenticate user
   const headersList = await headers();
-  const authResult = await requireAuth({
-    headers: headersList,
-  } as any);
+  const session = await requireAuthServer(headersList);
 
   // Redirect to login if not authenticated
-  if (!authResult || 'status' in authResult) {
+  if (!session) {
     redirect('/login');
   }
 

@@ -13,10 +13,17 @@ const KEY_LENGTH = 32; // 256 bits
 const ITERATIONS = 100000; // PBKDF2 iterations
 
 /**
- * Get encryption key from environment or generate from JWT_SECRET
+ * Get encryption key from environment
+ * Uses ENCRYPTION_SECRET if set, otherwise falls back to JWT_SECRET
+ * Both must be set in environment (validated at session.ts startup)
  */
 function getEncryptionKey(): Buffer {
-  const secret = process.env.ENCRYPTION_SECRET || process.env.JWT_SECRET || "change-me-in-production";
+  const secret = process.env.ENCRYPTION_SECRET || process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error(
+      "ENCRYPTION_SECRET or JWT_SECRET environment variable is required for encryption.",
+    );
+  }
 
   // Derive a consistent key from the secret
   return crypto.pbkdf2Sync(secret, "stride-encryption-salt", ITERATIONS, KEY_LENGTH, "sha512");

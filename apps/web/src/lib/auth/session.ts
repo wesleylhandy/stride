@@ -2,7 +2,16 @@ import { prisma } from "@stride/database";
 import jwt from "jsonwebtoken";
 import type { UserRole } from "@stride/types";
 
-const JWT_SECRET = process.env.JWT_SECRET || "change-me-in-production";
+// Validate JWT_SECRET - fail fast if not set (security critical)
+const JWT_SECRET_ENV = process.env.JWT_SECRET;
+if (!JWT_SECRET_ENV) {
+  throw new Error(
+    "JWT_SECRET environment variable is required. Set it to a secure random value (min 32 characters).",
+  );
+}
+// After validation, we know JWT_SECRET_ENV is a string
+const JWT_SECRET: string = JWT_SECRET_ENV;
+
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
 const SESSION_EXPIRES_IN_DAYS = 7;
 
@@ -144,26 +153,20 @@ export async function cleanupExpiredSessions(): Promise<number> {
 }
 
 /**
- * Get session from request headers
- * Looks for token in Authorization header or cookie
+ * Get session token from Authorization header
+ * For API routes that use Bearer token authentication
+ * 
+ * NOTE: Do NOT use this for cookie-based authentication in server components.
+ * Use cookies() API from next/headers instead.
+ * 
  * @param headers - Request headers
  * @returns Token string or null
  */
 export function getTokenFromHeaders(headers: Headers): string | null {
-  // Check Authorization header
+  // Check Authorization header (Bearer token)
   const authHeader = headers.get("authorization");
   if (authHeader?.startsWith("Bearer ")) {
     return authHeader.substring(7);
-  }
-
-  // Check cookie (for browser-based auth)
-  const cookieHeader = headers.get("cookie");
-  if (cookieHeader) {
-    const cookies = cookieHeader.split(";").map((c) => c.trim());
-    const sessionCookie = cookies.find((c) => c.startsWith("session="));
-    if (sessionCookie) {
-      return sessionCookie.substring(8);
-    }
   }
 
   return null;

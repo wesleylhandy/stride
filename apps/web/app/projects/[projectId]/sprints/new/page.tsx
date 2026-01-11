@@ -2,7 +2,7 @@ import { notFound, redirect } from 'next/navigation';
 import { cycleRepository, issueRepository, projectRepository } from '@stride/database';
 import type { Issue, Cycle, IssueType, Priority } from '@stride/types';
 import { canUpdateCycle, canViewCycle } from '@/lib/auth/permissions';
-import { requireAuth } from '@/middleware/auth';
+import { requireAuthServer } from '@/middleware/auth';
 import { headers } from 'next/headers';
 import { SprintPlanningClient } from '@/components/SprintPlanningClient';
 import { BurndownChartClient } from '@/components/BurndownChartClient';
@@ -39,15 +39,11 @@ export default async function SprintPlanningPage({
 
   // Get auth
   const headersList = await headers();
-  const authResult = await requireAuth({
-    headers: headersList,
-  } as any);
+  const session = await requireAuthServer(headersList);
 
-  if (!authResult || 'status' in authResult) {
+  if (!session) {
     notFound();
   }
-
-  const session = authResult;
 
   // Check permission to view cycles
   if (!canViewCycle(session.role)) {

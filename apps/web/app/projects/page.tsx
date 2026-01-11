@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { requireAuth } from '@/middleware/auth';
+import { requireAuthServer } from '@/middleware/auth';
 import { projectRepository } from '@stride/database';
 import { headers } from 'next/headers';
 import { ProjectCard } from '@/components/ProjectCard';
@@ -45,12 +45,10 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
     // Note: Layout handles authentication and redirects
     // We still need to check auth here for server component safety
     const headersList = await headers();
-    const authResult = await requireAuth({
-      headers: headersList,
-    } as any);
+    const session = await requireAuthServer(headersList);
 
     // Redirect to login if not authenticated (T004)
-    if (!authResult || 'status' in authResult) {
+    if (!session) {
       redirect('/login');
     }
 
@@ -113,8 +111,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
   }
 }
 
-// Cache configuration for static project data (T026)
-// Projects listing is user-specific, so we use dynamic rendering
-// but can add revalidation for better performance
-export const revalidate = 60; // Revalidate every 60 seconds
+// Force dynamic rendering - this route requires authentication
+// and fetches user-specific data, so it cannot be statically generated
+export const dynamic = 'force-dynamic';
 

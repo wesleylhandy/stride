@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { notFound } from 'next/navigation';
-import { requireAuth } from '@/middleware/auth';
+import { requireAuthServer } from '@/middleware/auth';
 import { headers } from 'next/headers';
 import { projectRepository } from '@stride/database';
 
@@ -29,11 +29,9 @@ export default async function ProjectSettingsLayout({
 
   // Authenticate user
   const headersList = await headers();
-  const authResult = await requireAuth({
-    headers: headersList,
-  } as any);
+  const session = await requireAuthServer(headersList);
 
-  if (!authResult || 'status' in authResult) {
+  if (!session) {
     notFound();
   }
 

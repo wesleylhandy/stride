@@ -60,10 +60,16 @@ export async function POST(request: Request) {
     );
 
     // Set HTTP-only cookie
+    // secure flag should be true in production (HTTPS required)
+    // Use COOKIE_SECURE env var to override, or detect HTTPS from request
+    const isSecure =
+      process.env.COOKIE_SECURE === "true" ||
+      (process.env.NODE_ENV === "production" &&
+        process.env.COOKIE_SECURE !== "false");
     const cookieStore = await cookies();
     cookieStore.set("session", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: isSecure,
       sameSite: "lax",
       maxAge: 60 * 60 * 24 * 7, // 7 days
       path: "/",
