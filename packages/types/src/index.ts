@@ -5,7 +5,8 @@ export * from './issue';
 export * from './cycle';
 export * from './api';
 export * from './config';
-export * from './prisma';
+// Prisma types are exported via ./prisma subpath only (requires @stride/database)
+// export * from './prisma';
 export * from './logger';
 export * from './invitation';
 

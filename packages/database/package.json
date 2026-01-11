@@ -5,6 +5,7 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
+    "build": "pnpm db:generate",
     "db:generate": "prisma generate",
     "db:migrate": "bash scripts/migrate.sh",
     "db:studio": "prisma studio",
