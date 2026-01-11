@@ -20,6 +20,7 @@
 **How it works**: Marketing site provides overview + links to GitHub for full docs.
 
 **Pros**:
+
 - ✅ Zero duplication - single source of truth in GitHub
 - ✅ Always up-to-date (no sync needed)
 - ✅ Lower maintenance (edit once in GitHub)
@@ -29,6 +30,7 @@
 - ✅ Smaller marketing site bundle
 
 **Cons**:
+
 - ❌ External navigation (leaves marketing site)
 - ❌ Less SEO value (content not on your domain)
 - ❌ GitHub UI/theme may not match brand
@@ -42,6 +44,7 @@
 **How it works**: Copy all markdown to marketing site, render with MDX.
 
 **Pros**:
+
 - ✅ Better SEO (content on your domain)
 - ✅ Consistent branding/UX
 - ✅ Faster navigation (no external redirect)
@@ -51,6 +54,7 @@
 - ✅ Offline viewing possible (if PWA)
 
 **Cons**:
+
 - ❌ **Duplication risk** (must sync manually or via build)
 - ❌ Larger bundle size
 - ❌ More complex build process
@@ -60,11 +64,13 @@
 
 ### Option 3: Hybrid Approach (Recommended)
 
-**How it works**: 
+**How it works**:
+
 - Embed **core/essential** docs (quick start, overview, common patterns)
 - Link to GitHub for **detailed** technical reference
 
 **Implementation**:
+
 ```
 Marketing Site:
   /docs/configuration
@@ -77,6 +83,7 @@ Marketing Site:
 ```
 
 **Pros**:
+
 - ✅ SEO for essential content (quick start, overview)
 - ✅ Better UX for common tasks (stays on site)
 - ✅ Detailed docs remain centralized (no duplication)
@@ -84,6 +91,7 @@ Marketing Site:
 - ✅ Clear separation: marketing vs technical
 
 **Cons**:
+
 - ⚠️ Some duplication (but minimal, only essential content)
 - ⚠️ Need sync strategy for embedded portions
 - ⚠️ Two sources for configuration docs (but different purposes)
@@ -93,12 +101,14 @@ Marketing Site:
 ### SEO Impact
 
 **Current (GitHub Links)**:
+
 - ❌ Search results show GitHub, not your domain
 - ❌ "How to configure Stride" queries → GitHub results
 - ❌ Less brand recognition in search results
 - ❌ GitHub's SEO authority vs your domain
 
 **Embedded**:
+
 - ✅ Your domain ranks for documentation queries
 - ✅ Better brand association ("Stride configuration guide")
 - ✅ Internal linking improves site authority
@@ -106,24 +116,28 @@ Marketing Site:
 - ✅ Rich snippets possible (breadcrumbs, structured data)
 
 **Hybrid**:
+
 - ✅ Core queries rank on your domain
 - ✅ Detailed technical queries may still go to GitHub (acceptable trade-off)
 
 ### User Experience
 
 **Current (GitHub Links)**:
+
 - Context switch (your site → GitHub)
 - Different UI/theme
 - GitHub's navigation vs your navigation
 - Users might explore GitHub instead of returning
 
 **Embedded**:
+
 - Seamless experience (stays on your site)
 - Consistent navigation/branding
 - Can add search, filters, interactive demos
 - Faster (no redirect)
 
 **Hybrid**:
+
 - Core tasks seamless (embedded)
 - Power users can access detailed docs (GitHub)
 - Progressive disclosure pattern
@@ -131,18 +145,21 @@ Marketing Site:
 ### Maintenance Complexity
 
 **Current (GitHub Links)**:
+
 - ✅ Edit once in GitHub
 - ✅ PR workflow for contributions
 - ✅ Version control is source of truth
 - ✅ No sync needed
 
 **Embedded**:
+
 - ❌ Must sync changes (manual or automated)
 - ❌ Risk of divergence
 - ❌ Two places to update
 - ⚠️ Could automate with build script (reads from `docs/` at build time)
 
 **Hybrid**:
+
 - ⚠️ Minimal sync (only essential content)
 - ✅ Detailed docs stay in GitHub only
 - ✅ Can automate embedded portion sync
@@ -150,17 +167,20 @@ Marketing Site:
 ### Build & Deployment
 
 **Current (GitHub Links)**:
+
 - ✅ Simple (no doc processing)
 - ✅ Fast builds
 - ✅ Small bundle
 
 **Embedded**:
+
 - ⚠️ Must process markdown → MDX/HTML
 - ⚠️ Larger bundle (all docs included)
 - ⚠️ Slower builds (markdown processing)
 - ✅ But: Static generation = fast runtime
 
 **Hybrid**:
+
 - ⚠️ Some processing (but limited)
 - ✅ Most benefits of embedded
 - ✅ Lower complexity than full embedding
@@ -179,12 +199,14 @@ Marketing Site:
 #### Phase 1: Embed Essential Content
 
 **Pages to embed** (read from `docs/configuration/` at build time):
+
 - `/docs/configuration` - Overview + Quick Start (embedded)
 - `/docs/configuration/reference` - Full reference (GitHub link)
-- `/docs/configuration/examples` - Examples (GitHub link)  
+- `/docs/configuration/examples` - Examples (GitHub link)
 - `/docs/configuration/troubleshooting` - Troubleshooting (GitHub link)
 
 **Sync mechanism**:
+
 ```typescript
 // Build-time script: apps/site/scripts/sync-docs.ts
 // Reads from docs/configuration/reference.md
@@ -195,6 +217,7 @@ Marketing Site:
 #### Phase 2: Enhanced Embedded Pages
 
 Add to embedded pages:
+
 - Search functionality
 - Interactive code examples
 - Copy-to-clipboard
@@ -210,12 +233,14 @@ Add to embedded pages:
 ### Content Selection for Embedding
 
 **Embed** (essential for discovery/SEO):
+
 - Overview/Introduction
 - Quick Start guide
 - Common patterns (basic workflows)
 - Key concepts
 
 **Link to GitHub** (detailed technical):
+
 - Complete schema reference
 - All examples
 - Troubleshooting guide
@@ -235,22 +260,22 @@ async function getEmbeddedContent() {
   // Read from centralized source at build time
   const docPath = join(process.cwd(), '..', '..', 'docs', 'configuration', 'reference.md');
   const fullDoc = await readFile(docPath, 'utf-8');
-  
+
   // Extract only "Overview" and "Quick Start" sections
   const overview = extractSection(fullDoc, 'Overview');
   const quickStart = extractSection(fullDoc, 'Quick Start');
-  
+
   return { overview, quickStart };
 }
 
 export default async function ConfigurationPage() {
   const { overview, quickStart } = await getEmbeddedContent();
-  
+
   return (
     <div>
       <MarkdownRenderer content={overview} />
       <MarkdownRenderer content={quickStart} />
-      
+
       <section>
         <h2>Full Documentation</h2>
         <p>For complete reference:</p>
@@ -266,6 +291,7 @@ export default async function ConfigurationPage() {
 ```
 
 **Build-time sync**:
+
 - Markdown files read during Next.js build
 - Static generation (SSG) ensures fast runtime
 - No runtime file system access needed
@@ -278,38 +304,41 @@ If you want all docs embedded but with single source of truth:
 **Strategy**: Read from `docs/configuration/` at build time, generate static pages.
 
 **Implementation**:
+
 ```typescript
 // next.config.ts
 async function generateStaticParams() {
-  const docsDir = join(process.cwd(), '..', '..', 'docs', 'configuration');
+  const docsDir = join(process.cwd(), "..", "..", "docs", "configuration");
   const files = await readdir(docsDir);
-  
+
   return files
-    .filter(f => f.endsWith('.md'))
-    .map(f => ({ slug: f.replace('.md', '') }));
+    .filter((f) => f.endsWith(".md"))
+    .map((f) => ({ slug: f.replace(".md", "") }));
 }
 ```
 
 **Pros**:
+
 - ✅ All docs embedded (better SEO)
 - ✅ Single source of truth (read from `docs/` at build)
 - ✅ No manual sync (automatic)
 
 **Cons**:
+
 - ⚠️ Larger bundle
 - ⚠️ Slower builds
 - ⚠️ More complex build process
 
 ## Decision Matrix
 
-| Factor | GitHub Links | Full Embed | Hybrid | Build-Time Sync All |
-|--------|--------------|------------|--------|---------------------|
-| **SEO** | ⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| **UX** | ⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| **Maintainability** | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
-| **Build Complexity** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ |
-| **Bundle Size** | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ |
-| **Single Source of Truth** | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| Factor                     | GitHub Links | Full Embed | Hybrid   | Build-Time Sync All |
+| -------------------------- | ------------ | ---------- | -------- | ------------------- |
+| **SEO**                    | ⭐⭐         | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐          |
+| **UX**                     | ⭐⭐         | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐          |
+| **Maintainability**        | ⭐⭐⭐⭐⭐   | ⭐⭐       | ⭐⭐⭐⭐ | ⭐⭐⭐⭐            |
+| **Build Complexity**       | ⭐⭐⭐⭐⭐   | ⭐⭐⭐     | ⭐⭐⭐⭐ | ⭐⭐⭐              |
+| **Bundle Size**            | ⭐⭐⭐⭐⭐   | ⭐⭐       | ⭐⭐⭐⭐ | ⭐⭐⭐              |
+| **Single Source of Truth** | ⭐⭐⭐⭐⭐   | ⭐⭐       | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐          |
 
 ## Final Recommendation
 
@@ -320,6 +349,7 @@ async function generateStaticParams() {
 3. **Long term**: Consider full build-time sync if SEO becomes critical
 
 This balances:
+
 - ✅ SEO benefits (essential content on your domain)
 - ✅ UX benefits (seamless for common tasks)
 - ✅ Maintainability (detailed docs stay centralized)

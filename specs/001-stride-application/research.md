@@ -273,6 +273,87 @@ services:
 
 ---
 
+## 9. AI Gateway Integration and Triage Patterns (Phase 9)
+
+### Decision
+Separate AI Gateway service with standardized request/response format. Issue context payload includes core fields (title, description, status, custom fields, error traces if available, recent comments - last 5-10). UI displays analysis in dedicated expandable section. Permission model: default Admin only, configurable via project configuration.
+
+### Rationale
+- Separation of concerns: AI Gateway as separate service allows independent scaling and deployment
+- Balanced context: Core fields provide sufficient context without overwhelming payload size
+- Flexible permissions: Default Admin-only provides security/cost control while allowing customization
+- Expandable UI: Dedicated section keeps context visible without cluttering default view
+- Natural language assignee suggestions: More flexible than hard-coded user IDs
+
+### Implementation
+
+#### Issue Context Payload Structure
+```typescript
+{
+  issue: {
+    title: string;
+    description: string;
+    status: string;
+    customFields: Record<string, unknown>;
+    errorTraces?: Array<{ message: string; stack: string }>;
+    recentComments: Array<{ author: string; content: string; timestamp: Date }>; // Last 5-10
+  },
+  projectConfig: {
+    priorityValues?: string[]; // If custom priorities exist
+  }
+}
+```
+
+#### AI Gateway Response Format
+```typescript
+{
+  summary: string; // Plain-language root cause summary
+  priority: string; // Priority value (matches project config or standard low/medium/high)
+  suggestedAssignee: string; // Natural language description (e.g., "frontend developer with React experience")
+}
+```
+
+#### Permission Model
+- Default: Admin role only
+- Configuration: `ai_triage_permissions: ['admin', 'member']` in `stride.config.yaml`
+- API route: Check user role against config at route level
+- UI: Hide/disable "Triage with AI" button if user lacks permission
+
+#### UI Component Structure
+- Component: `packages/ui/src/organisms/AITriageAnalysis.tsx`
+- Position: After issue details, before comments in IssueDetail view
+- Behavior: Expandable/collapsible accordion, expanded by default when suggestions available
+- Sections: Summary, Priority Suggestion (with accept/modify), Assignee Suggestion (description + manual selection)
+
+### Alternatives Considered
+- **Full issue history**: Too large payload, unnecessary context
+- **User ID for assignee**: Less flexible, requires user profiles with expertise data
+- **Modal overlay**: Breaks context, requires navigation back to issue
+- **All authenticated users**: Too permissive, higher cost/security risk
+- **Admin only (no override)**: Too restrictive, doesn't allow team customization
+
+### Integration Points
+- Main app → AI Gateway: HTTP client in `apps/web/src/lib/ai/triage.ts`
+- AI Gateway endpoint: `POST /analyze-issue` (documented in `packages/ai-gateway/README.md`)
+- Permission check: API route middleware before processing request
+- Configuration: Read `ai_triage_permissions` from project config
+- Error handling: Graceful degradation - log errors, display user-friendly message, issue remains functional
+
+### Error Handling Patterns
+1. **AI Gateway Unavailable**: Display error in AITriageAnalysis section, allow retry, issue fully functional
+2. **Malformed Response**: Log error server-side, display "Unable to analyze issue", allow retry
+3. **Timeout (30s)**: Display timeout message, allow retry
+4. **Permission Denied**: Hide button in UI, return 403 from API with clear message
+5. **No Project Priority Config**: Use standard low/medium/high mapping
+
+### Future Enhancements
+- Fuzzy matching for assignee descriptions to suggest relevant users
+- Caching of AI analysis results to avoid redundant requests
+- Batch triage for multiple issues
+- Learning from user accept/reject patterns to improve suggestions
+
+---
+
 ## Summary
 
 All NEEDS CLARIFICATION items have been resolved with specific implementation decisions. Each decision includes:

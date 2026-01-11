@@ -14,7 +14,8 @@
 6. **Attachment** - File uploads linked to issues
 7. **RepositoryConnection** - Git repository integrations
 8. **Webhook** - External service webhook configurations
-9. **Session** - User authentication sessions
+9. **AiProviderConfig** - AI provider configuration per project
+10. **Session** - User authentication sessions
 
 ## Entity Definitions
 
@@ -388,7 +389,8 @@ Project
   ├──→ Issue
   ├──→ Cycle
   ├──→ RepositoryConnection
-  └──→ Webhook
+  ├──→ Webhook
+  └──→ AiProviderConfig
 
 Issue
   ├──→ Comment
@@ -409,6 +411,7 @@ Cycle
 - `Issue(projectId, key)` (composite unique)
 - `Cycle(projectId, name)` (composite unique)
 - `RepositoryConnection.repositoryUrl` (unique)
+- `AiProviderConfig(projectId, providerType)` (composite unique)
 - `Session.token` (unique)
 
 ### Foreign Key Constraints

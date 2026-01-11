@@ -1252,46 +1252,224 @@ Where:
 
 ## Phase 9: User Story 7 - AI-Powered Triage and Analysis (P3)
 
-**Goal**: Enable AI-powered issue triage that sends issue context to self-hosted AI gateway and displays analysis, priority suggestions, and assignment recommendations.
+**Goal**: Enable AI-powered issue triage that sends issue context (title, description, status, custom fields, error traces if available, recent 5-10 comments) to self-hosted AI gateway and displays analysis in a dedicated expandable "AI Triage Analysis" section with priority suggestions (matching project config or standard format) and assignee recommendations (natural language description with manual selection).
 
-**Independent Test**: Open an issue with error context, click the AI triage button, verify the request is sent to the configured AI gateway, and confirm that AI-generated analysis (summary, priority, assignment suggestion) is displayed in the issue view. Test succeeds when AI analysis enhances issue understanding without exposing data outside the organization's network.
+**Independent Test**: Open an issue with error context, click the AI triage button (visible only to Admin by default, or roles allowed by project configuration), verify the request is sent to the configured AI gateway with correct payload structure, and confirm that AI-generated analysis (summary, priority, assignment suggestion) is displayed in the expandable "AI Triage Analysis" section positioned after issue details but before comments. Test succeeds when AI analysis enhances issue understanding without exposing data outside the organization's network.
 
-**Dependencies**: Phase 4 complete (issues must exist)
+**Dependencies**: Phase 4 complete (issues must exist), Phase 5 complete (configuration system must exist for priority matching and permission configuration)
+
+### Configuration Schema Updates
+
+- [ ] T511 [US7] Add aiTriageConfig schema to packages/yaml-config/src/schema.ts with fields: permissions (array of 'admin'|'member'|'viewer', default ['admin']), enabled (boolean, default true). Note: YAML config uses snake_case `ai_triage_permissions`, TypeScript schema property is `aiTriageConfig.permissions` (camelCase).
+- [ ] T512 [US7] Update default config generator to include aiTriageConfig defaults in packages/yaml-config/src/default-config.ts
+- [ ] T513 [US7] Add priority values extraction helper function in packages/yaml-config/src/priority-extractor.ts to read custom priority values from project config for AI gateway
+
+**Acceptance Criteria**:
+
+- Configuration schema validates aiTriageConfig correctly
+- Default config includes AI triage settings
+- Priority extraction works for both custom and standard priorities
 
 ### AI Gateway Service
 
-- [ ] T450 [US7] Create AI Gateway package structure in packages/ai-gateway/
-- [ ] T451 [US7] Implement API endpoints in packages/ai-gateway/src/routes.ts
-- [ ] T452 [US7] Support commercial APIs (OpenAI, Anthropic) in packages/ai-gateway/src/providers/commercial.ts
-- [ ] T453 [US7] Support self-hosted LLMs in packages/ai-gateway/src/providers/self-hosted.ts
-- [ ] T454 [US7] Add request/response logging in packages/ai-gateway/src/middleware/logging.ts
-- [ ] T455 [US7] Implement rate limiting in packages/ai-gateway/src/middleware/rate-limit.ts
-- [ ] T456 [US7] Add mock mode for development in packages/ai-gateway/src/providers/mock.ts
+- [ ] T514 [US7] Verify AI Gateway package structure exists in packages/ai-gateway/ (already created in Phase 1, T008)
+- [ ] T515 [US7] Implement POST /analyze-issue endpoint in packages/ai-gateway/src/routes.ts accepting issue context payload (title, description, status, customFields, errorTraces?, recentComments) and projectConfig (priorityValues?)
+- [ ] T516 [US7] Support commercial APIs (OpenAI, Anthropic) in packages/ai-gateway/src/providers/commercial.ts
+- [ ] T517 [US7] Support self-hosted LLMs in packages/ai-gateway/src/providers/self-hosted.ts
+- [ ] T518 [US7] Implement priority mapping logic in packages/ai-gateway/src/mappers/priority.ts: if projectConfig.priorityValues exists, return one of those values; otherwise return standard (low/medium/high)
+- [ ] T519 [US7] Add request/response logging in packages/ai-gateway/src/middleware/logging.ts
+- [ ] T520 [US7] Implement rate limiting in packages/ai-gateway/src/middleware/rate-limit.ts
+- [ ] T521 [US7] Add mock mode for development in packages/ai-gateway/src/providers/mock.ts returning sample responses matching response format
 
 **Acceptance Criteria**:
 
-- AI Gateway service runs
+- AI Gateway service runs and accepts correct payload format
 - Commercial and self-hosted LLMs work
+- Priority mapping matches project config or falls back to standard
 - Logging is functional
 - Rate limiting prevents abuse
+- Mock mode returns properly formatted responses
 
-### AI Triage Integration
+### Issue Context Payload Builder
 
-- [ ] T457 [US7] Create "Triage with AI" button in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T458 [US7] Send issue context to AI Gateway in apps/web/src/lib/ai/triage.ts
-- [ ] T459 [US7] Display AI analysis in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T460 [US7] Show priority suggestions in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T461 [US7] Show assignee suggestions in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T462 [US7] Allow accepting/modifying suggestions in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T463 [US7] Implement graceful degradation when AI unavailable in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T464 [US7] Create AI triage API endpoint in apps/web/app/api/projects/[projectId]/issues/[issueKey]/ai-triage/route.ts
+- [ ] T522 [US7] Create issue context payload builder function in apps/web/src/lib/ai/triage.ts that extracts: title, description, status, customFields (JSON), errorTraces (if available from Root Cause Dashboard - check Phase 8 diagnostics data in issue.customFields or linked error webhook data), recentComments (last 5-10 ordered by timestamp)
+- [ ] T523 [US7] Add project config reader helper in apps/web/src/lib/ai/triage.ts to extract priorityValues from project configuration for AI gateway request
+- [ ] T524 [US7] Create HTTP client for AI Gateway in apps/web/src/lib/ai/triage.ts with error handling and timeout (30 seconds per SC-011)
 
 **Acceptance Criteria**:
 
+- Payload includes all required core fields
+- Error traces included only if available
+- Recent comments limited to last 5-10
+- Priority values extracted from config correctly
+- HTTP client handles errors and timeouts gracefully
+
+### Permission System
+
+- [ ] T525 [US7] Create permission check utility in apps/web/src/lib/ai/permissions.ts that reads aiTriageConfig.permissions from project config (maps YAML snake_case `ai_triage_permissions` to schema camelCase `aiTriageConfig.permissions`), defaults to ['admin'] if not configured, and checks if user role is in allowed list
+- [ ] T526 [US7] Add permission check to AI triage API route in apps/web/app/api/projects/[projectId]/issues/[issueKey]/ai-triage/route.ts returning 403 with clear message if user lacks permission
+
+**Acceptance Criteria**:
+
+- Default permission is Admin only
+- Configuration override works correctly
+- Permission denied returns appropriate 403 error
+- Error messages are user-friendly
+
+### AI Triage API Endpoint
+
+- [ ] T527 [US7] Create AI triage API endpoint in apps/web/app/api/projects/[projectId]/issues/[issueKey]/ai-triage/route.ts
+- [ ] T528 [US7] Implement permission check in API route using permission utility from T525 in apps/web/app/api/projects/[projectId]/issues/[issueKey]/ai-triage/route.ts
+- [ ] T529 [US7] Build issue context payload in API route using payload builder from T522 in apps/web/app/api/projects/[projectId]/issues/[issueKey]/ai-triage/route.ts
+- [ ] T530 [US7] Call AI Gateway HTTP client in API route and return formatted response (summary, priority, suggestedAssignee)
+- [ ] T531 [US7] Add error handling in API route for: AI Gateway unavailable, malformed response, timeout, permission denied
+
+**Acceptance Criteria**:
+
+- API endpoint accepts requests and validates permissions
+- Payload is correctly built and sent to AI Gateway
+- Responses are formatted correctly
+- All error cases handled gracefully with user-friendly messages
+
+### UI Components - Core Structure
+
+- [ ] T532 [US7] Create AITriageAnalysis component in packages/ui/src/organisms/AITriageAnalysis.tsx as expandable accordion section with props: issueId, projectId, analysis (from API), onAccept, onDismiss
+- [ ] T533 [US7] Create AISummary component in packages/ui/src/molecules/AISummary.tsx to display plain-language root cause summary
+- [ ] T534 [US7] Create AIPrioritySuggestion component in packages/ui/src/molecules/AIPrioritySuggestion.tsx to display priority suggestion with accept/modify buttons
+- [ ] T535 [US7] Create AIAssigneeSuggestion component in packages/ui/src/molecules/AIAssigneeSuggestion.tsx to display natural language assignee description with "Select Assignee" button that opens project members selector
+- [ ] T536 [US7] Integrate AITriageAnalysis component into IssueDetail in packages/ui/src/organisms/IssueDetail.tsx positioned after issue details section, before comments section
+- [ ] T537 [US7] Add "Triage with AI" button to IssueDetail header in packages/ui/src/organisms/IssueDetail.tsx with permission check (hide/disable if user lacks permission)
+
+**Acceptance Criteria**:
+
+- AITriageAnalysis section is expandable/collapsible accordion
+- Section positioned correctly (after details, before comments)
+- All sub-components render correctly
+- Button visibility respects permissions
+- Section expands automatically when suggestions available
+
+### UI Components - Integration & State
+
+- [ ] T538 [US7] Add state management for AI triage in IssueDetail using TanStack Query for API calls in packages/ui/src/organisms/IssueDetail.tsx
+- [ ] T539 [US7] Implement "Triage with AI" button click handler that calls API endpoint and updates AITriageAnalysis with results in packages/ui/src/organisms/IssueDetail.tsx
+- [ ] T540 [US7] Implement accept/modify functionality for priority suggestion in AIPrioritySuggestion component in packages/ui/src/molecules/AIPrioritySuggestion.tsx
+- [ ] T541 [US7] Implement assignee selection flow in AIAssigneeSuggestion component: display description, show project members selector on click, allow manual selection in packages/ui/src/molecules/AIAssigneeSuggestion.tsx
+- [ ] T542 [US7] Add loading states for AI triage request in AITriageAnalysis component in packages/ui/src/organisms/AITriageAnalysis.tsx
+- [ ] T543 [US7] Add error display in AITriageAnalysis component for: gateway unavailable, malformed response, timeout, permission denied in packages/ui/src/organisms/AITriageAnalysis.tsx
+- [ ] T544 [US7] Implement retry functionality for failed AI triage requests in AITriageAnalysis component in packages/ui/src/organisms/AITriageAnalysis.tsx
+- [ ] T545 [US7] Style AITriageAnalysis section to match existing design tokens and accordion pattern in packages/ui/src/organisms/AITriageAnalysis.tsx
+
+**Acceptance Criteria**:
+
+- Button triggers API call correctly
+- Loading states display during request
+- Error states display with retry option
+- Priority suggestions can be accepted or modified
+- Assignee selection works with project members list
+- All styling matches design system
+- Issue functionality remains fully available even when AI unavailable
+
+### Error Handling & Edge Cases
+
+- [ ] T546 [US7] Handle AI Gateway unavailable: display error message in AITriageAnalysis section, allow retry, ensure issue remains functional in packages/ui/src/organisms/AITriageAnalysis.tsx
+- [ ] T547 [US7] Handle malformed AI Gateway response: log error server-side, display "Unable to analyze issue" message, allow retry in apps/web/app/api/projects/[projectId]/issues/[issueKey]/ai-triage/route.ts and packages/ui/src/organisms/AITriageAnalysis.tsx
+- [ ] T548 [US7] Handle timeout (30s): display timeout message, allow retry in apps/web/src/lib/ai/triage.ts and packages/ui/src/organisms/AITriageAnalysis.tsx
+- [ ] T549 [US7] Handle permission denied: hide button in UI, return 403 from API with clear message in apps/web/app/api/projects/[projectId]/issues/[issueKey]/ai-triage/route.ts and packages/ui/src/organisms/IssueDetail.tsx
+- [ ] T550 [US7] Handle no project priority config: use standard low/medium/high mapping in packages/ai-gateway/src/mappers/priority.ts
+- [ ] T551 [US7] Handle assignee description with no match: user manually selects from project members list (already handled in T541 - assignee selection flow)
+
+**Acceptance Criteria**:
+
+- All error cases handled gracefully
+- Error messages are user-friendly
+- Retry functionality works for recoverable errors
+- Issue remains fully functional in all error scenarios
+- Permission checks work correctly in both UI and API
+
+**Acceptance Criteria** (Overall Phase 9):
+
 - AI triage works when gateway is available
-- Suggestions are displayed clearly
-- Users can accept/modify suggestions
-- Graceful degradation works (shows error, issue remains functional)
+- Issue context payload includes correct core fields (title, description, status, custom fields, error traces if available, recent 5-10 comments)
+- AI Triage Analysis section displays in correct position (after details, before comments)
+- Priority suggestions match project configuration or use standard format
+- Assignee suggestions display as natural language descriptions with manual selection
+- Permission system defaults to Admin only but allows configuration override
+- All error cases handled with graceful degradation
+- Issue functionality remains fully available when AI unavailable
+
+### Documentation Updates
+
+**Based on Phase 9 Clarifications (Session 2026-01-23)**: Phase 9 requires comprehensive documentation updates to reflect the new AI triage feature and UI-based AI provider configuration. Follow hybrid approach: keep infrastructure-level documentation, add project-level UI configuration sections.
+
+#### AI Providers Integration Documentation Updates
+
+- [ ] T552 [US7] [P] Update docs/integrations/ai-providers.md to add new "Project-Level AI Provider Configuration" section with navigation instructions to Project Settings → Integrations page
+- [ ] T553 [US7] [P] Document UI form fields (API key, endpoint URL, model selection) in docs/integrations/ai-providers.md with descriptions of password-type masked fields and required vs optional fields
+- [ ] T554 [US7] [P] Document model selection workflow in docs/integrations/ai-providers.md: auto-discovery for self-hosted LLMs (Ollama /api/tags), manual selection for cloud providers, model multiselect interface usage
+- [ ] T555 [US7] [P] Document test connection functionality for self-hosted LLMs in docs/integrations/ai-providers.md including optional non-blocking test button workflow
+- [ ] T556 [US7] [P] Document database storage details in docs/integrations/ai-providers.md: encrypted credentials (API keys/tokens), plain text endpoint URLs for self-hosted LLMs, per-project storage
+- [ ] T557 [US7] [P] Add clear distinction section in docs/integrations/ai-providers.md separating infrastructure setup (system-wide, environment variables, Docker Compose) from project-level configuration (per-project, UI-based, database storage)
+- [ ] T558 [US7] [P] Update examples in docs/integrations/ai-providers.md to include UI-based configuration examples alongside existing environment variable examples, showing Project Settings → Integrations UI workflow
+- [ ] T559 [US7] [P] Verify existing infrastructure setup sections (environment variables, Docker Compose, bare-metal) remain intact in docs/integrations/ai-providers.md and are clearly labeled as "Infrastructure Setup"
+
+**Acceptance Criteria**:
+
+- Infrastructure setup documentation (environment variables, Docker) remains unchanged and clearly labeled
+- Project-level UI configuration documentation clearly separated from infrastructure setup
+- All form fields and workflows documented with clear examples
+- Database storage and encryption details explained
+- Users can understand difference between infrastructure and project-level configuration
+
+#### AI Triage Feature Documentation
+
+- [ ] T560 [US7] [P] Create docs/user/ai-triage.md (or add section to existing user docs) with feature overview: what AI triage is, when to use it, benefits
+- [ ] T561 [US7] [P] Document how to trigger AI triage in docs/user/ai-triage.md: button location in IssueDetail view, permission requirements (Admin by default, configurable), button visibility based on permissions
+- [ ] T562 [US7] [P] Document interpreting AI triage results in docs/user/ai-triage.md: summary section (plain-language root cause), priority suggestion (matches project config or standard), assignee suggestion (natural language description)
+- [ ] T563 [US7] [P] Document accepting/modifying AI suggestions in docs/user/ai-triage.md: accepting priority updates, selecting assignee from project members based on description, dismissing suggestions, collapsing/expanding AI Triage Analysis section
+- [ ] T564 [US7] [P] Add troubleshooting section for AI triage errors in docs/user/ai-triage.md covering: gateway unavailable (error message, retry functionality), permission denied (button visibility, 403 errors), timeout (30s limit, retry option), malformed response (error display, retry)
+- [ ] T565 [US7] [P] Add cross-reference links in docs/user/ai-triage.md: link to Project Settings → Integrations for provider setup, link to configuration docs for ai_triage_permissions setting
+- [ ] T566 [US7] [P] Ensure docs/user/ai-triage.md includes links to AI providers integration documentation (docs/integrations/ai-providers.md) for infrastructure and project-level setup
+
+**Acceptance Criteria**:
+
+- Feature documentation is comprehensive and covers all user-facing aspects
+- Users can understand how to use AI triage feature without consulting multiple files
+- Troubleshooting covers common error scenarios with actionable solutions
+- All cross-references to related documentation work correctly
+- Documentation is accessible and discoverable in user/project docs structure
+
+#### Configuration Documentation Updates
+
+- [ ] T567 [US7] [P] Update configuration reference documentation (apps/web/content/docs/configuration-reference.md or similar) to add aiTriageConfig section with schema definition
+- [ ] T568 [US7] [P] Document ai_triage_permissions field in configuration reference with YAML examples showing snake_case format: array of 'admin'|'member'|'viewer', default ['admin'], optional configuration
+- [ ] T569 [US7] [P] Document default behavior in configuration reference: Admin only if ai_triage_permissions not configured, how to override default, permission configuration scenarios with examples
+- [ ] T570 [US7] [P] Add aiTriageConfig.enabled field documentation in configuration reference: boolean default true, optional configuration
+- [ ] T571 [US7] [P] Include configuration examples in configuration reference showing aiTriageConfig in full stride.config.yaml context with comments explaining each field
+- [ ] T572 [US7] [P] Add cross-reference from configuration reference to AI triage feature documentation (docs/user/ai-triage.md) and AI providers integration docs (docs/integrations/ai-providers.md)
+
+**Acceptance Criteria**:
+
+- aiTriageConfig schema fully documented with all fields
+- YAML examples are correct and validated
+- Default behavior clearly explained
+- Configuration examples are complete and tested
+- Cross-references to related documentation work correctly
+
+#### Documentation Link Verification and Navigation
+
+- [ ] T573 [US7] [P] Verify all documentation links work correctly: test cross-references between docs/user/ai-triage.md, docs/integrations/ai-providers.md, configuration reference, and any other related docs
+- [ ] T574 [US7] [P] Update documentation navigation/sidebar (if applicable) to include AI triage feature documentation link in apps/web/src/components/features/docs/DocsNavigation.tsx or equivalent navigation component
+- [ ] T575 [US7] [P] Ensure AI triage documentation is discoverable: verify it appears in appropriate documentation index/overview pages if they exist
+- [ ] T576 [US7] [P] Validate all file paths referenced in documentation (e.g., Project Settings → Integrations page route) are correct and match actual implementation
+- [ ] T577 [US7] [P] Test all documentation examples: verify YAML configuration examples pass validation, verify UI workflow descriptions match actual implementation
+
+**Acceptance Criteria**:
+
+- All documentation links resolve correctly (internal and cross-references)
+- Navigation includes AI triage documentation where appropriate
+- Documentation is discoverable through navigation and search
+- All examples in documentation are valid and tested
+- File paths and routes referenced in docs match implementation
 
 ---
 
@@ -1372,6 +1550,173 @@ Where:
 - Backward compatibility verified
 - Documentation links work correctly
 - Manual testing confirms permissive defaults work
+
+---
+
+## Phase 8.9: Service Integration Documentation (P2)
+
+**Goal**: Create comprehensive documentation for all service integrations (SMTP, Sentry, AI Providers, Git OAuth, Monitoring Webhooks). Marketing site displays a simple integrations section with SVG icons for supported services. Web app provides full implementation details served from root `docs` folder (single-source of truth). Cross-site synchronization of how-to/troubleshooting content between marketing and web app is deferred to a later phase.
+
+**Independent Test**: Navigate to marketing site integrations section, verify it displays SVG icons for all 5 integration categories (SMTP, Sentry, AI Providers, Git OAuth, Monitoring Webhooks) with supported service icons listed. Navigate to `/docs/integrations` on web app (authenticated), verify comprehensive guide with status indicators. Navigate to `/docs/integrations/smtp` on web app, verify full setup guide with environment variables, step-by-step instructions, examples, and troubleshooting served from root `docs` folder. Test succeeds when marketing site shows visual integration capabilities and web app provides complete documentation.
+
+**Dependencies**: Phase 7.6 complete (docs structure must exist), Phase 8.6 complete (documentation patterns established)
+
+### Clarifications
+
+#### Session 2025-01-23
+
+- Q: How should shared factual content (like supported services lists) maintain consistency between marketing site and web app? → A: Marketing site integrations should be a simple section on the main site displaying SVG icons for supported services (not full markdown documentation pages). Web app documentation is served from root `docs` folder (single-source of truth). Cross-site synchronization of how-to/troubleshooting content between marketing site and web app is deferred to a later phase. Current single-source of truth pattern (root `docs` folder) should be maintained.
+- Q: Should web app integration documentation include Docker-specific setup instructions and comprehensive troubleshooting? → A: Yes. Web app integration docs must be thorough how-to guides including: (1) Docker-specific setup instructions (docker-compose.yml examples, secrets management, container configuration), (2) Bare-metal setup instructions (.env file examples), (3) Comprehensive troubleshooting sections covering Docker container issues, env var problems, connection failures, authentication errors, service-specific problems, and debugging techniques. All Docker Compose examples must be tested and verified.
+
+### Marketing Site Integrations Section
+
+- [x] T465 Create integrations section component in apps/site/app/components/integrations/IntegrationsSection.tsx
+- [x] T466 [P] Create SVG icon components for SMTP services (SendGrid, AWS SES, Mailgun, Gmail, Microsoft 365, Self-hosted) in apps/site/app/components/integrations/smtp-icons.tsx
+- [x] T467 [P] Create SVG icon components for Sentry in apps/site/app/components/integrations/sentry-icon.tsx
+- [x] T468 [P] Create SVG icon components for AI providers (Ollama, OpenAI, Anthropic) in apps/site/app/components/integrations/ai-icons.tsx
+- [x] T469 [P] Create SVG icon components for Git OAuth (GitHub, GitLab) in apps/site/app/components/integrations/git-icons.tsx
+- [x] T470 [P] Create SVG icon components for monitoring webhooks (Sentry, Datadog, New Relic) in apps/site/app/components/integrations/monitoring-icons.tsx
+- [x] T471 Add integrations section to main marketing site page (homepage or features page)
+
+**Acceptance Criteria**:
+
+- Integrations section displays all 5 integration categories with appropriate SVG icons
+- Supported services are represented with recognizable SVG icons for each integration type
+- Section is visually appealing and demonstrates flexibility/compatibility (marketing appeal)
+- Icons are accessible (alt text, semantic HTML)
+- Section is statically generated for SEO
+- No full documentation pages created on marketing site (simple icon list only)
+
+### Web App Content Files (Root `docs` Folder - Single-Source of Truth)
+
+- [x] T479 Create SMTP detailed guide content in docs/integrations/smtp.md
+- [x] T480 [P] Create Sentry detailed guide content in docs/integrations/sentry.md
+- [x] T481 [P] Create AI providers detailed guide content in docs/integrations/ai-providers.md
+- [x] T482 [P] Create Git OAuth detailed guide content in docs/integrations/git-oauth.md
+- [x] T483 [P] Create monitoring webhooks detailed guide content in docs/integrations/monitoring-webhooks.md
+- [x] T484 Create integrations overview content in docs/integrations/index.md
+
+**Acceptance Criteria**:
+
+- All content markdown files created in root `docs/integrations/` folder (single-source of truth)
+- Files follow content structure contract (Overview, Prerequisites, Configuration, Verification, Examples, Troubleshooting, Related Documentation)
+- All environment variables documented with descriptions, defaults, requirements
+- **Docker-specific setup instructions included**: How to configure via docker-compose.yml, environment variable management, secrets handling, container restart requirements
+- **Docker Compose examples provided**: Working examples showing env vars in docker-compose.yml context
+- **Bare-metal setup instructions included**: How to configure without Docker (for non-containerized deployments)
+- Step-by-step setup instructions included (both Docker and bare-metal paths)
+- Code examples are working and tested (Docker Compose snippets and .env file examples)
+- **Comprehensive troubleshooting section**: Common Docker-specific issues (container logs, env var not loading, secrets issues), connection problems, authentication failures, service-specific errors, debugging commands and techniques
+- Consistent structure across all service docs
+- Root `docs` folder pattern maintained (consistent with existing documentation structure)
+
+### Web App Structure
+
+- [x] T485 Create integrations overview page route in apps/web/app/docs/integrations/page.tsx
+- [x] T486 [P] Create SMTP service page route in apps/web/app/docs/integrations/smtp/page.tsx
+- [x] T487 [P] Create Sentry service page route in apps/web/app/docs/integrations/sentry/page.tsx
+- [x] T488 [P] Create AI providers service page route in apps/web/app/docs/integrations/ai-providers/page.tsx
+- [x] T489 [P] Create Git OAuth service page route in apps/web/app/docs/integrations/git-oauth/page.tsx
+- [x] T490 [P] Create monitoring webhooks service page route in apps/web/app/docs/integrations/monitoring-webhooks/page.tsx
+
+**Acceptance Criteria**:
+
+- All 6 web app pages created (overview + 5 services)
+- Pages follow existing web app docs pattern (see apps/web/app/docs/configuration/page.tsx)
+- Overview page reads from root `docs/integrations/index.md` (single-source of truth)
+- Service pages read from root `docs/integrations/[service].md` using MarkdownRenderer component
+- Pages support authenticated access with proper layout
+- Pages use DocumentationPageContent component from @stride/ui
+- Content is served from root `docs` folder (maintains single-source of truth pattern)
+
+### Web App Overview Page Implementation
+
+- [x] T491 Implement integration status indicators in apps/web/app/docs/integrations/page.tsx (if dynamic status API available, otherwise static table)
+- [x] T492 [P] Add environment variables reference table in docs/integrations/index.md
+- [x] T493 [P] Add integration list with links to service-specific guides in docs/integrations/index.md
+
+**Acceptance Criteria**:
+
+- Overview page reads from root `docs/integrations/index.md`
+- Overview page shows comprehensive integration guide
+- Integration status table displays (Configured/Not Configured, Required/Optional) if dynamic API available, otherwise static table
+- Environment variables reference table included in overview content
+- Links to all service-specific guides work correctly
+- Content follows root `docs` folder structure (single-source of truth)
+
+### Web App Navigation
+
+- [x] T494 Add "Integrations" to docs navigation sidebar in apps/web/src/components/features/docs/DocsNavigation.tsx (or equivalent)
+- [x] T495 Ensure integration docs accessible from main docs page in apps/web/app/docs/page.tsx
+- [x] T496 Update docs breadcrumbs to support integrations routes in apps/web/src/lib/navigation/docs-breadcrumbs.ts
+
+**Acceptance Criteria**:
+
+- Integrations link appears in web app docs navigation sidebar
+- Integration docs accessible from main docs page
+- Breadcrumbs work correctly for all integration doc routes
+- Navigation maintains proper hierarchy
+
+### Update Existing SMTP Documentation
+
+- [x] T497 Review existing SMTP documentation in docs/deployment/smtp-configuration.md
+- [x] T498 [P] Move and update SMTP content to match new structure in docs/integrations/smtp.md (incorporate existing content, enhance with full details)
+- [x] T499 Update or redirect references to old SMTP documentation location in docs/deployment/smtp-configuration.md (or move file to archive if no longer needed)
+
+**Acceptance Criteria**:
+
+- Existing SMTP documentation content preserved and enhanced in root `docs/integrations/smtp.md`
+- New SMTP guide matches content structure contract
+- Old documentation location updated/redirected or archived
+- No broken links or references
+- Root `docs` folder structure maintained (single-source of truth)
+
+### Cross-References and Links
+
+**Note**: Cross-site synchronization of how-to/troubleshooting content between marketing site and web app is deferred to a later phase. Focus on internal documentation linking within web app.
+
+- [x] T500 [P] Add links to related documentation (installation, configuration) from integration docs in root `docs/integrations/`
+- [x] T501 [P] Verify all internal links work correctly within web app documentation
+- [x] T502 [P] Add external links to service provider documentation where helpful in root `docs/integrations/` content
+
+**Acceptance Criteria**:
+
+- Related documentation links included where appropriate in integration docs
+- All internal links verified and working within web app
+- External links open in new tab with proper attributes
+- Links reference root `docs` folder structure (single-source of truth)
+
+### Quality Assurance
+
+- [x] T503 [P] Verify marketing site integrations section displays correctly with all SVG icons
+- [x] T504 [P] Verify documentation structure consistency across all 5 services in root `docs/integrations/`
+- [x] T505 [P] Verify all environment variables documented with descriptions, defaults, requirements in root `docs/integrations/`
+- [x] T505a [P] Verify Docker-specific setup instructions included (docker-compose.yml examples, secrets management, container configuration)
+- [x] T505b [P] Verify bare-metal setup instructions included (non-Docker deployment paths)
+- [x] T506 [P] Test Docker Compose examples are working and accurate (verify env vars in docker-compose.yml context)
+- [x] T506a [P] Test bare-metal .env file examples are working and accurate
+- [x] T507 [P] Verify comprehensive troubleshooting sections in root `docs/integrations/` content:
+  - Docker-specific issues (container logs, env var loading, secrets)
+  - Connection problems and authentication failures
+  - Service-specific error messages and solutions
+  - Debugging commands and diagnostic techniques
+- [x] T508 [P] Verify accessibility standards (proper headings, semantic HTML, keyboard navigation) in web app docs and marketing site icons
+- [x] T509 [P] Verify SEO metadata on marketing site integrations section
+- [x] T510 Verify documentation follows established patterns from Phase 8.6 (configuration docs) and root `docs` folder structure
+
+**Acceptance Criteria**:
+
+- Marketing site integrations section displays correctly with accessible SVG icons
+- Documentation structure consistent across all services in root `docs/integrations/` (single-source of truth)
+- All environment variables complete and accurate in root `docs/integrations/` content
+- **Docker-specific setup thoroughly documented**: docker-compose.yml examples, secrets handling, container restart procedures, env var management in Docker context
+- **Bare-metal setup documented**: Non-Docker deployment paths with .env file examples
+- **Docker Compose examples tested and verified**: All code snippets work when applied to docker-compose.yml
+- **Bare-metal examples tested**: All .env examples work in standalone deployments
+- **Comprehensive troubleshooting included**: Docker container issues, env var problems, connection failures, authentication errors, service-specific problems, debugging techniques
+- Accessibility standards met (web app docs and marketing site icon section)
+- SEO metadata properly configured on marketing site integrations section
+- Documentation patterns consistent with existing docs and root `docs` folder structure maintained
 
 ---
 
@@ -1491,6 +1836,10 @@ Phase 1: Setup
                                 └─> Phase 7.6: Settings Pages and Navigation Fixes
                                       ├─> Phase 8: User Story 6 (Diagnostics)
                                       ├─> Phase 8.5: Repository Connections (Settings)
+                                      ├─> Phase 8.6: Toast & Config Documentation
+                                      ├─> Phase 8.7: User Assignment & Clone
+                                      ├─> Phase 8.8: Troubleshooting & Permissive Config
+                                      ├─> Phase 8.9: Service Integration Documentation
                                       ├─> Phase 9: User Story 7 (AI Triage)
                                       └─> Phase 10: Polish & Testing
 ```
@@ -1506,8 +1855,11 @@ Phase 1: Setup
 - **Phase 7.5** (Authenticated Layouts): Depends on US1 (needs authentication infrastructure)
 - **Phase 7.6** (Settings Pages): Depends on US1 (needs authentication), optional dependency on Phase 7.5 (layouts enhance UX)
 - **Phase 8.5** (Repository Connections): Depends on Phase 7.6 (project settings pages must exist), Phase 3 (repository connection API endpoints must exist)
+- **Phase 8.6** (Toast & Config Documentation): Depends on Phase 4 (error handling patterns exist), Phase 5 (configuration system exists)
+- **Phase 8.8** (Troubleshooting & Permissive Config): Depends on US3 (Configuration as Code must exist), US2 (Kanban board must exist)
+- **Phase 8.9** (Service Integration Documentation): Depends on Phase 7.6 (docs structure must exist), Phase 8.6 (documentation patterns established)
 - **US6** (Diagnostics): Depends on US2 (needs issues to create from errors)
-- **US7** (AI): Depends on US2 (needs issues to triage)
+- **US7** (AI): Depends on US2 (needs issues to triage), US3 (needs configuration system for priority matching and permission configuration)
 
 ### Parallel Execution Opportunities
 
@@ -1559,9 +1911,26 @@ Phase 1: Setup
 - T278-T281 (Manual flow) can be parallelized with T282-T287 (Error handling)
 - T288-T290 (Notifications) can run in parallel
 
+**Within Phase 8.9 (Service Integration Documentation)**:
+
+- T466-T470 (Marketing site service pages) can be parallelized
+- T472-T476 (Marketing site content) can be parallelized
+- T480-T483 (Web app content files) can be parallelized
+- T485-T489 (Web app service pages) can be parallelized
+- T492-T493 (Web app overview content) can be parallelized
+- T500-T503 (Cross-references and links) can be parallelized
+- T504-T509 (Quality assurance checks) can be parallelized
+
 **Within Phase 9 (US7)**:
 
-- T450-T456 (AI Gateway) can be parallelized with T457-T464 (Integration)
+- T511-T513 (Configuration schema) can be parallelized
+- T514-T521 (AI Gateway service) can be parallelized after T513
+- T522-T524 (Payload builder & HTTP client) can be parallelized
+- T525-T526 (Permission system) can be parallelized
+- T527-T531 (API endpoint) must run sequentially (dependencies)
+- T532-T537 (UI components - core structure) can be parallelized
+- T538-T545 (UI components - integration) must run sequentially (dependencies)
+- T546-T551 (Error handling) can be parallelized
 
 ---
 
@@ -1602,6 +1971,11 @@ Phase 1: Setup
 **Test**: Open an issue with error context, click the AI triage button, verify the request is sent to the configured AI gateway, and confirm that AI-generated analysis (summary, priority, assignment suggestion) is displayed in the issue view.  
 **Success**: AI analysis enhances issue understanding without exposing data outside the organization's network.
 
+### Phase 8.9 - Service Integration Documentation
+
+**Test**: Navigate to `/docs/integrations` on marketing site, verify overview page lists all 5 integrations with supported services. Navigate to `/docs/integrations/smtp` on marketing site, verify it shows capabilities and supported providers (SendGrid, AWS SES, etc.) but no implementation steps. Navigate to `/docs/integrations` on web app (authenticated), verify comprehensive guide with status indicators. Navigate to `/docs/integrations/smtp` on web app, verify full setup guide with environment variables, step-by-step instructions, examples, and troubleshooting.  
+**Success**: All integrations are documented on both sites with appropriate detail level - marketing shows capabilities, web app provides implementation details.
+
 ---
 
 ## MVP Scope Recommendation
@@ -1638,7 +2012,7 @@ Phase 1: Setup
 
 ## Task Summary
 
-**Total Tasks**: 427  
+**Total Tasks**: 499  
 **Phase 1 (Setup)**: 14 tasks  
 **Phase 2 (Foundational)**: 44 tasks  
 **Phase 3 (US1)**: 38 tasks  
@@ -1649,12 +2023,15 @@ Phase 1: Setup
 **Phase 7.5 (Authenticated Layouts)**: 37 tasks  
 **Phase 7.6 (Settings Pages Fixes)**: 22 tasks  
 **Phase 8 (US6)**: 18 tasks  
+**Phase 8.5 (Repository Connections)**: 37 tasks  
+**Phase 8.6 (Toast & Config Docs)**: 25 tasks  
+**Phase 8.7 (User Assignment & Clone)**: 8 tasks  
 **Phase 8.8 (Troubleshooting & Permissive Config)**: 27 tasks  
-**Phase 9 (US7)**: 15 tasks (T450-T464, deferred - P3 priority)
-**Phase 10 (Polish)**: 40 tasks (6 testing deferred, 34 non-testing tasks remaining)  
-**Phase 10 (Polish)**: 40 tasks
+**Phase 8.9 (Service Integration Documentation)**: 46 tasks (T465-T510)  
+**Phase 9 (US7)**: 41 tasks (T511-T551, deferred - P3 priority)
+**Phase 10 (Polish)**: 40 tasks (6 testing deferred, 34 non-testing tasks remaining)
 
-**Parallel Opportunities**: ~102 tasks marked with [P]
+**Parallel Opportunities**: ~148 tasks marked with [P]
 
 **Estimated Timeline**:
 

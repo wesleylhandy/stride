@@ -120,6 +120,7 @@ services:
       LLM_ENDPOINT: ${LLM_ENDPOINT:-http://localhost:11434}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY:-}
       
       # Application Configuration
       NODE_ENV: ${NODE_ENV:-development}

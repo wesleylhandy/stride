@@ -76,8 +76,11 @@ Create comprehensive documentation for all service integrations that Stride supp
 - **Marketing Site** (`apps/site`):
   - Overview page: `/docs/integrations` - List all supported services with brief descriptions
   - Service-specific pages: `/docs/integrations/smtp`, `/docs/integrations/sentry`, etc.
-  - Focus: High-level overview, use cases, benefits, quick start
-  - Target: Prospective users evaluating Stride
+  - Focus: High-level overview, value proposition, use cases, benefits, **list of supported services/platforms** (e.g., "SMTP: SendGrid, AWS SES, Mailgun, Gmail, Microsoft 365" or "Git: GitHub, GitLab" or "AI: Ollama, OpenAI, Anthropic") - this demonstrates flexibility and compatibility (marketing appeal)
+  - Target: Prospective users evaluating Stride (information, documentation, persuasion)
+  - **Include**: What integrations exist, what services are supported, why users want them, what they enable
+  - **Exclude**: Step-by-step setup instructions, detailed environment variable configurations, code examples, troubleshooting, verification steps
+  - Implementation details: Link to web app authenticated docs for actual setup
 
 - **Web App** (`apps/web`):
   - Overview page: `/docs/integrations` - Comprehensive integration guide
@@ -86,10 +89,11 @@ Create comprehensive documentation for all service integrations that Stride supp
   - Target: Users configuring their Stride instance
 
 #### Content Organization
-- **Progressive Disclosure**: Marketing site has overview + quick start; Web app has full details
-- **Cross-references**: Marketing docs link to detailed guides in web app (when logged in)
-- **Environment Variables**: Centralized reference in web app, summarized in marketing site
-- **Code Examples**: Both sites have examples, web app has more comprehensive samples
+- **Progressive Disclosure**: Marketing site shows what integrations exist and what services are supported (marketing appeal); Web app has full implementation details
+- **Cross-references**: Marketing docs link to detailed setup guides in web app (for authenticated users)
+- **Supported Services List**: Marketing site should list what services can be integrated with (e.g., "SMTP: SendGrid, AWS SES, Mailgun, Gmail" or "Git: GitHub, GitLab") - this is part of the marketing appeal showing flexibility and compatibility
+- **Environment Variables**: Detailed configuration reference in web app only (marketing site avoids specifics)
+- **Code Examples & Setup Steps**: Web app only (marketing site focuses on capabilities and supported options, not how to configure)
 
 #### Content Storage Pattern
 - **Marketing Site**: 
@@ -109,6 +113,12 @@ Create comprehensive documentation for all service integrations that Stride supp
 - ✅ **RESOLVED**: Future UI implementation - See `service-integration-docs-research.md` section 4
 - ✅ **RESOLVED**: Webhook configuration documentation - See `service-integration-docs-research.md` section 5
 - ✅ **RESOLVED**: Navigation structure - See `service-integration-docs-research.md` section 6
+
+## Clarifications
+
+### Session 2025-01-XX
+
+- Q: What should marketing site service pages contain - implementation steps or information/persuasion only? → A: Marketing should show WHAT integrations exist and WHAT services/platforms are supported (e.g., "SMTP: SendGrid, AWS SES, Mailgun, Gmail" or "Git: GitHub, GitLab") as marketing appeal demonstrating flexibility and compatibility. Include why users want these integrations and what they enable. Exclude detailed implementation particulars: step-by-step setup instructions, detailed environment variable configurations, code examples, troubleshooting, verification steps. Link to web app for actual implementation details.
 
 All clarifications resolved. See `service-integration-docs-research.md` for detailed decisions and rationale.
 
@@ -176,13 +186,15 @@ All clarifications resolved. See `service-integration-docs-research.md` for deta
 
 ### Documentation Structure
 
-1. **Marketing Site Structure**
-   - `/docs/integrations` - Overview page listing all integrations
-   - `/docs/integrations/smtp` - SMTP overview and quick start
-   - `/docs/integrations/sentry` - Sentry overview
-   - `/docs/integrations/ai-providers` - AI Gateway overview
-   - `/docs/integrations/git-oauth` - Git OAuth overview
-   - `/docs/integrations/monitoring-webhooks` - Monitoring webhooks overview
+1. **Marketing Site Structure** (Information & Persuasion - Capabilities, Not Implementation)
+   - `/docs/integrations` - Overview page listing all integrations with brief descriptions
+   - `/docs/integrations/smtp` - SMTP value proposition, benefits, use cases, **list of supported services** (SendGrid, AWS SES, Mailgun, Gmail, Microsoft 365, Self-hosted) - this demonstrates flexibility
+   - `/docs/integrations/sentry` - Sentry value proposition, benefits, use cases
+   - `/docs/integrations/ai-providers` - AI Gateway value proposition, benefits, use cases, **supported providers** (Ollama, OpenAI, Anthropic) - shows flexibility
+   - `/docs/integrations/git-oauth` - Git OAuth value proposition, benefits, use cases, **supported services** (GitHub, GitLab)
+   - `/docs/integrations/monitoring-webhooks` - Monitoring webhooks value proposition, benefits, use cases, **supported services** (Sentry, Datadog, New Relic)
+   - **Content Focus**: What each integration enables, why users want it, **what services/platforms are supported** (marketing appeal). **Exclude**: Step-by-step setup, detailed env vars, code examples, troubleshooting
+   - **Call-to-Action**: Link to web app authenticated docs for implementation details
 
 2. **Web App Structure**
    - `/docs/integrations` - Comprehensive integration guide with status indicators
@@ -262,37 +274,23 @@ However, future enhancement could include:
 
 ### Content Requirements
 
-For each service documentation, include:
+**Marketing Site Pages** (Information & Persuasion - Show Capabilities):
+1. **Overview** - What the service does, why users want it, what features it enables
+2. **Benefits** - Value proposition, use cases, outcomes users can achieve
+3. **Supported Services** - **List of providers/platforms supported** (e.g., "SMTP: SendGrid, AWS SES, Mailgun, Gmail, Microsoft 365, Self-hosted" or "Git: GitHub, GitLab") - This demonstrates flexibility and compatibility, which is part of marketing appeal
+4. **Integration Capabilities** - High-level description of what the integration enables (e.g., "Connect your GitHub or GitLab repositories" or "Send emails via your preferred SMTP provider")
+5. **Call-to-Action** - Link to web app authenticated docs for implementation ("Get Started" / "View Setup Guide")
+6. **Related Documentation** - Links to installation, configuration docs in web app
+7. **Exclude**: Step-by-step setup instructions, detailed environment variable tables, code examples, troubleshooting sections, verification steps
 
-1. **Overview**
-   - What the service does
-   - Why you'd want to configure it
-   - What features it enables
-
-2. **Configuration**
-   - Prerequisites
-   - Step-by-step setup instructions
-   - Environment variables (with descriptions)
-   - Service-specific configuration (e.g., Sentry project setup, GitHub OAuth app creation)
-
-3. **Verification**
-   - How to verify configuration is working
-   - How to test the integration
-   - What success looks like
-
-4. **Examples**
-   - Minimal working example
-   - Common configurations
-   - Service-specific examples (multiple SMTP providers, etc.)
-
-5. **Troubleshooting**
-   - Common issues and solutions
-   - Error messages and fixes
-   - Debugging steps
-
-6. **Related Documentation**
-   - Links to relevant docs
-   - Next steps after configuration
+**Web App Pages** (Full Implementation Details):
+1. **Overview** - What the service does, why you'd want to configure it, what features it enables
+2. **Prerequisites** - What's needed before setup
+3. **Configuration** - Step-by-step setup instructions, environment variables (with descriptions), service-specific configuration steps
+4. **Verification** - How to verify configuration is working, how to test the integration, what success looks like
+5. **Examples** - Minimal working example, common configurations, service-specific examples
+6. **Troubleshooting** - Common issues and solutions, error messages and fixes, debugging steps
+7. **Related Documentation** - Links to relevant docs, next steps after configuration
 
 ### Navigation Updates
 

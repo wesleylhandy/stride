@@ -2,9 +2,10 @@
 
 **Feature Branch**: `001-stride-application`  
 **Created**: 2024-12-19  
-**Status**: Planning Complete (Phase 0-1)  
+**Status**: Implementation Complete (Phase 0-3 MVP)  
 **Feature Spec**: `specs/001-stride-application/spec.md`  
-**Related Feature**: Extension of FR-004 (Repository Linking)
+**Related Feature**: Extension of FR-004 (Repository Linking)  
+**Tasks**: Documented in `tasks.md` Phase 8.5 (all MVP tasks complete)
 
 ## Technical Context
 
@@ -103,9 +104,9 @@
 - [x] Verify existing API endpoints support post-onboarding connection
 - [x] Review onboarding repository connection UI for reusable components
 - [x] Check project settings navigation structure
-- [ ] **DECISION NEEDED**: Disconnect repository functionality requirements
-- [ ] **DECISION NEEDED**: Connection health/status indicators
-- [ ] **DECISION NEEDED**: Reconnection flow (same vs different repository)
+- [x] **RESOLVED**: Disconnect repository functionality requirements (deferred to future)
+- [x] **RESOLVED**: Connection health/status indicators (basic timestamp for MVP)
+- [x] **RESOLVED**: Reconnection flow (supported via existing upsert logic)
 
 ### Research Output
 
@@ -262,20 +263,22 @@ apps/web/src/components/features/projects/
 
 ### Tasks
 
-- [ ] Enable Integrations link in ProjectSettingsNavigation
-- [ ] Create integrations settings page route
-- [ ] Extract reusable RepositoryConnectionForm component
-- [ ] Create RepositoryConnectionSettings component
-- [ ] Implement connection status display
-- [ ] Implement OAuth connection flow
-- [ ] Implement manual token connection flow
-- [ ] Add error handling and loading states
-- [ ] Add success notifications
-- [ ] **OPTIONAL**: Implement disconnect functionality
-- [ ] **OPTIONAL**: Add connection health indicators
-- [ ] Write unit tests
-- [ ] Write integration tests
-- [ ] Write E2E tests
+- [x] Enable Integrations link in ProjectSettingsNavigation
+- [x] Create integrations settings page route
+- [x] Extract reusable RepositoryConnectionForm component
+- [x] Create RepositoryConnectionSettings component
+- [x] Implement connection status display
+- [x] Implement OAuth connection flow
+- [x] Implement manual token connection flow
+- [x] Add error handling and loading states
+- [x] Add success notifications
+- [ ] **OPTIONAL**: Implement disconnect functionality (deferred to future enhancement)
+- [ ] **OPTIONAL**: Add connection health indicators (basic timestamp implemented for MVP)
+- [x] Write unit tests
+- [x] Write integration tests
+- [x] Write E2E tests
+
+**Note**: All MVP tasks are complete. See `tasks.md` Phase 8.5 (T259-T295) for detailed task breakdown and implementation status.
 
 ### Dependencies
 

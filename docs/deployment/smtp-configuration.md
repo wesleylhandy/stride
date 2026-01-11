@@ -1,8 +1,12 @@
 # SMTP Email Configuration
 
+> **Note**: This documentation has been moved to the [Integrations Guide](../integrations/smtp.md) for better organization. This file is kept for reference but may be archived in a future update.
+
 **Status**: Optional  
 **Required For**: Email invitation feature  
 **App Functionality**: Works fully without SMTP configuration
+
+**New Location**: [SMTP Integration Documentation](../integrations/smtp.md)
 
 ## Overview
 
