@@ -4,6 +4,7 @@ import { headers } from 'next/headers';
 import { prisma } from '@stride/database';
 import { DashboardLayout } from '@/components/templates/DashboardLayout';
 import { SettingsNavigation } from '../components/features/settings/SettingsNavigation';
+import { PageContainer } from '@stride/ui';
 import type { UserRole } from '@stride/types';
 import type { BreadcrumbItem } from '@stride/ui';
 
@@ -46,21 +47,23 @@ export default async function SettingsLayout({ children }: SettingsLayoutProps) 
 
   return (
     <DashboardLayout breadcrumbs={breadcrumbs}>
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-foreground dark:text-foreground-dark">
-          Settings
-        </h1>
-        <p className="mt-2 text-sm text-foreground-secondary dark:text-foreground-dark-secondary">
-          Manage your account and system settings.
-        </p>
-      </div>
+      <PageContainer variant="constrained">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-foreground dark:text-foreground-dark">
+            Settings
+          </h1>
+          <p className="mt-2 text-sm text-foreground-secondary dark:text-foreground-dark-secondary">
+            Manage your account and system settings.
+          </p>
+        </div>
 
-      {/* Settings Navigation Tabs - Persistent across all settings pages */}
-      <SettingsNavigation userRole={userRole} />
+        {/* Settings Navigation Tabs - Persistent across all settings pages */}
+        <SettingsNavigation userRole={userRole} />
 
-      {/* Settings Content - Changes based on route */}
-      {children}
+        {/* Settings Content - Changes based on route */}
+        {children}
+      </PageContainer>
     </DashboardLayout>
   );
 }

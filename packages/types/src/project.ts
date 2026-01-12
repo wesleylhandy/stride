@@ -25,6 +25,7 @@ export interface ProjectConfig {
   custom_fields: CustomFieldConfig[];
   automation_rules: AutomationRule[];
   user_assignment?: UserAssignmentConfig;
+  ai_triage_config?: AiTriageConfig;
 }
 
 export interface UserAssignmentConfig {
@@ -32,6 +33,11 @@ export interface UserAssignmentConfig {
   assignee_required: boolean;
   clone_preserve_assignee: boolean;
   require_assignee_for_statuses: string[];
+}
+
+export interface AiTriageConfig {
+  permissions: ('admin' | 'member' | 'viewer')[];
+  enabled: boolean;
 }
 
 export interface WorkflowConfig {

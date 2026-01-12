@@ -101,4 +101,5 @@ export * from "./issue-repository";
 export * from "./issue-branch-repository";
 export * from "./cycle-repository";
 export * from "./invitation-repository";
+export * from "./global-infrastructure-config-repository";
 

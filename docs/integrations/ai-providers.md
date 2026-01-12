@@ -51,6 +51,19 @@ Before configuring AI providers:
 
 ## Configuration
 
+Stride supports two levels of AI provider configuration:
+
+1. **Infrastructure Setup** (System-wide): Configure AI Gateway service and global provider settings via environment variables
+2. **Project-Level Configuration** (Per-project): Configure project-specific providers, API keys, and models via the web UI
+
+**Infrastructure Setup** is required for the AI Gateway service to run. **Project-Level Configuration** allows you to configure multiple providers per project with encrypted credential storage and fine-grained model selection.
+
+---
+
+## Infrastructure Setup
+
+**System-wide configuration** for AI Gateway service. Required for AI features to work. Configure via environment variables and Docker Compose.
+
 ### Environment Variables
 
 | Variable | Required | Default | Description |
@@ -634,6 +647,208 @@ services:
     env_file:
       - .env.${NODE_ENV:-development}
 ```
+
+---
+
+## Project-Level AI Provider Configuration
+
+**Per-project configuration** via the web UI. Configure multiple providers per project with encrypted credential storage and model selection. Available after infrastructure setup is complete.
+
+### Overview
+
+Project-level configuration allows you to:
+
+- Configure multiple AI providers per project (OpenAI, Anthropic, Google Gemini, Ollama)
+- Store API keys/tokens securely with encryption (per-project credentials)
+- Select specific models from each provider
+- Test connections to self-hosted LLMs
+- Override infrastructure-level defaults per project
+
+**Navigation**: Go to **Project Settings → Integrations** page (`/projects/[projectId]/settings/integrations`)
+
+**Permissions**: Admin role required (by default, configurable via `ai_triage_permissions` in project configuration)
+
+### Configuration Workflow
+
+#### Step 1: Navigate to Project Settings
+
+1. Open your project in Stride
+2. Click **Settings** in the project navigation
+3. Click the **Integrations** tab
+4. Scroll to the **AI Provider Configuration** section
+
+#### Step 2: Add AI Provider
+
+1. Click **Add Provider** button
+2. Select provider type from dropdown:
+   - **OpenAI**: Commercial AI service (GPT-3.5, GPT-4)
+   - **Anthropic**: Commercial AI service (Claude)
+   - **Google Gemini**: Commercial AI service (Gemini Pro, Gemini Ultra)
+   - **Ollama**: Self-hosted LLM (requires endpoint URL)
+
+#### Step 3: Configure Provider Credentials
+
+**For Cloud Providers (OpenAI, Anthropic, Google Gemini)**:
+- **API Key** (required, password-type field): Enter your API key
+  - API keys are masked after entry (never displayed in plain text)
+  - Must be re-entered to change (encrypted in database)
+- **Endpoint URL**: Not required (uses provider's default API endpoint)
+- **Auth Token**: Not required for cloud providers
+
+**For Self-Hosted LLMs (Ollama)**:
+- **Endpoint URL** (required): Ollama endpoint URL (e.g., `http://localhost:11434`)
+- **Auth Token** (optional, password-type field): Authentication token if Ollama requires auth
+- **API Key**: Not required for Ollama
+
+**Security Note**: All API keys and auth tokens are stored encrypted in the database. Endpoint URLs are stored as plain text (not sensitive).
+
+#### Step 4: Select Models
+
+**Dynamic Model Fetching** (Cloud Providers):
+- Models are automatically fetched from provider API when API key is entered
+- Available models populate in the multiselect dropdown
+- Select one or more models to enable for this project
+- Models are fetched from:
+  - **OpenAI**: `/v1/models` endpoint
+  - **Anthropic**: Provider API (varies by provider)
+  - **Google Gemini**: `/v1/models` endpoint
+
+**Auto-Discovery** (Self-Hosted Ollama):
+- Models are automatically discovered from Ollama `/api/tags` endpoint when endpoint URL is provided
+- Available models populate in the multiselect dropdown
+- Select one or more models to enable for this project
+- If discovery fails, you can manually enter model names
+
+**Manual Model Entry** (Fallback):
+- If automatic model fetching/discovery fails, you can manually enter model names
+- Enter model names one per line or comma-separated
+- Manual entry is available for all provider types
+
+**Model Selection**:
+- Select multiple models from the multiselect interface
+- Selected models become available for AI triage in this project
+- System automatically assigns a default model when AI triage is triggered (from selected models)
+
+#### Step 5: Test Connection (Optional, Self-Hosted Only)
+
+For self-hosted LLMs (Ollama), you can optionally test the connection:
+
+1. Click **Test Connection** button (appears for Ollama providers)
+2. System validates endpoint connectivity
+3. Connection test result displays (success or error message)
+4. **Note**: Connection test is optional and non-blocking (form submission not prevented if test fails)
+
+#### Step 6: Save Configuration
+
+1. Review all fields
+2. Click **Save Provider** button
+3. Provider is added to the project's configured providers list
+4. Configuration is saved to database (credentials encrypted)
+
+### Managing Providers
+
+**Edit Provider**:
+- Click **Edit** button next to provider in the list
+- Update fields (API keys/tokens must be re-entered to change)
+- Save changes
+
+**Delete Provider**:
+- Click **Delete** button next to provider
+- Confirm deletion
+- Provider configuration is removed (cannot be undone)
+
+**Multiple Providers**:
+- You can configure multiple providers per project
+- System selects from configured providers when AI triage is triggered
+- Default model assignment uses configured allowed models from any configured provider
+
+### Database Storage Details
+
+**Encrypted Fields** (stored encrypted):
+- API keys (OpenAI, Anthropic, Google Gemini)
+- Auth tokens (Ollama, if provided)
+
+**Plain Text Fields** (stored as plain text):
+- Endpoint URLs (self-hosted LLMs only)
+- Provider type
+- Enabled models list
+- Default model selection
+
+**Storage Location**: Per-project storage in database (not in environment variables or configuration files)
+
+### UI-Based Configuration vs Infrastructure Setup
+
+**Infrastructure Setup** (Environment Variables):
+- System-wide configuration
+- Required for AI Gateway service
+- Configured via `.env` file and `docker-compose.yml`
+- Global provider settings
+
+**Project-Level Configuration** (Web UI):
+- Per-project configuration
+- Configured via Project Settings → Integrations page
+- Project-specific credentials and models
+- Overrides infrastructure defaults (if applicable)
+
+**Precedence**: Project-level configuration takes precedence over infrastructure-level defaults when both are configured.
+
+### Configuration Examples
+
+**Example 1: Single Provider (OpenAI)**
+
+1. Navigate to Project Settings → Integrations
+2. Click **Add Provider**
+3. Select **OpenAI** from dropdown
+4. Enter OpenAI API key (password-type field, masked)
+5. Models auto-populate from OpenAI API
+6. Select models: `gpt-4`, `gpt-3.5-turbo`
+7. Click **Save Provider**
+
+**Example 2: Self-Hosted Ollama**
+
+1. Navigate to Project Settings → Integrations
+2. Click **Add Provider**
+3. Select **Ollama** from dropdown
+4. Enter endpoint URL: `http://localhost:11434`
+5. (Optional) Enter auth token if required
+6. (Optional) Click **Test Connection** to verify connectivity
+7. Models auto-populate from Ollama `/api/tags` endpoint
+8. Select models: `llama2`, `mistral`
+9. Click **Save Provider**
+
+**Example 3: Multiple Providers**
+
+1. Configure OpenAI provider (as in Example 1)
+2. Configure Anthropic provider:
+   - Select **Anthropic** from dropdown
+   - Enter Anthropic API key
+   - Select models: `claude-3-opus-20240229`, `claude-3-sonnet-20240229`
+   - Save provider
+3. Both providers are now configured and available for AI triage
+
+### Troubleshooting Project-Level Configuration
+
+**Models Not Fetching**:
+- Verify API key is correct (cloud providers)
+- Verify endpoint URL is accessible (Ollama)
+- Check network connectivity
+- Manual model entry is available as fallback
+
+**Connection Test Fails (Ollama)**:
+- Verify Ollama service is running
+- Check endpoint URL is correct
+- Verify network connectivity from web app to Ollama endpoint
+- Connection test is optional (form submission not blocked)
+
+**API Key Not Saving**:
+- Ensure API key field is not empty
+- Verify you have Admin permissions
+- Check browser console for errors
+
+**Models Not Available in AI Triage**:
+- Verify at least one model is selected for the provider
+- Check provider configuration is saved
+- Verify infrastructure setup is complete (AI Gateway running)
 
 ---
 

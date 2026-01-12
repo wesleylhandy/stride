@@ -37,7 +37,7 @@ const navItems: NavItem[] = [
   },
   {
     name: 'Documentation',
-    href: '/docs/configuration',
+    href: '/docs',
     icon: (
       <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path
@@ -116,8 +116,8 @@ export function Sidebar({ currentProjectId: propProjectId, className }: SidebarP
     if (href === '/projects') {
       return pathname === '/projects' || pathname?.startsWith('/projects/');
     }
-    if (href === '/docs/configuration') {
-      return pathname === '/docs/configuration' || pathname?.startsWith('/docs/configuration');
+    if (href === '/docs') {
+      return pathname === '/docs' || pathname?.startsWith('/docs/');
     }
     return pathname === href || pathname?.startsWith(`${href}/`);
   };

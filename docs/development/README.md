@@ -11,6 +11,7 @@ Welcome to the Stride developer guide. This document provides comprehensive info
 - [Testing](#testing)
 - [Database](#database)
 - [API Development](#api-development)
+- [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
 
 ## Getting Started

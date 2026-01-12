@@ -8,6 +8,7 @@ import { Badge } from '../atoms/Badge';
 import { MarkdownRenderer } from '../molecules/MarkdownRenderer';
 import { IssueForm } from './IssueForm';
 import { RootCauseDashboard, type ErrorTraceData } from './RootCauseDashboard';
+import { AITriageAnalysis } from './AITriageAnalysis';
 import { cn } from '../utils/cn';
 
 export interface IssueBranch {
@@ -50,6 +51,10 @@ export interface IssueDetailProps {
    * Callback when issue is cloned
    */
   onClone?: () => void;
+  /**
+   * Whether user can use AI triage (permission check)
+   */
+  canUseAITriage?: boolean;
   /**
    * Additional CSS classes
    */
@@ -175,6 +180,7 @@ export function IssueDetail({
   onUpdate,
   onStatusChange,
   onClone,
+  canUseAITriage = false,
   className,
 }: IssueDetailProps) {
   const [isEditing, setIsEditing] = React.useState(false);
@@ -580,6 +586,35 @@ export function IssueDetail({
         }
         return null;
       })()}
+
+      {/* AI Triage Analysis (T559) - positioned after issue details, before comments */}
+      {canUseAITriage && (
+        <AITriageAnalysis
+          issueId={issue.id}
+          projectId={issue.projectId}
+          issueKey={issue.key}
+          availablePriorities={(() => {
+            // Extract priority values from project config
+            if (!projectConfig?.custom_fields) return undefined;
+            const priorityField = projectConfig.custom_fields.find(
+              (field) => field.key === 'priority' && field.type === 'dropdown'
+            );
+            return priorityField?.options;
+          })()}
+          onPriorityAccepted={async (priority) => {
+            // Update issue priority if onUpdate is available
+            if (onUpdate) {
+              await onUpdate({ priority: priority as typeof issue.priority });
+            }
+          }}
+          onAssigneeSelected={async (userId) => {
+            // Update issue assignee if onUpdate is available
+            if (onUpdate) {
+              await onUpdate({ assigneeId: userId });
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

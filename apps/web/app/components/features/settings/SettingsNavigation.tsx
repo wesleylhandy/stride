@@ -44,17 +44,30 @@ export function SettingsNavigation({
             href: '/settings/users',
             adminOnly: true,
           } as SettingsTab,
+          {
+            id: 'infrastructure',
+            label: 'Infrastructure',
+            href: '/settings/infrastructure',
+            adminOnly: true,
+          } as SettingsTab,
         ]
       : []),
   ];
 
   const isActive = (href: string) => {
-    return pathname === href || (pathname?.startsWith(`${href}/`) ?? false);
+    if (!pathname) return false;
+    // Exact match
+    if (pathname === href) return true;
+    // Match sub-routes
+    if (pathname.startsWith(`${href}/`)) return true;
+    // Special case: /settings should highlight Account tab
+    if (pathname === '/settings' && href === '/settings/account') return true;
+    return false;
   };
 
   return (
     <div className="mb-8 border-b border-border dark:border-border-dark">
-      <nav className="-mb-px flex space-x-8" aria-label="Settings navigation">
+      <nav className="-mb-px flex space-x-8 px-1" aria-label="Settings navigation">
         {settingsTabs.map((tab) => {
           const active = isActive(tab.href);
           return (

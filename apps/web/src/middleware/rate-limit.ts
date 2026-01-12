@@ -137,8 +137,12 @@ function checkRateLimit(
 function getRateLimitConfig(request: NextRequest): RateLimitConfig {
   const pathname = request.nextUrl.pathname;
 
-  // Auth endpoints
+  // Auth endpoints - exclude /api/auth/me which is frequently called by UserMenu
+  // Use API rate limit for /me endpoint since it's a safe GET endpoint
   if (pathname.startsWith("/api/auth")) {
+    if (pathname === "/api/auth/me") {
+      return DEFAULT_RATE_LIMITS.api;
+    }
     return DEFAULT_RATE_LIMITS.auth;
   }
 

@@ -144,6 +144,26 @@ Migrations are stored in `prisma/migrations/`. To create a new migration:
 3. Review the generated migration file
 4. Apply with `pnpm db:deploy`
 
+## Troubleshooting
+
+### Prisma Client Cache Issues
+
+If you encounter errors like "The column does not exist" after schema changes, even though the database table exists, this is likely a Next.js/Prisma client cache issue.
+
+**Quick fix**:
+```bash
+# Use the helper script
+./scripts/db-fix-prisma-cache.sh
+
+# Or manually:
+rm -rf apps/web/.next
+rm -rf node_modules/.pnpm/@prisma+client@*
+pnpm --filter @stride/database db:generate
+pnpm install
+```
+
+See the [Development Troubleshooting Guide](../../docs/development/troubleshooting.md) for detailed steps.
+
 ## Type Safety
 
 All database operations are fully type-safe thanks to Prisma:

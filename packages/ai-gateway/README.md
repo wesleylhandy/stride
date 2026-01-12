@@ -37,7 +37,7 @@ ANTHROPIC_API_KEY=sk-ant-...         # Anthropic API key (optional)
 
 # Service Configuration
 NODE_ENV=development
-PORT=3001
+PORT=3002  # Default port for local development (3001 is used by site app)
 ```
 
 ## API Endpoints

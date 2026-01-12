@@ -62,12 +62,13 @@ model User {
   updatedAt     DateTime @updatedAt
 
   // Relations
-  reportedIssues   Issue[]       @relation("Reporter")
-  assignedIssues   Issue[]       @relation("Assignee")
+  reportedIssues   Issue[]                     @relation("Reporter")
+  assignedIssues   Issue[]                     @relation("Assignee")
   comments         Comment[]
   attachments      Attachment[]
   sessions         Session[]
-  sentInvitations  Invitation[]  @relation("SentInvitations")
+  sentInvitations  Invitation[]                @relation("SentInvitations")
+  updatedConfigs   GlobalInfrastructureConfig[] @relation("ConfigUpdater")
 
   @@index([role])
   @@map("users")
@@ -91,6 +92,7 @@ model Project {
   cycles                Cycle[]
   repositoryConnections RepositoryConnection[]
   webhooks              Webhook[]
+  aiProviderConfigs     AiProviderConfig[]
 
   @@index([repositoryUrl])
   @@map("projects")
@@ -296,4 +298,41 @@ model Invitation {
   @@index([expiresAt])
   @@index([invitedById])
   @@map("invitations")
+}
+
+model GlobalInfrastructureConfig {
+  id        String   @id @default(uuid())
+  gitConfig Json     @default("{}")
+  aiConfig  Json     @default("{}")
+  updatedBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  updatedByUser User? @relation("ConfigUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
+
+  @@index([updatedAt])
+  @@index([updatedBy])
+  @@map("global_infrastructure_config")
+}
+
+model AiProviderConfig {
+  id           String   @id @default(uuid())
+  projectId    String
+  providerType String   // "openai", "anthropic", "ollama", etc.
+  apiKey       String?  // Encrypted (for cloud providers)
+  endpointUrl  String?  // Plain text (for self-hosted LLMs)
+  authToken    String?  // Encrypted (optional, for self-hosted with auth)
+  enabledModels Json    @default("[]") // Array of model names selected by admin
+  defaultModel String?  // Default model to use if multiple enabled
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, providerType])
+  @@index([projectId])
+  @@map("ai_provider_configs")
 }

@@ -16,6 +16,10 @@ import {
   exchangeGitLabCode,
   type GitLabOAuthConfig,
 } from "@/lib/integrations/gitlab";
+import {
+  getGitHubOAuthConfig,
+  getGitLabOAuthConfig,
+} from "@/lib/config/git-oauth-config";
 import { z } from "zod";
 
 interface RouteParams {
@@ -68,18 +72,36 @@ export async function GET(
       let authUrl: string;
 
       if (repositoryType === "GitHub") {
+        // Use global infrastructure config with fallback to env vars
+        const githubConfig = await getGitHubOAuthConfig();
+        if (!githubConfig) {
+          return NextResponse.json(
+            { error: "GitHub OAuth configuration not found" },
+            { status: 400 },
+          );
+        }
+
         const config: GitHubOAuthConfig = {
-          clientId: process.env.GITHUB_CLIENT_ID || "",
-          clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
+          clientId: githubConfig.clientId,
+          clientSecret: githubConfig.clientSecret,
           redirectUri,
         };
         authUrl = getGitHubAuthUrl(config, state);
       } else if (repositoryType === "GitLab") {
+        // Use global infrastructure config with fallback to env vars
+        const gitlabConfig = await getGitLabOAuthConfig();
+        if (!gitlabConfig) {
+          return NextResponse.json(
+            { error: "GitLab OAuth configuration not found" },
+            { status: 400 },
+          );
+        }
+
         const config: GitLabOAuthConfig = {
-          clientId: process.env.GITLAB_CLIENT_ID || "",
-          clientSecret: process.env.GITLAB_CLIENT_SECRET || "",
+          clientId: gitlabConfig.clientId,
+          clientSecret: gitlabConfig.clientSecret,
           redirectUri,
-          baseUrl: process.env.GITLAB_BASE_URL,
+          baseUrl: gitlabConfig.baseUrl,
         };
         authUrl = getGitLabAuthUrl(config, state);
       } else {
@@ -157,18 +179,36 @@ export async function POST(
       const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/projects/${projectId}/repositories/callback`;
 
       if (validated.repositoryType === "GitHub") {
+        // Use global infrastructure config with fallback to env vars
+        const githubConfig = await getGitHubOAuthConfig();
+        if (!githubConfig) {
+          return NextResponse.json(
+            { error: "GitHub OAuth configuration not found" },
+            { status: 400 },
+          );
+        }
+
         const config: GitHubOAuthConfig = {
-          clientId: process.env.GITHUB_CLIENT_ID || "",
-          clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
+          clientId: githubConfig.clientId,
+          clientSecret: githubConfig.clientSecret,
           redirectUri,
         };
         accessToken = await exchangeGitHubCode(validated.code, config);
       } else if (validated.repositoryType === "GitLab") {
+        // Use global infrastructure config with fallback to env vars
+        const gitlabConfig = await getGitLabOAuthConfig();
+        if (!gitlabConfig) {
+          return NextResponse.json(
+            { error: "GitLab OAuth configuration not found" },
+            { status: 400 },
+          );
+        }
+
         const config: GitLabOAuthConfig = {
-          clientId: process.env.GITLAB_CLIENT_ID || "",
-          clientSecret: process.env.GITLAB_CLIENT_SECRET || "",
+          clientId: gitlabConfig.clientId,
+          clientSecret: gitlabConfig.clientSecret,
           redirectUri,
-          baseUrl: process.env.GITLAB_BASE_URL,
+          baseUrl: gitlabConfig.baseUrl,
         };
         accessToken = await exchangeGitLabCode(validated.code, config);
       } else {

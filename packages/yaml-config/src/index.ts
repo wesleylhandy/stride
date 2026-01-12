@@ -3,6 +3,7 @@ export * from './parser';
 export * from './schema';
 export * from './validator';
 export * from './default-config';
+export * from './priority-extractor';
 
 // Re-export types for convenience
 export type {
@@ -11,6 +12,7 @@ export type {
   CustomFieldConfig,
   WorkflowConfig,
   AutomationRule,
+  AiTriageConfig,
 } from './schema';
 
 export type {

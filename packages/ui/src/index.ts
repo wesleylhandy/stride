@@ -25,6 +25,9 @@ export { CodeBlock, type CodeBlockProps } from './molecules/CodeBlock';
 export { AuthForm, type AuthFormProps } from './molecules/AuthForm';
 export { AuthError, type AuthErrorProps } from './molecules/AuthError';
 export { PageContainer, type PageContainerProps, type PageContainerVariant } from './molecules/PageContainer';
+export { AISummary, type AISummaryProps } from './molecules/AISummary';
+export { AIPrioritySuggestion, type AIPrioritySuggestionProps } from './molecules/AIPrioritySuggestion';
+export { AIAssigneeSuggestion, type AIAssigneeSuggestionProps, type User } from './molecules/AIAssigneeSuggestion';
 
 // Organisms
 export { CommandPalette, type CommandPaletteProps, type Command } from './organisms/CommandPalette';
@@ -37,6 +40,7 @@ export { TopBar, type TopBarProps } from './organisms/TopBar';
 export { Sidebar, type SidebarProps } from './organisms/Sidebar';
 export { ProjectTabs, type ProjectTabsProps, type ProjectTab } from './organisms/ProjectTabs';
 export { DocumentationPageContent, type DocumentationPageContentProps, type DocumentationSection } from './organisms/DocumentationPageContent';
+export { AITriageAnalysis, type AITriageAnalysisProps, type AITriageAnalysisData } from './organisms/AITriageAnalysis';
 
 // Hooks
 export { useToast } from './hooks/useToast';

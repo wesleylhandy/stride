@@ -1256,13 +1256,27 @@ Where:
 
 **Independent Test**: Open an issue with error context, click the AI triage button (visible only to Admin by default, or roles allowed by project configuration), verify the request is sent to the configured AI gateway with correct payload structure, and confirm that AI-generated analysis (summary, priority, assignment suggestion) is displayed in the expandable "AI Triage Analysis" section positioned after issue details but before comments. Test succeeds when AI analysis enhances issue understanding without exposing data outside the organization's network.
 
-**Dependencies**: Phase 4 complete (issues must exist), Phase 5 complete (configuration system must exist for priority matching and permission configuration)
+**Dependencies**: Phase 4 complete (issues must exist), Phase 5 complete (configuration system must exist for priority matching and permission configuration), Phase 8.5 complete (Project Settings → Integrations page pattern established for UI consistency)
+
+**Phase 9 Structure**:
+
+1. Configuration Schema Updates
+2. AI Provider Configuration UI (FR-028a through FR-028e)
+3. AI Gateway Service
+4. AI Prompt Strategy Implementation
+5. Issue Context Payload Builder
+6. Permission System
+7. AI Triage API Endpoint
+8. UI Components - Core Structure
+9. UI Components - Integration & State
+10. Error Handling & Edge Cases
+11. Documentation Updates
 
 ### Configuration Schema Updates
 
-- [ ] T511 [US7] Add aiTriageConfig schema to packages/yaml-config/src/schema.ts with fields: permissions (array of 'admin'|'member'|'viewer', default ['admin']), enabled (boolean, default true). Note: YAML config uses snake_case `ai_triage_permissions`, TypeScript schema property is `aiTriageConfig.permissions` (camelCase).
-- [ ] T512 [US7] Update default config generator to include aiTriageConfig defaults in packages/yaml-config/src/default-config.ts
-- [ ] T513 [US7] Add priority values extraction helper function in packages/yaml-config/src/priority-extractor.ts to read custom priority values from project config for AI gateway
+- [x] T511 [US7] Add aiTriageConfig schema to packages/yaml-config/src/schema.ts with fields: permissions (array of 'admin'|'member'|'viewer', default ['admin']), enabled (boolean, default true). Note: YAML config uses snake_case `ai_triage_permissions`, TypeScript schema property is `aiTriageConfig.permissions` (camelCase).
+- [x] T512 [US7] Update default config generator to include aiTriageConfig defaults in packages/yaml-config/src/default-config.ts
+- [x] T513 [US7] Add priority values extraction helper function in packages/yaml-config/src/priority-extractor.ts to read custom priority values from project config for AI gateway
 
 **Acceptance Criteria**:
 
@@ -1272,14 +1286,14 @@ Where:
 
 ### AI Gateway Service
 
-- [ ] T514 [US7] Verify AI Gateway package structure exists in packages/ai-gateway/ (already created in Phase 1, T008)
-- [ ] T515 [US7] Implement POST /analyze-issue endpoint in packages/ai-gateway/src/routes.ts accepting issue context payload (title, description, status, customFields, errorTraces?, recentComments) and projectConfig (priorityValues?)
-- [ ] T516 [US7] Support commercial APIs (OpenAI, Anthropic) in packages/ai-gateway/src/providers/commercial.ts
-- [ ] T517 [US7] Support self-hosted LLMs in packages/ai-gateway/src/providers/self-hosted.ts
-- [ ] T518 [US7] Implement priority mapping logic in packages/ai-gateway/src/mappers/priority.ts: if projectConfig.priorityValues exists, return one of those values; otherwise return standard (low/medium/high)
-- [ ] T519 [US7] Add request/response logging in packages/ai-gateway/src/middleware/logging.ts
-- [ ] T520 [US7] Implement rate limiting in packages/ai-gateway/src/middleware/rate-limit.ts
-- [ ] T521 [US7] Add mock mode for development in packages/ai-gateway/src/providers/mock.ts returning sample responses matching response format
+- [x] T514 [US7] Verify AI Gateway package structure exists in packages/ai-gateway/ (already created in Phase 1, T008)
+- [x] T515 [US7] Implement POST /analyze-issue endpoint in packages/ai-gateway/src/routes.ts accepting issue context payload (title, description, status, customFields, errorTraces?, recentComments) and projectConfig (priorityValues?)
+- [x] T516 [US7] Support commercial APIs (OpenAI, Anthropic) in packages/ai-gateway/src/providers/commercial.ts
+- [x] T517 [US7] Support self-hosted LLMs in packages/ai-gateway/src/providers/self-hosted.ts
+- [x] T518 [US7] Implement priority mapping logic in packages/ai-gateway/src/mappers/priority.ts: if projectConfig.priorityValues exists, return one of those values; otherwise return standard (low/medium/high)
+- [x] T519 [US7] Add request/response logging in packages/ai-gateway/src/middleware/logging.ts
+- [x] T520 [US7] Implement rate limiting in packages/ai-gateway/src/middleware/rate-limit.ts
+- [x] T520.1 [US7] [P] Add mock mode for development in packages/ai-gateway/src/providers/mock.ts returning sample responses matching response format
 
 **Acceptance Criteria**:
 
@@ -1290,11 +1304,71 @@ Where:
 - Rate limiting prevents abuse
 - Mock mode returns properly formatted responses
 
+### AI Provider Configuration UI (FR-028a through FR-028e)
+
+**Based on Phase 9 Clarifications (Session 2026-01-10)**: Admin-only AI provider configuration management in Project Settings → Integrations page. Supports multiple providers per project with encrypted credential storage and model selection.
+
+- [x] T521 [US7] [P] Add AI Provider Configuration section to Project Settings → Integrations page in apps/web/app/projects/[projectId]/settings/integrations/page.tsx (reuse pattern from Phase 8.5 repository connections)
+- [x] T522 [US7] [P] Create AiProviderSettings component in apps/web/src/components/features/projects/AiProviderSettings.tsx to display list of configured providers with add/edit/delete actions
+- [x] T523 [US7] [P] Create AiProviderForm component in apps/web/src/components/features/projects/AiProviderForm.tsx with fields: provider type (dropdown: OpenAI, Anthropic, Ollama), API key/token (password-type masked field), endpoint URL (for self-hosted LLMs), optional auth token (password-type for self-hosted)
+- [x] T524 [US7] [P] Implement password-type input fields in AiProviderForm for API keys/tokens with masked display in apps/web/src/components/features/projects/AiProviderForm.tsx - tokens never displayed in plain text after entry, must be re-entered to change
+- [x] T525 [US7] [P] Add model selection multiselect interface in AiProviderForm in apps/web/src/components/features/projects/AiProviderForm.tsx allowing Admin to select which models from each provider are available to users
+- [x] T526 [US7] [P] Implement model auto-discovery for self-hosted LLMs in apps/web/src/components/features/projects/AiProviderForm.tsx: query Ollama `/api/tags` endpoint when endpoint URL is provided, populate available models in multiselect, handle discovery failures gracefully (show error, allow manual entry)
+- [x] T527 [US7] [P] Add optional "Test Connection" button for self-hosted LLM endpoints in AiProviderForm in apps/web/src/components/features/projects/AiProviderForm.tsx - form submission not blocked if test fails
+- [x] T528 [US7] [P] Create API endpoint for AI provider configuration in apps/web/app/api/projects/[projectId]/ai-providers/route.ts supporting GET (list), POST (create), PUT (update), DELETE operations
+- [x] T529 [US7] [P] Implement encrypted credential storage in AI provider API routes in apps/web/app/api/projects/[projectId]/ai-providers/route.ts: encrypt API keys/tokens before database storage, store endpoint URLs as plain text for self-hosted LLMs
+- [x] T530 [US7] [P] Add model discovery API endpoint for all providers in apps/web/app/api/projects/[projectId]/ai-providers/discover-models/route.ts that queries provider API endpoints (OpenAI, Anthropic, Google Gemini) or self-hosted endpoint (Ollama) and returns available models
+- [x] T531 [US7] [P] Add test connection API endpoint for self-hosted LLMs in apps/web/app/api/projects/[projectId]/ai-providers/test-connection/route.ts that validates endpoint connectivity
+- [x] T532 [US7] [P] Implement default model assignment logic in apps/web/src/lib/ai/provider-selector.ts: system assigns default model automatically when AI triage is triggered from configured allowed models
+- [x] T533 [US7] [P] Support multiple providers configured simultaneously per project in apps/web/src/lib/ai/provider-selector.ts: allow selection from configured allowed models when multiple providers available
+
+**Acceptance Criteria**:
+
+- Admin can configure multiple AI providers per project via Project Settings → Integrations UI
+- API keys/tokens stored encrypted in database, endpoint URLs stored as plain text
+- Password-type fields mask sensitive credentials, never display in plain text
+- Model selection multiselect works for all provider types
+- Dynamic model fetching works for cloud providers (OpenAI, Anthropic, Google Gemini), auto-discovery works for self-hosted LLMs (Ollama), falls back to manual entry on failure
+- Test connection button is optional and non-blocking
+- Multiple providers can be configured simultaneously
+- Default model assignment works correctly
+- UI follows same pattern as repository connections (Phase 8.5)
+
+### AI Prompt Strategy Implementation
+
+**Based on Phase 9 Clarifications (Session 2026-01-23, updated)**: Single system prompt stored in markdown file (version controlled) + structured user message with JSON schema and example. Direct LLM API calls (no agent frameworks). Prompt stored in markdown file for easy editing and external testing (Google AI Studio, OpenAI dashboard).
+
+- [x] T534 [US7] [P] Create system prompt markdown file in packages/ai-gateway/prompts/system-prompt.md (version controlled) with prompt defining: AI role ("You are an issue triage specialist for software development teams"), output format requirements (JSON with summary, priority, suggestedAssignee fields), analysis guidelines (focus on root cause, consider error traces, match project priority values)
+- [x] T535 [US7] [P] Add JSON schema definition to system prompt in packages/ai-gateway/prompts/system-prompt.md with structure: summary (string - plain-language root cause summary), priority (string - matches project config or standard low/medium/high), suggestedAssignee (string - natural language description)
+- [x] T536 [US7] [P] Add example output to system prompt in packages/ai-gateway/prompts/system-prompt.md demonstrating expected format and quality (authentication failure example with high priority and backend developer assignee suggestion)
+- [x] T537 [US7] Implement prompt file loader in packages/ai-gateway/src/lib/load-prompt.ts that reads system-prompt.md at service startup, caches content in memory, handles file read errors gracefully (log error, fail startup if critical)
+- [x] T538 [US7] Create build-user-message.ts in packages/ai-gateway/src/lib/build-user-message.ts that constructs structured user message from issue context payload: title, description, status, customFields (JSON), errorTraces (if available), recentComments (last 5-10), plus project-specific context injection (priorityValues, workflowRules, customFieldDefinitions)
+- [x] T539 [US7] [P] Implement OpenAI client in packages/ai-gateway/src/lib/openai-client.ts using direct openai.chat.completions.create() API with system and user messages, using response_format: { type: "json_object" } for JSON mode when available
+- [x] T540 [US7] [P] Implement Anthropic client in packages/ai-gateway/src/lib/anthropic-client.ts using direct anthropic.messages.create() API with system and user messages, using structured outputs feature if available
+- [x] T541 [US7] [P] Implement Ollama client in packages/ai-gateway/src/lib/ollama-client.ts using direct fetch() to Ollama API with system and user messages, relying on schema + example in prompt (no structured output mode support)
+- [x] T541.1 [US7] [P] Implement Google Gemini client in packages/ai-gateway/src/lib/google-gemini-client.ts using direct fetch() to Google Gemini API with system and user messages, relying on schema + example in prompt (no structured output mode support)
+- [x] T542 [US7] Create provider selection logic in packages/ai-gateway/src/lib/provider-selector.ts that selects appropriate client (OpenAI, Anthropic, Google Gemini, Ollama) based on configured provider type and model from database
+- [x] T543 [US7] Implement error handling for prompt/response in packages/ai-gateway/src/lib/response-parser.ts: if LLM response doesn't match JSON schema, log error and attempt to parse with fallback; if structured output mode fails, fall back to schema + example in prompt; if response missing required fields, log error and return user-friendly message
+- [x] T544 [US7] Update POST /analyze-issue endpoint in packages/ai-gateway/src/routes.ts to: load system prompt using load-prompt.ts (from T537), build user message using build-user-message.ts, call appropriate provider client (OpenAI/Anthropic/Google Gemini/Ollama), parse response with error handling, return formatted response
+
+**Acceptance Criteria**:
+
+- System prompt is stored in markdown file (packages/ai-gateway/prompts/system-prompt.md) with JSON schema and example
+- Prompt file is version controlled and can be easily edited and tested externally (Google AI Studio, OpenAI dashboard)
+- Service reads prompt file at startup and caches in memory
+- Changes to prompt file require service restart to take effect
+- User message builder constructs structured payload with project context injection
+- Direct LLM API calls work for all providers (OpenAI, Anthropic, Google Gemini, Ollama)
+- Structured output modes used when available (OpenAI JSON mode, Anthropic structured outputs)
+- Schema + example fallback works for providers without structured output support
+- Error handling gracefully handles malformed responses and missing fields
+- No agent frameworks or tool definitions used
+
 ### Issue Context Payload Builder
 
-- [ ] T522 [US7] Create issue context payload builder function in apps/web/src/lib/ai/triage.ts that extracts: title, description, status, customFields (JSON), errorTraces (if available from Root Cause Dashboard - check Phase 8 diagnostics data in issue.customFields or linked error webhook data), recentComments (last 5-10 ordered by timestamp)
-- [ ] T523 [US7] Add project config reader helper in apps/web/src/lib/ai/triage.ts to extract priorityValues from project configuration for AI gateway request
-- [ ] T524 [US7] Create HTTP client for AI Gateway in apps/web/src/lib/ai/triage.ts with error handling and timeout (30 seconds per SC-011)
+- [x] T545 [US7] Create issue context payload builder function in apps/web/src/lib/ai/triage.ts that extracts: title, description, status, customFields (JSON), errorTraces (if available from issue.customFields or linked error webhook data - does not require Phase 8 completion), recentComments (last 5-10 ordered by timestamp)
+- [x] T546 [US7] Add project config reader helper in apps/web/src/lib/ai/triage.ts to extract priorityValues from project configuration for AI gateway request
+- [x] T547 [US7] Create HTTP client for AI Gateway in apps/web/src/lib/ai/triage.ts with error handling and timeout (30 seconds per SC-011)
 
 **Acceptance Criteria**:
 
@@ -1306,8 +1380,8 @@ Where:
 
 ### Permission System
 
-- [ ] T525 [US7] Create permission check utility in apps/web/src/lib/ai/permissions.ts that reads aiTriageConfig.permissions from project config (maps YAML snake_case `ai_triage_permissions` to schema camelCase `aiTriageConfig.permissions`), defaults to ['admin'] if not configured, and checks if user role is in allowed list
-- [ ] T526 [US7] Add permission check to AI triage API route in apps/web/app/api/projects/[projectId]/issues/[issueKey]/ai-triage/route.ts returning 403 with clear message if user lacks permission
+- [x] T548 [US7] Create permission check utility in apps/web/src/lib/ai/permissions.ts that reads aiTriageConfig.permissions from project config (maps YAML snake_case `ai_triage_permissions` to schema camelCase `aiTriageConfig.permissions`), defaults to ['admin'] if not configured, and checks if user role is in allowed list
+- [x] T549 [US7] Add permission check to AI triage API route in apps/web/app/api/projects/[projectId]/issues/[issueKey]/ai-triage/route.ts returning 403 with clear message if user lacks permission
 
 **Acceptance Criteria**:
 
@@ -1318,11 +1392,11 @@ Where:
 
 ### AI Triage API Endpoint
 
-- [ ] T527 [US7] Create AI triage API endpoint in apps/web/app/api/projects/[projectId]/issues/[issueKey]/ai-triage/route.ts
-- [ ] T528 [US7] Implement permission check in API route using permission utility from T525 in apps/web/app/api/projects/[projectId]/issues/[issueKey]/ai-triage/route.ts
-- [ ] T529 [US7] Build issue context payload in API route using payload builder from T522 in apps/web/app/api/projects/[projectId]/issues/[issueKey]/ai-triage/route.ts
-- [ ] T530 [US7] Call AI Gateway HTTP client in API route and return formatted response (summary, priority, suggestedAssignee)
-- [ ] T531 [US7] Add error handling in API route for: AI Gateway unavailable, malformed response, timeout, permission denied
+- [x] T550 [US7] Create AI triage API endpoint in apps/web/app/api/projects/[projectId]/issues/[issueKey]/ai-triage/route.ts
+- [x] T551 [US7] Implement permission check in API route using permission utility from T548 in apps/web/app/api/projects/[projectId]/issues/[issueKey]/ai-triage/route.ts
+- [x] T552 [US7] Build issue context payload in API route using payload builder from T545 in apps/web/app/api/projects/[projectId]/issues/[issueKey]/ai-triage/route.ts
+- [x] T553 [US7] Call AI Gateway HTTP client in API route and return formatted response (summary, priority, suggestedAssignee)
+- [x] T554 [US7] Add error handling in API route for: AI Gateway unavailable, malformed response, timeout, permission denied
 
 **Acceptance Criteria**:
 
@@ -1333,12 +1407,12 @@ Where:
 
 ### UI Components - Core Structure
 
-- [ ] T532 [US7] Create AITriageAnalysis component in packages/ui/src/organisms/AITriageAnalysis.tsx as expandable accordion section with props: issueId, projectId, analysis (from API), onAccept, onDismiss
-- [ ] T533 [US7] Create AISummary component in packages/ui/src/molecules/AISummary.tsx to display plain-language root cause summary
-- [ ] T534 [US7] Create AIPrioritySuggestion component in packages/ui/src/molecules/AIPrioritySuggestion.tsx to display priority suggestion with accept/modify buttons
-- [ ] T535 [US7] Create AIAssigneeSuggestion component in packages/ui/src/molecules/AIAssigneeSuggestion.tsx to display natural language assignee description with "Select Assignee" button that opens project members selector
-- [ ] T536 [US7] Integrate AITriageAnalysis component into IssueDetail in packages/ui/src/organisms/IssueDetail.tsx positioned after issue details section, before comments section
-- [ ] T537 [US7] Add "Triage with AI" button to IssueDetail header in packages/ui/src/organisms/IssueDetail.tsx with permission check (hide/disable if user lacks permission)
+- [x] T555 [US7] Create AITriageAnalysis component in packages/ui/src/organisms/AITriageAnalysis.tsx as expandable accordion section with props: issueId, projectId, analysis (from API), onAccept, onDismiss
+- [x] T556 [US7] Create AISummary component in packages/ui/src/molecules/AISummary.tsx to display plain-language root cause summary
+- [x] T557 [US7] Create AIPrioritySuggestion component in packages/ui/src/molecules/AIPrioritySuggestion.tsx to display priority suggestion with accept/modify buttons
+- [x] T558 [US7] Create AIAssigneeSuggestion component in packages/ui/src/molecules/AIAssigneeSuggestion.tsx to display natural language assignee description with "Select Assignee" button that opens project members selector
+- [x] T559 [US7] Integrate AITriageAnalysis component into IssueDetail in packages/ui/src/organisms/IssueDetail.tsx positioned after issue details section, before comments section
+- [x] T560 [US7] Add "Triage with AI" button to IssueDetail header in packages/ui/src/organisms/IssueDetail.tsx with permission check (hide/disable if user lacks permission)
 
 **Acceptance Criteria**:
 
@@ -1350,14 +1424,14 @@ Where:
 
 ### UI Components - Integration & State
 
-- [ ] T538 [US7] Add state management for AI triage in IssueDetail using TanStack Query for API calls in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T539 [US7] Implement "Triage with AI" button click handler that calls API endpoint and updates AITriageAnalysis with results in packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T540 [US7] Implement accept/modify functionality for priority suggestion in AIPrioritySuggestion component in packages/ui/src/molecules/AIPrioritySuggestion.tsx
-- [ ] T541 [US7] Implement assignee selection flow in AIAssigneeSuggestion component: display description, show project members selector on click, allow manual selection in packages/ui/src/molecules/AIAssigneeSuggestion.tsx
-- [ ] T542 [US7] Add loading states for AI triage request in AITriageAnalysis component in packages/ui/src/organisms/AITriageAnalysis.tsx
-- [ ] T543 [US7] Add error display in AITriageAnalysis component for: gateway unavailable, malformed response, timeout, permission denied in packages/ui/src/organisms/AITriageAnalysis.tsx
-- [ ] T544 [US7] Implement retry functionality for failed AI triage requests in AITriageAnalysis component in packages/ui/src/organisms/AITriageAnalysis.tsx
-- [ ] T545 [US7] Style AITriageAnalysis section to match existing design tokens and accordion pattern in packages/ui/src/organisms/AITriageAnalysis.tsx
+- [x] T561 [US7] Add state management for AI triage in IssueDetail using TanStack Query for API calls in packages/ui/src/organisms/IssueDetail.tsx
+- [x] T562 [US7] Implement "Triage with AI" button click handler that calls API endpoint and updates AITriageAnalysis with results in packages/ui/src/organisms/IssueDetail.tsx
+- [x] T563 [US7] Implement accept/modify functionality for priority suggestion in AIPrioritySuggestion component in packages/ui/src/molecules/AIPrioritySuggestion.tsx
+- [x] T564 [US7] Implement assignee selection flow in AIAssigneeSuggestion component: display description, show project members selector on click, allow manual selection in packages/ui/src/molecules/AIAssigneeSuggestion.tsx
+- [x] T565 [US7] Add loading states for AI triage request in AITriageAnalysis component in packages/ui/src/organisms/AITriageAnalysis.tsx
+- [x] T566 [US7] Add error display in AITriageAnalysis component for: gateway unavailable, malformed response, timeout, permission denied in packages/ui/src/organisms/AITriageAnalysis.tsx
+- [x] T567 [US7] Implement retry functionality for failed AI triage requests in AITriageAnalysis component in packages/ui/src/organisms/AITriageAnalysis.tsx
+- [x] T568 [US7] Style AITriageAnalysis section to match existing design tokens and accordion pattern in packages/ui/src/organisms/AITriageAnalysis.tsx
 
 **Acceptance Criteria**:
 
@@ -1371,14 +1445,14 @@ Where:
 
 ### Error Handling & Edge Cases
 
-- [ ] T546 [US7] Handle AI Gateway unavailable: display error message in AITriageAnalysis section, allow retry, ensure issue remains functional in packages/ui/src/organisms/AITriageAnalysis.tsx
-- [ ] T547 [US7] Handle malformed AI Gateway response: log error server-side, display "Unable to analyze issue" message, allow retry in apps/web/app/api/projects/[projectId]/issues/[issueKey]/ai-triage/route.ts and packages/ui/src/organisms/AITriageAnalysis.tsx
-- [ ] T548 [US7] Handle timeout (30s): display timeout message, allow retry in apps/web/src/lib/ai/triage.ts and packages/ui/src/organisms/AITriageAnalysis.tsx
-- [ ] T549 [US7] Handle permission denied: hide button in UI, return 403 from API with clear message in apps/web/app/api/projects/[projectId]/issues/[issueKey]/ai-triage/route.ts and packages/ui/src/organisms/IssueDetail.tsx
-- [ ] T550 [US7] Handle no project priority config: use standard low/medium/high mapping in packages/ai-gateway/src/mappers/priority.ts
-- [ ] T551 [US7] Handle assignee description with no match: user manually selects from project members list (already handled in T541 - assignee selection flow)
+- [x] T569 [US7] Handle AI Gateway unavailable: display error message in AITriageAnalysis section, allow retry, ensure issue remains functional in packages/ui/src/organisms/AITriageAnalysis.tsx
+- [x] T570 [US7] Handle malformed AI Gateway response: log error server-side, display "Unable to analyze issue" message, allow retry in apps/web/app/api/projects/[projectId]/issues/[issueKey]/ai-triage/route.ts and packages/ui/src/organisms/AITriageAnalysis.tsx
+- [x] T571 [US7] Handle timeout (30s): display timeout message, allow retry in apps/web/src/lib/ai/triage.ts and packages/ui/src/organisms/AITriageAnalysis.tsx
+- [x] T572 [US7] Handle permission denied: hide button in UI, return 403 from API with clear message in apps/web/app/api/projects/[projectId]/issues/[issueKey]/ai-triage/route.ts and packages/ui/src/organisms/IssueDetail.tsx
+- [x] T573 [US7] Handle no project priority config: use standard low/medium/high mapping in packages/ai-gateway/src/mappers/priority.ts
+- [x] T574 [US7] Handle assignee description with no match: user manually selects from project members list (already handled in T564 - assignee selection flow)
 
-**Acceptance Criteria**:
+**Error Handling Acceptance Criteria**:
 
 - All error cases handled gracefully
 - Error messages are user-friendly
@@ -1386,7 +1460,7 @@ Where:
 - Issue remains fully functional in all error scenarios
 - Permission checks work correctly in both UI and API
 
-**Acceptance Criteria** (Overall Phase 9):
+**Overall Phase 9 Acceptance Criteria**:
 
 - AI triage works when gateway is available
 - Issue context payload includes correct core fields (title, description, status, custom fields, error traces if available, recent 5-10 comments)
@@ -1403,14 +1477,14 @@ Where:
 
 #### AI Providers Integration Documentation Updates
 
-- [ ] T552 [US7] [P] Update docs/integrations/ai-providers.md to add new "Project-Level AI Provider Configuration" section with navigation instructions to Project Settings → Integrations page
-- [ ] T553 [US7] [P] Document UI form fields (API key, endpoint URL, model selection) in docs/integrations/ai-providers.md with descriptions of password-type masked fields and required vs optional fields
-- [ ] T554 [US7] [P] Document model selection workflow in docs/integrations/ai-providers.md: auto-discovery for self-hosted LLMs (Ollama /api/tags), manual selection for cloud providers, model multiselect interface usage
-- [ ] T555 [US7] [P] Document test connection functionality for self-hosted LLMs in docs/integrations/ai-providers.md including optional non-blocking test button workflow
-- [ ] T556 [US7] [P] Document database storage details in docs/integrations/ai-providers.md: encrypted credentials (API keys/tokens), plain text endpoint URLs for self-hosted LLMs, per-project storage
-- [ ] T557 [US7] [P] Add clear distinction section in docs/integrations/ai-providers.md separating infrastructure setup (system-wide, environment variables, Docker Compose) from project-level configuration (per-project, UI-based, database storage)
-- [ ] T558 [US7] [P] Update examples in docs/integrations/ai-providers.md to include UI-based configuration examples alongside existing environment variable examples, showing Project Settings → Integrations UI workflow
-- [ ] T559 [US7] [P] Verify existing infrastructure setup sections (environment variables, Docker Compose, bare-metal) remain intact in docs/integrations/ai-providers.md and are clearly labeled as "Infrastructure Setup"
+- [x] T575 [US7] [P] Update docs/integrations/ai-providers.md to add new "Project-Level AI Provider Configuration" section with navigation instructions to Project Settings → Integrations page
+- [x] T576 [US7] [P] Document UI form fields (API key, endpoint URL, model selection) in docs/integrations/ai-providers.md with descriptions of password-type masked fields and required vs optional fields
+- [x] T577 [US7] [P] Document model selection workflow in docs/integrations/ai-providers.md: dynamic model fetching for cloud providers (OpenAI, Anthropic, Google Gemini) via provider APIs, auto-discovery for self-hosted LLMs (Ollama /api/tags), manual entry fallback on failure, model multiselect interface usage
+- [x] T578 [US7] [P] Document test connection functionality for self-hosted LLMs in docs/integrations/ai-providers.md including optional non-blocking test button workflow
+- [x] T579 [US7] [P] Document database storage details in docs/integrations/ai-providers.md: encrypted credentials (API keys/tokens), plain text endpoint URLs for self-hosted LLMs, per-project storage
+- [x] T580 [US7] [P] Add clear distinction section in docs/integrations/ai-providers.md separating infrastructure setup (system-wide, environment variables, Docker Compose) from project-level configuration (per-project, UI-based, database storage)
+- [x] T581 [US7] [P] Update examples in docs/integrations/ai-providers.md to include UI-based configuration examples alongside existing environment variable examples, showing Project Settings → Integrations UI workflow
+- [x] T582 [US7] [P] Verify existing infrastructure setup sections (environment variables, Docker Compose, bare-metal) remain intact in docs/integrations/ai-providers.md and are clearly labeled as "Infrastructure Setup"
 
 **Acceptance Criteria**:
 
@@ -1422,13 +1496,13 @@ Where:
 
 #### AI Triage Feature Documentation
 
-- [ ] T560 [US7] [P] Create docs/user/ai-triage.md (or add section to existing user docs) with feature overview: what AI triage is, when to use it, benefits
-- [ ] T561 [US7] [P] Document how to trigger AI triage in docs/user/ai-triage.md: button location in IssueDetail view, permission requirements (Admin by default, configurable), button visibility based on permissions
-- [ ] T562 [US7] [P] Document interpreting AI triage results in docs/user/ai-triage.md: summary section (plain-language root cause), priority suggestion (matches project config or standard), assignee suggestion (natural language description)
-- [ ] T563 [US7] [P] Document accepting/modifying AI suggestions in docs/user/ai-triage.md: accepting priority updates, selecting assignee from project members based on description, dismissing suggestions, collapsing/expanding AI Triage Analysis section
-- [ ] T564 [US7] [P] Add troubleshooting section for AI triage errors in docs/user/ai-triage.md covering: gateway unavailable (error message, retry functionality), permission denied (button visibility, 403 errors), timeout (30s limit, retry option), malformed response (error display, retry)
-- [ ] T565 [US7] [P] Add cross-reference links in docs/user/ai-triage.md: link to Project Settings → Integrations for provider setup, link to configuration docs for ai_triage_permissions setting
-- [ ] T566 [US7] [P] Ensure docs/user/ai-triage.md includes links to AI providers integration documentation (docs/integrations/ai-providers.md) for infrastructure and project-level setup
+- [x] T583 [US7] [P] Create docs/user/ai-triage.md (or add section to existing user docs) with feature overview: what AI triage is, when to use it, benefits
+- [x] T584 [US7] [P] Document how to trigger AI triage in docs/user/ai-triage.md: button location in IssueDetail view, permission requirements (Admin by default, configurable), button visibility based on permissions
+- [x] T585 [US7] [P] Document interpreting AI triage results in docs/user/ai-triage.md: summary section (plain-language root cause), priority suggestion (matches project config or standard), assignee suggestion (natural language description)
+- [x] T586 [US7] [P] Document accepting/modifying AI suggestions in docs/user/ai-triage.md: accepting priority updates, selecting assignee from project members based on description, dismissing suggestions, collapsing/expanding AI Triage Analysis section
+- [x] T587 [US7] [P] Add troubleshooting section for AI triage errors in docs/user/ai-triage.md covering: gateway unavailable (error message, retry functionality), permission denied (button visibility, 403 errors), timeout (30s limit, retry option), malformed response (error display, retry)
+- [x] T588 [US7] [P] Add cross-reference links in docs/user/ai-triage.md: link to Project Settings → Integrations for provider setup, link to configuration docs for ai_triage_permissions setting
+- [x] T589 [US7] [P] Ensure docs/user/ai-triage.md includes links to AI providers integration documentation (docs/integrations/ai-providers.md) for infrastructure and project-level setup
 
 **Acceptance Criteria**:
 
@@ -1440,12 +1514,12 @@ Where:
 
 #### Configuration Documentation Updates
 
-- [ ] T567 [US7] [P] Update configuration reference documentation (apps/web/content/docs/configuration-reference.md or similar) to add aiTriageConfig section with schema definition
-- [ ] T568 [US7] [P] Document ai_triage_permissions field in configuration reference with YAML examples showing snake_case format: array of 'admin'|'member'|'viewer', default ['admin'], optional configuration
-- [ ] T569 [US7] [P] Document default behavior in configuration reference: Admin only if ai_triage_permissions not configured, how to override default, permission configuration scenarios with examples
-- [ ] T570 [US7] [P] Add aiTriageConfig.enabled field documentation in configuration reference: boolean default true, optional configuration
-- [ ] T571 [US7] [P] Include configuration examples in configuration reference showing aiTriageConfig in full stride.config.yaml context with comments explaining each field
-- [ ] T572 [US7] [P] Add cross-reference from configuration reference to AI triage feature documentation (docs/user/ai-triage.md) and AI providers integration docs (docs/integrations/ai-providers.md)
+- [x] T590 [US7] [P] Update configuration reference documentation (apps/web/content/docs/configuration-reference.md or similar) to add aiTriageConfig section with schema definition
+- [x] T591 [US7] [P] Document ai_triage_permissions field in configuration reference with YAML examples showing snake_case format: array of 'admin'|'member'|'viewer', default ['admin'], optional configuration
+- [x] T592 [US7] [P] Document default behavior in configuration reference: Admin only if ai_triage_permissions not configured, how to override default, permission configuration scenarios with examples
+- [x] T593 [US7] [P] Add aiTriageConfig.enabled field documentation in configuration reference: boolean default true, optional configuration
+- [x] T594 [US7] [P] Include configuration examples in configuration reference showing aiTriageConfig in full stride.config.yaml context with comments explaining each field
+- [x] T595 [US7] [P] Add cross-reference from configuration reference to AI triage feature documentation (docs/user/ai-triage.md) and AI providers integration docs (docs/integrations/ai-providers.md)
 
 **Acceptance Criteria**:
 
@@ -1457,11 +1531,11 @@ Where:
 
 #### Documentation Link Verification and Navigation
 
-- [ ] T573 [US7] [P] Verify all documentation links work correctly: test cross-references between docs/user/ai-triage.md, docs/integrations/ai-providers.md, configuration reference, and any other related docs
-- [ ] T574 [US7] [P] Update documentation navigation/sidebar (if applicable) to include AI triage feature documentation link in apps/web/src/components/features/docs/DocsNavigation.tsx or equivalent navigation component
-- [ ] T575 [US7] [P] Ensure AI triage documentation is discoverable: verify it appears in appropriate documentation index/overview pages if they exist
-- [ ] T576 [US7] [P] Validate all file paths referenced in documentation (e.g., Project Settings → Integrations page route) are correct and match actual implementation
-- [ ] T577 [US7] [P] Test all documentation examples: verify YAML configuration examples pass validation, verify UI workflow descriptions match actual implementation
+- [x] T596 [US7] [P] Verify all documentation links work correctly: test cross-references between docs/user/ai-triage.md, docs/integrations/ai-providers.md, configuration reference, and any other related docs
+- [x] T597 [US7] [P] Update documentation navigation/sidebar (if applicable) to include AI triage feature documentation link in apps/web/src/components/features/docs/DocsNavigation.tsx or equivalent navigation component
+- [x] T598 [US7] [P] Ensure AI triage documentation is discoverable: verify it appears in appropriate documentation index/overview pages if they exist
+- [x] T599 [US7] [P] Validate all file paths referenced in documentation (e.g., Project Settings → Integrations page route) are correct and match actual implementation
+- [x] T600 [US7] [P] Test all documentation examples: verify YAML configuration examples pass validation, verify UI workflow descriptions match actual implementation
 
 **Acceptance Criteria**:
 
@@ -1924,12 +1998,16 @@ Phase 1: Setup
 **Within Phase 9 (US7)**:
 
 - T511-T513 (Configuration schema) can be parallelized
-- T514-T521 (AI Gateway service) can be parallelized after T513
-- T522-T524 (Payload builder & HTTP client) can be parallelized
-- T525-T526 (Permission system) can be parallelized
-- T527-T531 (API endpoint) must run sequentially (dependencies)
-- T532-T537 (UI components - core structure) can be parallelized
-- T538-T545 (UI components - integration) must run sequentially (dependencies)
+- T514-T520.1 (AI Gateway service) can be parallelized after T513
+- T521-T533 (AI Provider Configuration UI) can be parallelized after Phase 8.5 complete
+- T534-T544 (AI Prompt Strategy) can be parallelized (T537 must complete before T544, T541.1 can be parallelized with T539-T541)
+- T545-T547 (Payload builder & HTTP client) can be parallelized
+- T548-T549 (Permission system) can be parallelized
+- T550-T554 (API endpoint) must run sequentially (dependencies)
+- T555-T560 (UI components - core structure) can be parallelized
+- T561-T568 (UI components - integration) must run sequentially (dependencies)
+- T569-T574 (Error handling) can be parallelized
+- T575-T600 (Documentation) can be parallelized
 - T546-T551 (Error handling) can be parallelized
 
 ---
@@ -2012,7 +2090,7 @@ Phase 1: Setup
 
 ## Task Summary
 
-**Total Tasks**: 499  
+**Total Tasks**: 548  
 **Phase 1 (Setup)**: 14 tasks  
 **Phase 2 (Foundational)**: 44 tasks  
 **Phase 3 (US1)**: 38 tasks  
@@ -2028,7 +2106,7 @@ Phase 1: Setup
 **Phase 8.7 (User Assignment & Clone)**: 8 tasks  
 **Phase 8.8 (Troubleshooting & Permissive Config)**: 27 tasks  
 **Phase 8.9 (Service Integration Documentation)**: 46 tasks (T465-T510)  
-**Phase 9 (US7)**: 41 tasks (T511-T551, deferred - P3 priority)
+**Phase 9 (US7)**: 90 tasks (T511-T600, deferred - P3 priority)
 **Phase 10 (Polish)**: 40 tasks (6 testing deferred, 34 non-testing tasks remaining)
 
 **Parallel Opportunities**: ~148 tasks marked with [P]

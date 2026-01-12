@@ -72,6 +72,10 @@ export function generateDefaultConfig(
       },
     ],
     automation_rules: [],
+    ai_triage_config: {
+      permissions: ['admin'],
+      enabled: true,
+    },
   };
 }
 

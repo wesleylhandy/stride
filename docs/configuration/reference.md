@@ -302,6 +302,129 @@ user_assignment:
 - Status keys in `require_assignee_for_statuses` must match keys defined in `workflow.statuses`
 - The `default_assignee` setting applies only when creating new issues, not when updating existing ones
 
+## AI Triage Configuration
+
+### `ai_triage_config` (optional)
+
+- **Type**: AI Triage Configuration object
+- **Default**: See defaults below
+- **Description**: Configures AI-powered issue triage permissions and enablement
+
+**Note**: YAML configuration uses snake_case (`ai_triage_config`). TypeScript schema property is camelCase (`aiTriageConfig`).
+
+### AI Triage Configuration
+
+#### `permissions` (optional)
+
+- **Type**: Array of user role strings
+- **Default**: `['admin']`
+- **Description**: User roles allowed to use AI triage feature
+- **Allowed values**: `'admin'`, `'member'`, `'viewer'` (array can contain any combination)
+- **Example**: `['admin', 'member']` allows both Admin and Member roles to use AI triage
+
+**Default behavior**: If `ai_triage_config` is not configured or `permissions` is not specified, only Admin users can use AI triage.
+
+**Permission configuration scenarios**:
+- **Admin only** (default): `permissions: ['admin']` or omit configuration
+- **Admin and Members**: `permissions: ['admin', 'member']`
+- **All roles**: `permissions: ['admin', 'member', 'viewer']`
+- **Members only**: `permissions: ['member']` (Admin can still access, but this configures explicit member access)
+
+```yaml
+ai_triage_config:
+  permissions: ['admin', 'member']  # Allow Admin and Member roles
+```
+
+#### `enabled` (optional)
+
+- **Type**: Boolean
+- **Default**: `true`
+- **Description**: Whether AI triage feature is enabled for this project
+- **Note**: Even if enabled, AI triage requires AI provider configuration (see [AI Providers Integration](/docs/integrations/ai-providers))
+
+```yaml
+ai_triage_config:
+  enabled: true  # Enable AI triage (default)
+  permissions: ['admin']  # Admin only (default)
+```
+
+### Configuration Examples
+
+**Example 1: Default Configuration (Admin Only)**
+
+```yaml
+# Default behavior - Admin only, enabled
+# Can be omitted entirely (defaults apply)
+ai_triage_config:
+  permissions: ['admin']
+  enabled: true
+```
+
+**Example 2: Allow Admin and Members**
+
+```yaml
+ai_triage_config:
+  permissions: ['admin', 'member']
+  enabled: true
+```
+
+**Example 3: Disable AI Triage**
+
+```yaml
+ai_triage_config:
+  enabled: false
+  permissions: ['admin']  # Still required field, but feature disabled
+```
+
+**Example 4: Full Configuration Context**
+
+```yaml
+project_key: APP
+project_name: My Application
+
+workflow:
+  default_status: todo
+  statuses:
+    - key: todo
+      name: To Do
+      type: open
+    - key: in_progress
+      name: In Progress
+      type: in_progress
+    - key: done
+      name: Done
+      type: closed
+
+custom_fields:
+  - key: priority
+    name: Priority
+    type: dropdown
+    options: [Low, Medium, High, Critical]
+    required: false
+
+# AI Triage Configuration
+ai_triage_config:
+  permissions: ['admin', 'member']  # Allow Admin and Member roles
+  enabled: true  # Enable AI triage feature
+```
+
+### Default Behavior
+
+**If `ai_triage_config` is not configured**:
+- `permissions` defaults to `['admin']` (Admin only)
+- `enabled` defaults to `true` (enabled)
+- AI triage button visible to Admin users only
+
+**To override defaults**:
+- Configure `ai_triage_config` section in your YAML file
+- Set `permissions` to change allowed roles
+- Set `enabled: false` to disable AI triage
+
+### Related Documentation
+
+- [AI Triage Feature Documentation](/docs/user/ai-triage) - User guide for AI triage feature
+- [AI Providers Integration](/docs/integrations/ai-providers) - Setup and configuration for AI providers
+
 ## Complete Example
 
 ### Permissive Configuration (Default - All Transitions Allowed)

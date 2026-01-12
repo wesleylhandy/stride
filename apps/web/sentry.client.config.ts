@@ -50,5 +50,10 @@ Sentry.init({
     'Load failed',
     // Chrome extension errors
     'chrome-extension://',
+    // Next.js 16.0.10 + React 19 known bugs
+    "Failed to execute 'measure' on 'Performance'",
+    'cannot have a negative time stamp',
+    'ViewportBoundary',
+    'React Client Manifest',
   ],
 });

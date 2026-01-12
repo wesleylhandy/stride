@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import type { ProjectConfig } from '@stride/yaml-config';
 import { RepositoryConnectionSettings } from './RepositoryConnectionSettings';
+import { AiProviderSettings } from './AiProviderSettings';
 
 // Dynamically import ConfigEditor to code-split the heavy CodeMirror editor
 const ConfigEditor = dynamic(
@@ -146,7 +147,25 @@ export function ProjectSettingsContent({
   }
 
   if (activeTab === 'integrations') {
-    return <RepositoryConnectionSettings projectId={projectId} />;
+    return (
+      <div className="space-y-8">
+        {/* Repository Connections Section */}
+        <div>
+          <h2 className="mb-4 text-xl font-semibold text-foreground dark:text-foreground-dark">
+            Repository Connections
+          </h2>
+          <RepositoryConnectionSettings projectId={projectId} />
+        </div>
+
+        {/* AI Provider Configuration Section */}
+        <div>
+          <h2 className="mb-4 text-xl font-semibold text-foreground dark:text-foreground-dark">
+            AI Providers
+          </h2>
+          <AiProviderSettings projectId={projectId} />
+        </div>
+      </div>
+    );
   }
 
   return null;

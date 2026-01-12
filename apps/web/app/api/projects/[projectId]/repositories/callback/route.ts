@@ -13,6 +13,10 @@ import {
   exchangeGitLabCode,
   type GitLabOAuthConfig,
 } from '@/lib/integrations/gitlab';
+import {
+  getGitHubOAuthConfig,
+  getGitLabOAuthConfig,
+} from '@/lib/config/git-oauth-config';
 import { prisma } from '@stride/database';
 import type { Prisma } from '@stride/database';
 
@@ -144,18 +148,36 @@ export async function GET(
     let accessToken: string;
 
     if (repositoryType === 'GitHub') {
+      // Use global infrastructure config with fallback to env vars
+      const githubConfig = await getGitHubOAuthConfig();
+      if (!githubConfig) {
+        const errorUrl = new URL(returnTo, request.url);
+        errorUrl.searchParams.set('error', 'config_not_found');
+        errorUrl.searchParams.set('error_description', 'GitHub OAuth configuration not found');
+        return redirect(errorUrl.toString());
+      }
+
       const config: GitHubOAuthConfig = {
-        clientId: process.env.GITHUB_CLIENT_ID || '',
-        clientSecret: process.env.GITHUB_CLIENT_SECRET || '',
+        clientId: githubConfig.clientId,
+        clientSecret: githubConfig.clientSecret,
         redirectUri,
       };
       accessToken = await exchangeGitHubCode(code, config);
     } else if (repositoryType === 'GitLab') {
+      // Use global infrastructure config with fallback to env vars
+      const gitlabConfig = await getGitLabOAuthConfig();
+      if (!gitlabConfig) {
+        const errorUrl = new URL(returnTo, request.url);
+        errorUrl.searchParams.set('error', 'config_not_found');
+        errorUrl.searchParams.set('error_description', 'GitLab OAuth configuration not found');
+        return redirect(errorUrl.toString());
+      }
+
       const config: GitLabOAuthConfig = {
-        clientId: process.env.GITLAB_CLIENT_ID || '',
-        clientSecret: process.env.GITLAB_CLIENT_SECRET || '',
+        clientId: gitlabConfig.clientId,
+        clientSecret: gitlabConfig.clientSecret,
         redirectUri,
-        baseUrl: process.env.GITLAB_BASE_URL,
+        baseUrl: gitlabConfig.baseUrl,
       };
       accessToken = await exchangeGitLabCode(code, config);
     } else {

@@ -54,6 +54,16 @@ export const UserAssignmentConfigSchema = z.strictObject({
   require_assignee_for_statuses: [],
 });
 
+// AI triage configuration schema
+// Note: YAML config uses snake_case `ai_triage_permissions`, TypeScript schema property is `aiTriageConfig.permissions` (camelCase)
+export const AiTriageConfigSchema = z.strictObject({
+  permissions: z.array(z.enum(['admin', 'member', 'viewer'])).default(['admin']),
+  enabled: z.boolean().default(true),
+}).default({
+  permissions: ['admin'],
+  enabled: true,
+});
+
 // Project configuration schema
 export const ProjectConfigSchema = z.strictObject({
   project_key: z.string().regex(/^[A-Z0-9]{2,10}$/, 'Project key must be 2-10 uppercase alphanumeric characters'),
@@ -62,6 +72,7 @@ export const ProjectConfigSchema = z.strictObject({
   custom_fields: z.array(CustomFieldConfigSchema).default([]),
   automation_rules: z.array(AutomationRuleSchema).default([]),
   user_assignment: UserAssignmentConfigSchema.optional(),
+  ai_triage_config: AiTriageConfigSchema.optional(),
 });
 
 // Export inferred types
@@ -70,5 +81,6 @@ export type CustomFieldConfig = z.infer<typeof CustomFieldConfigSchema>;
 export type WorkflowConfig = z.infer<typeof WorkflowConfigSchema>;
 export type AutomationRule = z.infer<typeof AutomationRuleSchema>;
 export type UserAssignmentConfig = z.infer<typeof UserAssignmentConfigSchema>;
+export type AiTriageConfig = z.infer<typeof AiTriageConfigSchema>;
 export type ProjectConfig = z.infer<typeof ProjectConfigSchema>;
 

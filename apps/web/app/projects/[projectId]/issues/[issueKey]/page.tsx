@@ -3,6 +3,7 @@ import { IssueDetailClient } from '@/components/IssueDetailClient';
 import { projectRepository, issueRepository, issueBranchRepository } from '@stride/database';
 import type { Issue, ProjectConfig, IssueType, Priority } from '@stride/types';
 import { canUpdateIssue } from '@/lib/auth/permissions';
+import { canUseAITriage } from '@/lib/ai/permissions';
 import { requireAuthServer } from '@/middleware/auth';
 import { headers } from 'next/headers';
 import { PageContainer } from '@stride/ui';
@@ -76,6 +77,9 @@ export default async function IssueDetailPage({ params }: PageParams) {
   // Check edit permissions
   const canEdit = canUpdateIssue(session.role);
 
+  // Check AI triage permissions
+  const aiTriageAllowed = canUseAITriage(session.role, projectConfig);
+
   // Note: Update and status change handlers should be implemented as Server Actions
   // For now, we'll pass undefined and let the component handle client-side API calls
 
@@ -87,6 +91,7 @@ export default async function IssueDetailPage({ params }: PageParams) {
         projectConfig={projectConfig}
         branches={branches}
         canEdit={canEdit}
+        canUseAITriage={aiTriageAllowed}
       />
     </PageContainer>
   );

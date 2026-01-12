@@ -64,6 +64,7 @@
 - ✅ **RESOLVED**: Session management - See `research.md` section 6
 - ✅ **RESOLVED**: Rate limiting - See `research.md` section 7
 - ✅ **RESOLVED**: Docker Compose - See `research.md` section 8
+- ✅ **RESOLVED**: AI Prompt Strategy (Phase 9) - See `spec.md` Session 2026-01-23 (Phase 9 AI Prompt Strategy Clarifications) and `research.md` section 9 (Prompt Strategy)
 
 All clarifications resolved. See `research.md` for detailed decisions and rationale.
 
@@ -271,22 +272,22 @@ All clarifications resolved. See `research.md` for detailed decisions and ration
   - Similar pattern to repository connection management
   - Admin-only access (enforced at route level)
 - **Form Fields**:
-  - Cloud providers (OpenAI, Anthropic): API key field (password-type, masked)
+  - Cloud providers (OpenAI, Anthropic, Google Gemini): API key field (password-type, masked)
   - Self-hosted LLMs (Ollama): Endpoint URL field (required) + optional authentication token field (password-type)
   - All providers: Model multiselect interface
 - **Model Selection**:
-  - Cloud providers: Static list of available models (e.g., gpt-4, gpt-3.5-turbo, claude-3-opus)
-  - Self-hosted LLMs: Auto-discovery via API (queries Ollama `/api/tags` endpoint when endpoint URL provided)
+  - Cloud providers (OpenAI, Anthropic, Google Gemini): Dynamic model fetching via provider APIs (queries provider API endpoints to discover available models)
+  - Self-hosted LLMs (Ollama): Auto-discovery via API (queries Ollama `/api/tags` endpoint when endpoint URL provided)
   - If auto-discovery fails: Show error message, allow manual model entry
-  - Admin selects which models from each provider are available to users
+  - Admin selects which models from each provider are available to users via multiselect interface
   - System assigns default model automatically when triage triggered
 - **Validation**:
   - Optional "Test Connection" button for self-hosted LLMs (non-blocking)
   - Form submission not blocked if test fails (allows offline configuration)
 - **Multiple Providers**:
-  - Admin can configure multiple providers simultaneously (OpenAI, Anthropic, Ollama, etc.)
+  - Admin can configure multiple providers simultaneously (OpenAI, Anthropic, Google Gemini, Ollama, etc.)
   - Each provider configuration stored separately
-  - Admin explicitly selects which models from each provider are available
+  - Admin explicitly selects which models from each provider are available via multiselect interface
   - System uses default model assignment or allows selection from configured allowed models
 
 **Database Schema** (new model):
@@ -294,7 +295,7 @@ All clarifications resolved. See `research.md` for detailed decisions and ration
 model AiProviderConfig {
   id              String   @id @default(uuid())
   projectId       String
-  providerType    String   // "openai", "anthropic", "ollama", etc.
+  providerType    String   // "openai", "anthropic", "google-gemini", "ollama", etc.
   apiKey          String?  // Encrypted (for cloud providers)
   endpointUrl     String?  // Plain text (for self-hosted LLMs)
   authToken       String?  // Encrypted (optional, for self-hosted with auth)
@@ -324,6 +325,105 @@ model AiProviderConfig {
 - `apps/web/src/components/features/projects/AiProviderForm.tsx`: Form for adding/editing provider
 - `apps/web/src/components/features/projects/ModelSelector.tsx`: Multiselect for model selection
 - `apps/web/src/components/features/projects/EndpointTester.tsx`: Test connection button component
+
+#### AI Prompt Strategy (Based on Clarifications - Session 2026-01-23, updated)
+**Decision**: Single system prompt stored in markdown file + structured user message with JSON schema and example. Direct LLM API calls (no agent frameworks).
+
+**Rationale**:
+- Single system prompt stored in markdown file is simpler to maintain and update than multiple specialized prompts or per-project templates
+- Markdown format enables easy editing, version control, and external testing (Google AI Studio, OpenAI dashboard)
+- Project customization achieved through data injection in user message, not prompt modification
+- Direct API calls avoid unnecessary abstraction layers (agent frameworks, tool definitions)
+- JSON schema + example in prompt improves output consistency and reduces parsing errors
+- Single prompt handles all scenarios (error analysis, general issues) by including relevant context in user message
+- Aligns with KISS principle - sufficient for structured output without over-engineering
+
+**Implementation**:
+
+1. **System Prompt Structure** (stored in `packages/ai-gateway/prompts/system-prompt.md`):
+   - Defines AI role: "You are an issue triage specialist for software development teams"
+   - Output format requirements: JSON with `summary`, `priority`, `suggestedAssignee` fields
+   - Analysis guidelines:
+     - Focus on root cause analysis
+     - Consider error traces when available
+     - Match project priority values when provided
+     - Provide natural language assignee descriptions based on expertise/skills needed
+   - JSON schema definition:
+     ```json
+     {
+       "summary": "string - Plain-language root cause summary",
+       "priority": "string - Priority value matching project config or standard (low/medium/high)",
+       "suggestedAssignee": "string - Natural language description of ideal assignee (e.g., 'frontend developer with React experience')"
+     }
+     ```
+   - Example output:
+     ```json
+     {
+       "summary": "Authentication failure due to expired JWT token validation. The error trace indicates the token expiration check is not handling edge cases properly.",
+       "priority": "high",
+       "suggestedAssignee": "backend developer familiar with authentication systems and JWT token handling"
+     }
+     ```
+   - Handles all triage scenarios (error analysis, general issues, different issue types) - no separate prompts needed
+
+2. **User Message Structure** (constructed in `packages/ai-gateway/src/lib/build-user-message.ts`):
+   - Structured issue context payload:
+     - `title`: Issue title
+     - `description`: Issue description
+     - `status`: Current issue status
+     - `customFields`: Project-specific custom fields (JSON object)
+     - `errorTraces`: Array of error traces (if available from Root Cause Dashboard)
+     - `recentComments`: Last 5-10 comments (ordered by timestamp)
+   - Project-specific context injection:
+     - `priorityValues`: Array of custom priority values from project config (if exists)
+     - `workflowRules`: Relevant workflow rules that might affect triage
+     - `customFieldDefinitions`: Custom field definitions to help AI understand context
+   - Context adapts to scenario:
+     - Error traces included when available (from monitoring webhooks)
+     - Issue type inferred from custom fields
+     - Recent comments provide additional context
+
+3. **Provider Integration**:
+   - **Direct LLM API calls**: Use native provider APIs directly
+     - OpenAI: `openai.chat.completions.create()` with `system` and `user` messages
+     - Anthropic: `anthropic.messages.create()` with `system` and `user` messages
+     - Google Gemini: `fetch()` to Google Gemini API with `system` and `user` messages
+     - Ollama: `fetch()` to Ollama API with `system` and `user` messages
+   - **Structured output modes** (when available):
+     - OpenAI: Use `response_format: { type: "json_object" }` for JSON mode
+     - Anthropic: Use structured outputs feature if available
+     - Google Gemini: Rely on schema + example in prompt (may not support structured modes)
+     - Ollama: Rely on schema + example in prompt (may not support structured modes)
+   - **No agent frameworks**: Avoid LangChain, LlamaIndex, or similar frameworks
+   - **No tool definitions**: Single-purpose triage task doesn't require tool calling
+
+4. **File Structure**:
+   ```
+   packages/ai-gateway/
+   ├── prompts/
+   │   └── system-prompt.md           # System prompt markdown file with schema + example (version controlled)
+   ├── src/
+   │   ├── lib/
+   │   │   ├── load-prompt.ts         # Loads and caches system prompt from markdown file at startup
+   │   │   ├── build-user-message.ts  # Constructs structured user message from issue context
+   │   ├── openai-client.ts          # Direct OpenAI API integration
+   │   ├── anthropic-client.ts       # Direct Anthropic API integration
+   │   ├── google-gemini-client.ts   # Direct Google Gemini API integration
+   │   └── ollama-client.ts          # Direct Ollama API integration
+   └── index.ts                      # Main service entry point
+   ```
+
+5. **Error Handling for Prompt/Response**:
+   - If LLM response doesn't match JSON schema: Log error, attempt to parse with fallback, return error to user
+   - If structured output mode fails: Fall back to schema + example in prompt
+   - If response missing required fields: Log error, return user-friendly message, allow retry
+
+**Benefits**:
+- Simpler maintenance: Single prompt file to update
+- Better consistency: Same prompt across all projects (customization via data)
+- Lower complexity: No agent orchestration, tool definitions, or retry logic overhead
+- Provider flexibility: Works with all providers (structured modes when available, schema fallback otherwise)
+- Easier debugging: Clear prompt structure, predictable output format
 
 ### Component Structure
 
@@ -400,6 +500,16 @@ Update `packages/yaml-config/src/default-config.ts` to include default AI triage
 - **Issue Detail View**: Display AITriageAnalysis component
 - **Project Configuration**: Read `ai_triage_permissions` setting
 - **AI Gateway Service**: HTTP client in `apps/web/src/lib/ai/triage.ts`
+  - Constructs issue context payload (title, description, status, custom fields, error traces, recent comments)
+  - Injects project-specific context (priority values, workflow rules)
+  - Sends to AI Gateway `/analyze-issue` endpoint
+- **AI Gateway Implementation** (`packages/ai-gateway`):
+  - Loads system prompt from `prompts/system-prompt.md` at startup (cached in memory)
+  - Builds structured user message from issue context payload
+  - Makes direct LLM API calls (no agent frameworks)
+  - Changes to prompt file require service restart to take effect
+  - Uses provider structured output modes when available (OpenAI JSON mode, Anthropic structured outputs)
+  - Falls back to schema + example in prompt for compatibility
 - **Permission Middleware**: Check at API route level before processing
 - **Root Cause Dashboard**: Include error traces in context if available
 - **AI Provider Configuration**: Read from database, pass provider/model selection to AI Gateway
@@ -520,6 +630,6 @@ Phase 9 requires comprehensive documentation updates to reflect the new AI triag
 - P2 features (configuration, Git integration, sprints) follow
 - P3 features (diagnostics, AI) can be implemented after core is stable
 - All external integrations must gracefully degrade when services unavailable
-- **Phase 9 (AI Triage)**: Implement after Phase 4 (Issues) is complete and stable. All clarifications resolved in spec.md Session 2024-12-19 (Phase 9 Clarifications), Session 2026-01-10 (Phase 9 AI Provider Configuration & Self-Hosted LLM Configuration Clarifications), and Session 2026-01-23 (Phase 9 Documentation Updates Clarifications).
+- **Phase 9 (AI Triage)**: Implement after Phase 4 (Issues) is complete and stable. All clarifications resolved in spec.md Session 2024-12-19 (Phase 9 Clarifications), Session 2026-01-10 (Phase 9 AI Provider Configuration & Self-Hosted LLM Configuration Clarifications), Session 2026-01-23 (Phase 9 Documentation Updates Clarifications), and Session 2026-01-23 (Phase 9 AI Prompt Strategy Clarifications, updated). Prompt strategy: Single system prompt stored in markdown file (`packages/ai-gateway/prompts/system-prompt.md`) + structured user message with JSON schema and example. Direct LLM API calls (no agent frameworks). Prompt file is version controlled, easily editable, and can be tested externally (Google AI Studio, OpenAI dashboard). Changes require service restart.
 - **Documentation Updates**: Phase 9 requires comprehensive documentation updates following hybrid approach (infrastructure + project-level), comprehensive feature docs, and dedicated documentation tasks section in tasks.md. All updates must be completed as part of Phase 9 implementation.
 

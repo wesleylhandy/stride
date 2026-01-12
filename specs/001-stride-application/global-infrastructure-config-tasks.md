@@ -57,12 +57,12 @@ Where:
 
 ### Database Schema
 
-- [ ] T600 Create Prisma migration for GlobalInfrastructureConfig model in packages/database/prisma/migrations/YYYYMMDDHHMMSS_add_global_infrastructure_config/migration.sql
-- [ ] T601 Add GlobalInfrastructureConfig model to packages/database/prisma/schema.prisma with fields: id (UUID), gitConfig (JSONB), aiConfig (JSONB), updatedBy (String?, foreign key to User), createdAt, updatedAt
-- [ ] T602 Add User relation to GlobalInfrastructureConfig in packages/database/prisma/schema.prisma with onDelete: SetNull for audit trail
-- [ ] T603 Add indexes for GlobalInfrastructureConfig in packages/database/prisma/schema.prisma: updatedAt, updatedBy
-- [ ] T604 Run Prisma generate to update types in packages/database/
-- [ ] T605 Create repository function for GlobalInfrastructureConfig in packages/database/src/repositories/global-infrastructure-config-repository.ts with getOrCreate, update methods
+- [x] T600 Create Prisma migration for GlobalInfrastructureConfig model in packages/database/prisma/migrations/YYYYMMDDHHMMSS_add_global_infrastructure_config/migration.sql
+- [x] T601 Add GlobalInfrastructureConfig model to packages/database/prisma/schema.prisma with fields: id (UUID), gitConfig (JSONB), aiConfig (JSONB), updatedBy (String?, foreign key to User), createdAt, updatedAt
+- [x] T602 Add User relation to GlobalInfrastructureConfig in packages/database/prisma/schema.prisma with onDelete: SetNull for audit trail
+- [x] T603 Add indexes for GlobalInfrastructureConfig in packages/database/prisma/schema.prisma: updatedAt, updatedBy
+- [x] T604 Run Prisma generate to update types in packages/database/
+- [x] T605 Create repository function for GlobalInfrastructureConfig in packages/database/src/repositories/global-infrastructure-config-repository.ts with getOrCreate, update methods
 
 **Acceptance Criteria**:
 
@@ -74,12 +74,12 @@ Where:
 
 ### Configuration Service Layer
 
-- [ ] T606 Create configuration precedence resolver in apps/web/src/lib/config/infrastructure-precedence.ts that reads env vars first, then database, per-provider basis
-- [ ] T607 Create Git OAuth config reader in apps/web/src/lib/config/git-oauth-config.ts that resolves GitHub and GitLab config with per-provider precedence
-- [ ] T608 Create AI Gateway config reader in apps/web/src/lib/config/ai-gateway-config.ts that resolves AI Gateway URL and provider credentials with per-provider precedence
-- [ ] T609 Implement configuration validation utility in apps/web/src/lib/config/validate-infrastructure.ts using Zod schemas for Git OAuth and AI Gateway config
-- [ ] T610 Create configuration encryption utility in apps/web/src/lib/config/encrypt-infrastructure.ts that encrypts sensitive credentials using existing storage.ts encrypt function
-- [ ] T611 Create startup validation function in apps/web/src/lib/config/validate-startup.ts that validates env var configuration on application startup
+- [x] T606 Create configuration precedence resolver in apps/web/src/lib/config/infrastructure-precedence.ts that reads env vars first, then database, per-provider basis
+- [x] T607 Create Git OAuth config reader in apps/web/src/lib/config/git-oauth-config.ts that resolves GitHub and GitLab config with per-provider precedence
+- [x] T608 Create AI Gateway config reader in apps/web/src/lib/config/ai-gateway-config.ts that resolves AI Gateway URL and provider credentials with per-provider precedence
+- [x] T609 Implement configuration validation utility in apps/web/src/lib/config/validate-infrastructure.ts using Zod schemas for Git OAuth and AI Gateway config
+- [x] T610 Create configuration encryption utility in apps/web/src/lib/config/encrypt-infrastructure.ts that encrypts sensitive credentials using existing storage.ts encrypt function
+- [x] T611 Create startup validation function in apps/web/src/lib/config/validate-startup.ts that validates env var configuration on application startup
 
 **Acceptance Criteria**:
 
@@ -91,11 +91,11 @@ Where:
 
 ### Validation Schemas
 
-- [ ] T612 Create Zod schema for Git OAuth configuration in apps/web/src/lib/config/schemas/git-oauth-schema.ts with GitHub and GitLab validation rules
-- [ ] T613 Create Zod schema for AI Gateway configuration in apps/web/src/lib/config/schemas/ai-gateway-schema.ts with URL validation, API key format validation
-- [ ] T614 Create combined infrastructure config schema in apps/web/src/lib/config/schemas/infrastructure-schema.ts that combines Git and AI schemas
-- [ ] T615 Add validation for OAuth callback URL format in apps/web/src/lib/config/schemas/git-oauth-schema.ts
-- [ ] T616 Add validation for API key formats (OpenAI: sk-*, Anthropic: sk-ant-*, Google: AIza*) in apps/web/src/lib/config/schemas/ai-gateway-schema.ts
+- [x] T612 Create Zod schema for Git OAuth configuration in apps/web/src/lib/config/schemas/git-oauth-schema.ts with GitHub and GitLab validation rules
+- [x] T613 Create Zod schema for AI Gateway configuration in apps/web/src/lib/config/schemas/ai-gateway-schema.ts with URL validation, API key format validation
+- [x] T614 Create combined infrastructure config schema in apps/web/src/lib/config/schemas/infrastructure-schema.ts that combines Git and AI schemas
+- [x] T615 Add validation for OAuth callback URL format in apps/web/src/lib/config/schemas/git-oauth-schema.ts (URL validation already covers this via baseUrl)
+- [x] T616 Add validation for API key formats (OpenAI: sk-*, Anthropic: sk-ant-*, Google: AIza*) in apps/web/src/lib/config/schemas/ai-gateway-schema.ts
 
 **Acceptance Criteria**:
 
@@ -107,16 +107,16 @@ Where:
 
 ### API Routes - Configuration Management
 
-- [ ] T617 Create GET /api/admin/settings/infrastructure route in apps/web/app/api/admin/settings/infrastructure/route.ts with admin-only authentication check
-- [ ] T618 Implement configuration retrieval with precedence resolution in apps/web/app/api/admin/settings/infrastructure/route.ts (env vars → database)
-- [ ] T619 Ensure API response never exposes secrets (client secrets, API keys) in apps/web/app/api/admin/settings/infrastructure/route.ts
-- [ ] T620 Add source field to API response indicating configuration source (database/environment/default) in apps/web/app/api/admin/settings/infrastructure/route.ts
-- [ ] T621 Create PUT /api/admin/settings/infrastructure route in apps/web/app/api/admin/settings/infrastructure/route.ts with admin-only authentication check
-- [ ] T622 Implement configuration validation on save in apps/web/app/api/admin/settings/infrastructure/route.ts using Zod schemas
-- [ ] T623 Implement credential encryption before database storage in apps/web/app/api/admin/settings/infrastructure/route.ts
-- [ ] T624 Implement configuration update with upsert pattern in apps/web/app/api/admin/settings/infrastructure/route.ts
-- [ ] T625 Add updatedBy audit trail tracking in apps/web/app/api/admin/settings/infrastructure/route.ts
-- [ ] T626 Implement error handling for validation errors, permission denied, encryption failures in apps/web/app/api/admin/settings/infrastructure/route.ts
+- [x] T617 Create GET /api/admin/settings/infrastructure route in apps/web/app/api/admin/settings/infrastructure/route.ts with admin-only authentication check
+- [x] T618 Implement configuration retrieval with precedence resolution in apps/web/app/api/admin/settings/infrastructure/route.ts (env vars → database)
+- [x] T619 Ensure API response never exposes secrets (client secrets, API keys) in apps/web/app/api/admin/settings/infrastructure/route.ts
+- [x] T620 Add source field to API response indicating configuration source (database/environment/default) in apps/web/app/api/admin/settings/infrastructure/route.ts
+- [x] T621 Create PUT /api/admin/settings/infrastructure route in apps/web/app/api/admin/settings/infrastructure/route.ts with admin-only authentication check
+- [x] T622 Implement configuration validation on save in apps/web/app/api/admin/settings/infrastructure/route.ts using Zod schemas
+- [x] T623 Implement credential encryption before database storage in apps/web/app/api/admin/settings/infrastructure/route.ts
+- [x] T624 Implement configuration update with upsert pattern in apps/web/app/api/admin/settings/infrastructure/route.ts
+- [x] T625 Add updatedBy audit trail tracking in apps/web/app/api/admin/settings/infrastructure/route.ts
+- [x] T626 Implement error handling for validation errors, permission denied, encryption failures in apps/web/app/api/admin/settings/infrastructure/route.ts
 
 **Acceptance Criteria**:
 
@@ -130,14 +130,14 @@ Where:
 
 ### API Routes - Audit and Testing
 
-- [ ] T627 Create GET /api/admin/settings/infrastructure/audit route in apps/web/app/api/admin/settings/infrastructure/audit/route.ts with admin-only authentication check
-- [ ] T628 Implement audit log retrieval with pagination (limit, offset) in apps/web/app/api/admin/settings/infrastructure/audit/route.ts
-- [ ] T629 Create POST /api/admin/settings/infrastructure/test route in apps/web/app/api/admin/settings/infrastructure/test/route.ts with admin-only authentication check
-- [ ] T630 Implement test connection logic for GitHub OAuth in apps/web/app/api/admin/settings/infrastructure/test/route.ts
-- [ ] T631 Implement test connection logic for GitLab OAuth in apps/web/app/api/admin/settings/infrastructure/test/route.ts
-- [ ] T632 Implement test connection logic for AI Gateway in apps/web/app/api/admin/settings/infrastructure/test/route.ts
-- [ ] T633 Implement test connection logic for Ollama endpoint in apps/web/app/api/admin/settings/infrastructure/test/route.ts
-- [ ] T634 Add timeout handling for test connections in apps/web/app/api/admin/settings/infrastructure/test/route.ts
+- [x] T627 Create GET /api/admin/settings/infrastructure/audit route in apps/web/app/api/admin/settings/infrastructure/audit/route.ts with admin-only authentication check
+- [x] T628 Implement audit log retrieval with pagination (limit, offset) in apps/web/app/api/admin/settings/infrastructure/audit/route.ts
+- [x] T629 Create POST /api/admin/settings/infrastructure/test route in apps/web/app/api/admin/settings/infrastructure/test/route.ts with admin-only authentication check
+- [x] T630 Implement test connection logic for GitHub OAuth in apps/web/app/api/admin/settings/infrastructure/test/route.ts
+- [x] T631 Implement test connection logic for GitLab OAuth in apps/web/app/api/admin/settings/infrastructure/test/route.ts
+- [x] T632 Implement test connection logic for AI Gateway in apps/web/app/api/admin/settings/infrastructure/test/route.ts
+- [x] T633 Implement test connection logic for Ollama endpoint in apps/web/app/api/admin/settings/infrastructure/test/route.ts
+- [x] T634 Add timeout handling for test connections in apps/web/app/api/admin/settings/infrastructure/test/route.ts
 
 **Acceptance Criteria**:
 
@@ -149,12 +149,12 @@ Where:
 
 ### Settings UI - Infrastructure Page
 
-- [ ] T635 Create infrastructure settings page route in apps/web/app/settings/infrastructure/page.tsx with admin-only access check
-- [ ] T636 Add infrastructure tab to SettingsNavigation component in apps/web/app/components/features/settings/SettingsNavigation.tsx with admin-only visibility
-- [ ] T637 Create AdminInfrastructureSettings component in apps/web/src/components/features/settings/AdminInfrastructureSettings.tsx as main settings page
-- [ ] T638 Implement configuration fetch using TanStack Query in apps/web/src/components/features/settings/AdminInfrastructureSettings.tsx
-- [ ] T639 Implement read-only state display when env vars override in apps/web/src/components/features/settings/AdminInfrastructureSettings.tsx with explanatory message
-- [ ] T640 Ensure secrets are never displayed in UI (even read-only) in apps/web/src/components/features/settings/AdminInfrastructureSettings.tsx
+- [x] T635 Create infrastructure settings page route in apps/web/app/settings/infrastructure/page.tsx with admin-only access check
+- [x] T636 Add infrastructure tab to SettingsNavigation component in apps/web/app/components/features/settings/SettingsNavigation.tsx with admin-only visibility
+- [x] T637 Create AdminInfrastructureSettings component in apps/web/src/components/features/settings/AdminInfrastructureSettings.tsx as main settings page
+- [x] T638 Implement configuration fetch using TanStack Query in apps/web/src/components/features/settings/AdminInfrastructureSettings.tsx
+- [x] T639 Implement read-only state display when env vars override in apps/web/src/components/features/settings/AdminInfrastructureSettings.tsx with explanatory message
+- [x] T640 Ensure secrets are never displayed in UI (even read-only) in apps/web/src/components/features/settings/AdminInfrastructureSettings.tsx
 
 **Acceptance Criteria**:
 
@@ -166,14 +166,14 @@ Where:
 
 ### Settings UI - Git OAuth Configuration Form
 
-- [ ] T641 Create GitInfrastructureConfigForm component in apps/web/src/components/features/settings/GitInfrastructureConfigForm.tsx
-- [ ] T642 Implement GitHub OAuth configuration form in apps/web/src/components/features/settings/GitInfrastructureConfigForm.tsx with client ID and client secret fields (password-type for secret)
-- [ ] T643 Implement GitLab OAuth configuration form in apps/web/src/components/features/settings/GitInfrastructureConfigForm.tsx with client ID, client secret, and base URL fields
-- [ ] T644 Add form validation using React Hook Form and Zod schemas in apps/web/src/components/features/settings/GitInfrastructureConfigForm.tsx
-- [ ] T645 Implement read-only state when env vars override in apps/web/src/components/features/settings/GitInfrastructureConfigForm.tsx with "Configured via environment variables" message
-- [ ] T646 Add test connection button for GitHub OAuth in apps/web/src/components/features/settings/GitInfrastructureConfigForm.tsx
-- [ ] T647 Add test connection button for GitLab OAuth in apps/web/src/components/features/settings/GitInfrastructureConfigForm.tsx
-- [ ] T648 Implement form submission with error handling in apps/web/src/components/features/settings/GitInfrastructureConfigForm.tsx
+- [x] T641 Create GitInfrastructureConfigForm component in apps/web/src/components/features/settings/GitInfrastructureConfigForm.tsx
+- [x] T642 Implement GitHub OAuth configuration form in apps/web/src/components/features/settings/GitInfrastructureConfigForm.tsx with client ID and client secret fields (password-type for secret)
+- [x] T643 Implement GitLab OAuth configuration form in apps/web/src/components/features/settings/GitInfrastructureConfigForm.tsx with client ID, client secret, and base URL fields
+- [x] T644 Add form validation using React Hook Form and Zod schemas in apps/web/src/components/features/settings/GitInfrastructureConfigForm.tsx
+- [x] T645 Implement read-only state when env vars override in apps/web/src/components/features/settings/GitInfrastructureConfigForm.tsx with "Configured via environment variables" message
+- [x] T646 Add test connection button for GitHub OAuth in apps/web/src/components/features/settings/GitInfrastructureConfigForm.tsx
+- [x] T647 Add test connection button for GitLab OAuth in apps/web/src/components/features/settings/GitInfrastructureConfigForm.tsx
+- [x] T648 Implement form submission with error handling in apps/web/src/components/features/settings/GitInfrastructureConfigForm.tsx
 
 **Acceptance Criteria**:
 
@@ -186,17 +186,17 @@ Where:
 
 ### Settings UI - AI Gateway Configuration Form
 
-- [ ] T649 Create AIInfrastructureConfigForm component in apps/web/src/components/features/settings/AIInfrastructureConfigForm.tsx
-- [ ] T650 Implement AI Gateway URL field in apps/web/src/components/features/settings/AIInfrastructureConfigForm.tsx
-- [ ] T651 Implement Ollama endpoint URL field in apps/web/src/components/features/settings/AIInfrastructureConfigForm.tsx
-- [ ] T652 Implement OpenAI API key field (password-type) in apps/web/src/components/features/settings/AIInfrastructureConfigForm.tsx
-- [ ] T653 Implement Anthropic API key field (password-type) in apps/web/src/components/features/settings/AIInfrastructureConfigForm.tsx
-- [ ] T654 Implement Google AI API key field (password-type) in apps/web/src/components/features/settings/AIInfrastructureConfigForm.tsx
-- [ ] T655 Add form validation using React Hook Form and Zod schemas in apps/web/src/components/features/settings/AIInfrastructureConfigForm.tsx
-- [ ] T656 Implement read-only state when env vars override in apps/web/src/components/features/settings/AIInfrastructureConfigForm.tsx
-- [ ] T657 Add test connection button for AI Gateway in apps/web/src/components/features/settings/AIInfrastructureConfigForm.tsx
-- [ ] T658 Add test connection button for Ollama endpoint in apps/web/src/components/features/settings/AIInfrastructureConfigForm.tsx
-- [ ] T659 Implement form submission with error handling in apps/web/src/components/features/settings/AIInfrastructureConfigForm.tsx
+- [x] T649 Create AIInfrastructureConfigForm component in apps/web/src/components/features/settings/AIInfrastructureConfigForm.tsx
+- [x] T650 Implement AI Gateway URL field in apps/web/src/components/features/settings/AIInfrastructureConfigForm.tsx
+- [x] T651 Implement Ollama endpoint URL field in apps/web/src/components/features/settings/AIInfrastructureConfigForm.tsx
+- [x] T652 Implement OpenAI API key field (password-type) in apps/web/src/components/features/settings/AIInfrastructureConfigForm.tsx
+- [x] T653 Implement Anthropic API key field (password-type) in apps/web/src/components/features/settings/AIInfrastructureConfigForm.tsx
+- [x] T654 Implement Google AI API key field (password-type) in apps/web/src/components/features/settings/AIInfrastructureConfigForm.tsx
+- [x] T655 Add form validation using React Hook Form and Zod schemas in apps/web/src/components/features/settings/AIInfrastructureConfigForm.tsx
+- [x] T656 Implement read-only state when env vars override in apps/web/src/components/features/settings/AIInfrastructureConfigForm.tsx
+- [x] T657 Add test connection button for AI Gateway in apps/web/src/components/features/settings/AIInfrastructureConfigForm.tsx
+- [x] T658 Add test connection button for Ollama endpoint in apps/web/src/components/features/settings/AIInfrastructureConfigForm.tsx
+- [x] T659 Implement form submission with error handling in apps/web/src/components/features/settings/AIInfrastructureConfigForm.tsx
 
 **Acceptance Criteria**:
 
@@ -209,11 +209,11 @@ Where:
 
 ### Settings UI - Status View for Non-Admins
 
-- [ ] T660 Create InfrastructureStatusView component in apps/web/src/components/features/settings/InfrastructureStatusView.tsx for non-admin read-only view
-- [ ] T661 Display configuration status (configured/not configured) in apps/web/src/components/features/settings/InfrastructureStatusView.tsx without exposing secrets
-- [ ] T662 Display service URLs (AI Gateway URL, Ollama endpoint) in apps/web/src/components/features/settings/InfrastructureStatusView.tsx (URLs not sensitive)
-- [ ] T663 Ensure InfrastructureStatusView never displays secrets in apps/web/src/components/features/settings/InfrastructureStatusView.tsx
-- [ ] T664 Update infrastructure settings page to show InfrastructureStatusView for non-admin users in apps/web/app/settings/infrastructure/page.tsx
+- [x] T660 Create InfrastructureStatusView component in apps/web/src/components/features/settings/InfrastructureStatusView.tsx for non-admin read-only view
+- [x] T661 Display configuration status (configured/not configured) in apps/web/src/components/features/settings/InfrastructureStatusView.tsx without exposing secrets
+- [x] T662 Display service URLs (AI Gateway URL, Ollama endpoint) in apps/web/src/components/features/settings/InfrastructureStatusView.tsx (URLs not sensitive)
+- [x] T663 Ensure InfrastructureStatusView never displays secrets in apps/web/src/components/features/settings/InfrastructureStatusView.tsx
+- [x] T664 Update infrastructure settings page to show InfrastructureStatusView for non-admin users in apps/web/app/settings/infrastructure/page.tsx
 
 **Acceptance Criteria**:
 
@@ -225,10 +225,10 @@ Where:
 
 ### Integration - Update OAuth Flow to Use Global Config
 
-- [ ] T665 Update GitHub OAuth flow to read from global infrastructure config in apps/web/app/api/projects/[projectId]/repositories/route.ts
-- [ ] T666 Update GitLab OAuth flow to read from global infrastructure config in apps/web/app/api/projects/[projectId]/repositories/route.ts
-- [ ] T667 Update OAuth callback handler to read from global infrastructure config in apps/web/app/api/projects/[projectId]/repositories/callback/route.ts
-- [ ] T668 Ensure OAuth flow falls back to env vars if global config not available in apps/web/app/api/projects/[projectId]/repositories/route.ts
+- [x] T665 Update GitHub OAuth flow to read from global infrastructure config in apps/web/app/api/projects/[projectId]/repositories/route.ts
+- [x] T666 Update GitLab OAuth flow to read from global infrastructure config in apps/web/app/api/projects/[projectId]/repositories/route.ts
+- [x] T667 Update OAuth callback handler to read from global infrastructure config in apps/web/app/api/projects/[projectId]/repositories/callback/route.ts
+- [x] T668 Ensure OAuth flow falls back to env vars if global config not available in apps/web/app/api/projects/[projectId]/repositories/route.ts
 
 **Acceptance Criteria**:
 
@@ -239,9 +239,9 @@ Where:
 
 ### Integration - Update AI Gateway Usage (Phase 9 Compatibility)
 
-- [ ] T669 Create helper function to get AI Gateway URL with precedence in apps/web/src/lib/ai/gateway-url.ts (env var → global config → default)
-- [ ] T670 Update AI Gateway client to use global config helper in apps/web/src/lib/ai/triage.ts (if Phase 9 AI triage exists)
-- [ ] T671 Ensure Phase 9 per-project AI config can override global defaults in apps/web/src/lib/ai/triage.ts (maintain Phase 9 functionality)
+- [x] T669 Create helper function to get AI Gateway URL with precedence in apps/web/src/lib/ai/gateway-url.ts (env var → global config → default)
+- [x] T670 Update AI Gateway client to use global config helper in apps/web/src/lib/ai/triage.ts (if Phase 9 AI triage exists)
+- [x] T671 Ensure Phase 9 per-project AI config can override global defaults in apps/web/src/lib/ai/triage.ts (maintain Phase 9 functionality)
 
 **Acceptance Criteria**:
 

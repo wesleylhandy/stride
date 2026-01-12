@@ -13,6 +13,7 @@ export interface IssueDetailClientProps {
   projectConfig?: ProjectConfig;
   branches?: IssueBranch[];
   canEdit?: boolean;
+  canUseAITriage?: boolean;
   onUpdate?: (data: UpdateIssueInput) => Promise<void>;
   onStatusChange?: (newStatus: string) => Promise<void>;
 }
@@ -26,6 +27,7 @@ export function IssueDetailClient({
   projectConfig,
   branches = [],
   canEdit = false,
+  canUseAITriage = false,
   onUpdate: providedOnUpdate,
   onStatusChange: providedOnStatusChange,
 }: IssueDetailClientProps) {
@@ -173,6 +175,7 @@ export function IssueDetailClient({
         projectConfig={projectConfig}
         branches={branches}
         canEdit={canEdit}
+        canUseAITriage={canUseAITriage}
         onUpdate={handleUpdate}
         onStatusChange={handleStatusChange}
         onClone={handleClone}
