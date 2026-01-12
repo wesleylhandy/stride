@@ -105,28 +105,36 @@
 
 ### 4. Contributing Guidelines Template
 
-**Decision**: Include essential contributing guidelines in README, with optional CONTRIBUTING.md for comprehensive guide
+**Decision** (UPDATED 2026-01-23): Include essential contributing guidelines in README with link to comprehensive standalone CONTRIBUTING.md file
 
 **Rationale**:
 - README should have basic contributing info for visibility
-- Detailed guidelines can be in separate file
+- Comprehensive CONTRIBUTING.md provides detailed guidelines for tooling, mergeability criteria, and best practices
 - Reduces README length while maintaining accessibility
+- CONTRIBUTING.md is required (not optional) with comprehensive content
 
 **Essential Elements in README**:
 - Development setup link
 - Code standards reference (constitution.md)
-- PR process (fork, branch, test, submit)
-- Issue reporting guidelines
+- Quick contribution workflow (fork, branch, test, submit)
+- Link to CONTRIBUTING.md for detailed guidelines
 
-**Optional CONTRIBUTING.md Elements**:
-- Detailed development workflow
-- Code review process
-- Release process
-- Community guidelines
+**CONTRIBUTING.md Required Elements** (comprehensive):
+- Tooling instructions: speckit installation/configuration, AI-powered IDE/CLI setup (Cursor, VS Code), Next.js local development guide
+- Development setup: database configuration, environment setup, running application
+- Code standards: link to constitution.md
+- Git workflow: branch naming, commit messages, PR process
+- Testing requirements: what tests are required for PRs
+- Mergeability criteria: comprehensive quality gates (tests, lint/type checks, review approval, constitution alignment, coverage thresholds, documentation updates, breaking changes, tooling gates)
+- Open source best practices: standard practices plus project-specific guidance (speckit workflow, AI tooling conventions, project culture, review expectations)
+- Documentation: how to update documentation
+- Issue reporting: how to report bugs and request features
+- Code of conduct: link to or include code of conduct
+- Note: AI assistance is normal tooling and doesn't require special documentation
 
 **Alternatives Considered**:
 - All contributing info in README: Rejected - makes README too long
-- All contributing info in separate file: Rejected - reduces visibility
+- Minimal CONTRIBUTING.md: Rejected - comprehensive tooling instructions and mergeability criteria are essential for contributor success
 
 **References**:
 - GitHub Contributing Guidelines template
