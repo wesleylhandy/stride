@@ -1,3 +1,9 @@
+---
+purpose: Common configuration errors and how to resolve them
+targetAudience: Developers, project administrators
+lastUpdated: 2026-01-12
+---
+
 # Configuration Troubleshooting Guide
 
 Common configuration errors and how to resolve them.

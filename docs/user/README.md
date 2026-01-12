@@ -1,3 +1,9 @@
+---
+purpose: User guide for getting started with Stride project management and issue tracking
+targetAudience: End users, project managers, team members
+lastUpdated: 2026-01-12
+---
+
 # User Guide
 
 Welcome to Stride! This guide will help you get started with using Stride for managing your projects and tracking work.

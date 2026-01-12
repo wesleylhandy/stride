@@ -1,3 +1,9 @@
+---
+purpose: Complete guide to configuring Stride service integrations
+targetAudience: System administrators, DevOps engineers, developers
+lastUpdated: 2026-01-12
+---
+
 # Integration Guide
 
 Complete guide to configuring Stride service integrations. All integrations are optional—Stride works perfectly without them.

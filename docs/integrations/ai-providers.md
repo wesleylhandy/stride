@@ -1,3 +1,10 @@
+---
+purpose: Configure AI providers (Ollama, OpenAI, Anthropic, Google Gemini) for AI-powered issue triage
+targetAudience: System administrators, DevOps engineers, developers
+lastUpdated: 2026-01-12
+status: Optional
+---
+
 # AI Providers Integration
 
 **Status**: Optional  

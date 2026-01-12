@@ -48,3 +48,5 @@ export { useToast } from './hooks/useToast';
 // Utils
 export { cn } from './utils/cn';
 
+// Documentation utilities
+export { parseDocFrontmatter, type DocFrontmatter, type ParsedDoc } from './lib/docs/frontmatter';

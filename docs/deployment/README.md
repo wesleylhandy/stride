@@ -1,11 +1,17 @@
+---
+purpose: Overview of deployment options and guides for Stride
+targetAudience: System administrators, DevOps engineers, self-hosting users
+lastUpdated: 2026-01-12
+---
+
 # Deployment Guide
 
 This directory contains deployment guides for Stride.
 
 ## Available Guides
 
-- **[Docker Deployment](./docker.md)** - Complete guide for deploying Stride using Docker Compose
-- **[SMTP Configuration](./smtp-configuration.md)** - Email service configuration for invitation emails
+- **[Docker Deployment](/docs/deployment/docker)** - Complete guide for deploying Stride using Docker Compose
+- **[Infrastructure Configuration](/docs/deployment/infrastructure-configuration)** - Global infrastructure settings (Git OAuth and AI Gateway)
 
 ## Quick Start
 
@@ -17,7 +23,7 @@ For a quick deployment using Docker Compose:
 4. **Initialize**: Run migrations: `docker compose exec web pnpm --filter @stride/database prisma migrate deploy`
 5. **Access**: Open http://localhost:3000 and create your admin account
 
-For detailed instructions, see [Docker Deployment Guide](./docker.md).
+For detailed instructions, see [Docker Deployment Guide](/docs/deployment/docker).
 
 ## Deployment Options
 
@@ -29,7 +35,7 @@ Best for:
 - Development environments
 - Single-server deployments
 
-See [Docker Deployment Guide](./docker.md) for complete instructions.
+See [Docker Deployment Guide](/docs/deployment/docker) for complete instructions.
 
 ### Kubernetes (Advanced)
 
@@ -62,10 +68,10 @@ All deployment methods require configuration via environment variables. Key vari
 - `NEXT_PUBLIC_APP_URL` - Public URL of your application
 
 **Optional:**
-- `SMTP_*` - Email configuration (see [SMTP Configuration](./smtp-configuration.md))
-- `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` - GitHub OAuth integration
-- `SENTRY_DSN` - Error tracking
-- `AI_GATEWAY_URL` - AI features integration
+- `SMTP_*` - Email configuration (see [SMTP Integration](/docs/integrations/smtp))
+- `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` - GitHub OAuth integration (see [Git OAuth Integration](/docs/integrations/git-oauth))
+- `SENTRY_DSN` - Error tracking (see [Sentry Integration](/docs/integrations/sentry))
+- `AI_GATEWAY_URL` - AI features integration (see [AI Providers Integration](/docs/integrations/ai-providers))
 
 See `.env.example` for a complete list of configuration options.
 

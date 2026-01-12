@@ -1,3 +1,10 @@
+---
+purpose: Configure SMTP email for user invitations with any SMTP-compatible service
+targetAudience: System administrators, DevOps engineers
+lastUpdated: 2026-01-12
+status: Optional
+---
+
 # SMTP Email Integration
 
 **Status**: Optional  

@@ -174,12 +174,12 @@ export function InviteUserForm({
             <p className="text-sm text-foreground-secondary dark:text-foreground-dark-secondary">
               See{' '}
               <a
-                href="/docs/deployment/smtp-configuration"
+                href="/docs/integrations/smtp"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary hover:underline font-medium"
               >
-                SMTP Configuration documentation
+                SMTP Integration documentation
               </a>
               {' '}to enable email invitations. Invitation link will be shown below for manual sharing.
             </p>
@@ -208,7 +208,7 @@ export function InviteUserForm({
             <p className="text-xs text-foreground-secondary dark:text-foreground-dark-secondary">
               See{' '}
               <a
-                href="/docs/deployment/smtp-configuration"
+                href="/docs/integrations/smtp"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary hover:underline"

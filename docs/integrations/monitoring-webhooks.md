@@ -1,3 +1,10 @@
+---
+purpose: Configure webhooks from Sentry, Datadog, or New Relic to automatically create issues from error events
+targetAudience: System administrators, DevOps engineers
+lastUpdated: 2026-01-12
+status: Optional
+---
+
 # Monitoring Webhooks Integration
 
 **Status**: Optional  

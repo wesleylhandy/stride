@@ -1,3 +1,9 @@
+---
+purpose: Common development issues and how to resolve them
+targetAudience: Developers, contributors
+lastUpdated: 2026-01-12
+---
+
 # Development Troubleshooting Guide
 
 Common development issues and how to resolve them.

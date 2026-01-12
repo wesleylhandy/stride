@@ -1,8 +1,10 @@
-# Infrastructure Configuration Guide
+---
+purpose: Complete guide for configuring global infrastructure settings (Git OAuth and AI Gateway)
+targetAudience: System administrators, DevOps engineers
+lastUpdated: 2026-01-12
+---
 
-**Purpose**: Complete guide for configuring global infrastructure settings (Git OAuth and AI Gateway)  
-**Target Audience**: System administrators, DevOps engineers  
-**Last Updated**: 2026-01-23
+# Infrastructure Configuration Guide
 
 ## Overview
 

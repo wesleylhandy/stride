@@ -23,12 +23,16 @@ const DOCS_SEGMENT_LABELS: Record<string, string> = {
   'configuration': 'Configuration',
   'install': 'Installation',
   'integrations': 'Integrations',
+  'deployment': 'Deployment',
   // Integration subsections
   'smtp': 'SMTP Email',
   'sentry': 'Sentry',
   'ai-providers': 'AI Providers',
   'git-oauth': 'Git OAuth',
   'monitoring-webhooks': 'Monitoring Webhooks',
+  // Deployment subsections
+  'docker': 'Docker Deployment',
+  'infrastructure-configuration': 'Infrastructure Configuration',
 };
 
 /**

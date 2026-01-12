@@ -1,3 +1,10 @@
+---
+purpose: Guide to using AI-powered issue triage for automatic priority assignment and team member routing
+targetAudience: End users, project managers, administrators
+lastUpdated: 2026-01-12
+status: Optional Feature
+---
+
 # AI-Powered Issue Triage
 
 **Status**: Optional Feature  
