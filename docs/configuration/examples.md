@@ -1,3 +1,9 @@
+---
+purpose: Validated YAML configuration examples for common use cases
+targetAudience: Developers, project administrators
+lastUpdated: 2026-01-12
+---
+
 # Configuration Examples
 
 Validated YAML configuration examples for common use cases.

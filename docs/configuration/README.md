@@ -1,3 +1,9 @@
+---
+purpose: Complete documentation for configuring Stride projects using YAML configuration files
+targetAudience: Developers, project administrators
+lastUpdated: 2026-01-12
+---
+
 # Configuration Documentation
 
 Complete documentation for configuring Stride projects using YAML configuration files.

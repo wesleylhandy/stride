@@ -45,6 +45,42 @@ function extractUrls(text: string): string[] {
 }
 
 /**
+ * Generate anchor ID from heading text (GitHub-style)
+ * Converts "Updating Stride" to "updating-stride"
+ */
+function generateAnchorId(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+    .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+}
+
+/**
+ * Extract text content from React node
+ */
+function extractTextContent(node: React.ReactNode): string {
+  if (typeof node === 'string') {
+    return node;
+  }
+  if (typeof node === 'number') {
+    return String(node);
+  }
+  if (Array.isArray(node)) {
+    return node.map(extractTextContent).join('');
+  }
+  if (React.isValidElement(node)) {
+    const element = node as React.ReactElement<{ children?: React.ReactNode }>;
+    if (element.props?.children) {
+      return extractTextContent(element.props.children);
+    }
+  }
+  return '';
+}
+
+/**
  * MarkdownRenderer component
  * 
  * Renders Markdown content with:
@@ -132,6 +168,8 @@ export function MarkdownRenderer({
         'prose-li:text-foreground-secondary dark:prose-li:text-foreground-dark-secondary',
         'prose-table:border-collapse prose-th:border prose-th:border-border dark:prose-th:border-border-dark prose-th:p-2 prose-th:bg-gray-50 dark:prose-th:bg-gray-900',
         'prose-td:border prose-td:border-border dark:prose-td:border-border-dark prose-td:p-2',
+        // Heading anchor link styles - ensure headings have relative positioning and group for hover
+        'prose-headings:relative prose-headings:group',
         'max-w-none',
         className
       )}
@@ -175,8 +213,8 @@ export function MarkdownRenderer({
                 'hr',
               ],
               attributes: {
-                '*': ['className'],
-                a: ['href', 'title', 'target', 'rel'],
+                '*': ['className', 'id'],
+                a: ['href', 'title', 'target', 'rel', 'aria-label'],
                 img: ['src', 'alt', 'title', 'width', 'height'],
                 code: ['className'],
                 pre: ['className'],
@@ -186,6 +224,115 @@ export function MarkdownRenderer({
           rehypeHighlight, // Syntax highlighting for code blocks
         ]}
         components={{
+          // Customize headings - add anchor links with hover visibility
+          h1: (props) => {
+            const { children, ...restProps } = props;
+            const text = extractTextContent(children);
+            const anchorId = generateAnchorId(text);
+            return (
+              <h1 id={anchorId} className="group relative scroll-mt-20" {...restProps}>
+                <a
+                  href={`#${anchorId}`}
+                  className="absolute -left-8 top-0 opacity-0 group-hover:opacity-100 transition-opacity text-foreground-secondary dark:text-foreground-dark-secondary hover:text-primary dark:hover:text-primary-dark no-underline font-normal"
+                  aria-label={`Link to ${text}`}
+                  title={`Link to ${text}`}
+                >
+                  #
+                </a>
+                {children}
+              </h1>
+            );
+          },
+          h2: (props) => {
+            const { children, ...restProps } = props;
+            const text = extractTextContent(children);
+            const anchorId = generateAnchorId(text);
+            return (
+              <h2 id={anchorId} className="group relative scroll-mt-20" {...restProps}>
+                <a
+                  href={`#${anchorId}`}
+                  className="absolute -left-8 top-0 opacity-0 group-hover:opacity-100 transition-opacity text-foreground-secondary dark:text-foreground-dark-secondary hover:text-primary dark:hover:text-primary-dark no-underline font-normal"
+                  aria-label={`Link to ${text}`}
+                  title={`Link to ${text}`}
+                >
+                  #
+                </a>
+                {children}
+              </h2>
+            );
+          },
+          h3: (props) => {
+            const { children, ...restProps } = props;
+            const text = extractTextContent(children);
+            const anchorId = generateAnchorId(text);
+            return (
+              <h3 id={anchorId} className="group relative scroll-mt-20" {...restProps}>
+                <a
+                  href={`#${anchorId}`}
+                  className="absolute -left-8 top-0 opacity-0 group-hover:opacity-100 transition-opacity text-foreground-secondary dark:text-foreground-dark-secondary hover:text-primary dark:hover:text-primary-dark no-underline font-normal"
+                  aria-label={`Link to ${text}`}
+                  title={`Link to ${text}`}
+                >
+                  #
+                </a>
+                {children}
+              </h3>
+            );
+          },
+          h4: (props) => {
+            const { children, ...restProps } = props;
+            const text = extractTextContent(children);
+            const anchorId = generateAnchorId(text);
+            return (
+              <h4 id={anchorId} className="group relative scroll-mt-20" {...restProps}>
+                <a
+                  href={`#${anchorId}`}
+                  className="absolute -left-8 top-0 opacity-0 group-hover:opacity-100 transition-opacity text-foreground-secondary dark:text-foreground-dark-secondary hover:text-primary dark:hover:text-primary-dark no-underline font-normal"
+                  aria-label={`Link to ${text}`}
+                  title={`Link to ${text}`}
+                >
+                  #
+                </a>
+                {children}
+              </h4>
+            );
+          },
+          h5: (props) => {
+            const { children, ...restProps } = props;
+            const text = extractTextContent(children);
+            const anchorId = generateAnchorId(text);
+            return (
+              <h5 id={anchorId} className="group relative scroll-mt-20" {...restProps}>
+                <a
+                  href={`#${anchorId}`}
+                  className="absolute -left-8 top-0 opacity-0 group-hover:opacity-100 transition-opacity text-foreground-secondary dark:text-foreground-dark-secondary hover:text-primary dark:hover:text-primary-dark no-underline font-normal"
+                  aria-label={`Link to ${text}`}
+                  title={`Link to ${text}`}
+                >
+                  #
+                </a>
+                {children}
+              </h5>
+            );
+          },
+          h6: (props) => {
+            const { children, ...restProps } = props;
+            const text = extractTextContent(children);
+            const anchorId = generateAnchorId(text);
+            return (
+              <h6 id={anchorId} className="group relative scroll-mt-20" {...restProps}>
+                <a
+                  href={`#${anchorId}`}
+                  className="absolute -left-8 top-0 opacity-0 group-hover:opacity-100 transition-opacity text-foreground-secondary dark:text-foreground-dark-secondary hover:text-primary dark:hover:text-primary-dark no-underline font-normal"
+                  aria-label={`Link to ${text}`}
+                  title={`Link to ${text}`}
+                >
+                  #
+                </a>
+                {children}
+              </h6>
+            );
+          },
           // Customize code blocks - handle Mermaid diagrams (T140)
           code: (props) => {
             const { node: _node, inline, className, children, ...restProps } = props as { node?: unknown; inline?: boolean; className?: string; children?: React.ReactNode; [key: string]: unknown };

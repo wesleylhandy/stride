@@ -36,6 +36,7 @@
     "@uiw/react-codemirror": "^4.25.4",
     "clsx": "^2.1.1",
     "fuse.js": "^7.0.0",
+    "gray-matter": "^4.0.3",
     "highlight.js": "^11.9.0",
     "mermaid": "^11.0.0",
     "react-hook-form": "^7.54.0",

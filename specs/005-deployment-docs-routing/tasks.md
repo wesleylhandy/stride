@@ -44,8 +44,8 @@ Where:
 
 ### Directory Structure
 
-- [ ] T001 Create apps/web/app/docs/deployment/ directory for deployment documentation routes
-- [ ] T002 Create apps/web/app/docs/deployment/[guide]/ directory for dynamic route parameter
+- [x] T001 Create apps/web/app/docs/deployment/ directory for deployment documentation routes
+- [x] T002 Create apps/web/app/docs/deployment/[guide]/ directory for dynamic route parameter
 
 **Checkpoint**: Directory structure ready for route implementation
 
@@ -59,21 +59,21 @@ Where:
 
 ### Route Implementation
 
-- [ ] T003 [US1] Create apps/web/app/docs/deployment/page.tsx overview page that reads docs/deployment/README.md
-- [ ] T004 [US1] Implement getDocContent function in apps/web/app/docs/deployment/page.tsx following integrations pattern (read from repo root) with error handling: check file existence, handle read errors with server logging, detect empty files (trim and check length), return appropriate error messages per FR4 specification
-- [ ] T005 [US1] Add dynamic import for DocumentationPageContent component in apps/web/app/docs/deployment/page.tsx with SSR enabled
-- [ ] T006 [US1] Add metadata export with title "Deployment Guide - Stride" and description in apps/web/app/docs/deployment/page.tsx
-- [ ] T007 [US1] Add sections array with all deployment guides (Overview, Docker, Infrastructure Configuration, SMTP Configuration) in apps/web/app/docs/deployment/page.tsx
-- [ ] T008 [US1] Create apps/web/app/docs/deployment/[guide]/page.tsx dynamic route for individual deployment guides
-- [ ] T009 [US1] Implement route parameter validation with strict whitelist ['docker', 'infrastructure-configuration', 'smtp-configuration'] in apps/web/app/docs/deployment/[guide]/page.tsx
-- [ ] T010 [US1] Add notFound() call for invalid guide names in apps/web/app/docs/deployment/[guide]/page.tsx
-- [ ] T011 [US1] Implement getDocContent function that maps guide names to markdown files in apps/web/app/docs/deployment/[guide]/page.tsx
-- [ ] T012 [US1] Add generateMetadata function with unique titles and descriptions per guide in apps/web/app/docs/deployment/[guide]/page.tsx
-- [ ] T013 [US1] Implement error handling for missing files with "Documentation Not Found" message in apps/web/app/docs/deployment/[guide]/page.tsx (check file existence first per FR4 error detection order)
-- [ ] T014 [US1] Implement error handling for read errors with "Documentation Error" message and server logging in apps/web/app/docs/deployment/[guide]/page.tsx (check file readability second per FR4 error detection order)
-- [ ] T015 [US1] Implement empty file detection (trim and check length) with "Documentation Empty" message in apps/web/app/docs/deployment/[guide]/page.tsx (check file content third per FR4 error detection order: (1) existence, (2) readability, (3) content)
-- [ ] T016 [US1] Add sections array with all deployment guides in navigation sidebar in apps/web/app/docs/deployment/[guide]/page.tsx
-- [ ] T017 [US1] Add dynamic import for DocumentationPageContent component with SSR enabled in apps/web/app/docs/deployment/[guide]/page.tsx
+- [x] T003 [US1] Create apps/web/app/docs/deployment/page.tsx overview page that reads docs/deployment/README.md
+- [x] T004 [US1] Implement getDocContent function in apps/web/app/docs/deployment/page.tsx following integrations pattern (read from repo root) with error handling: check file existence, handle read errors with server logging, detect empty files (trim and check length), return appropriate error messages per FR4 specification
+- [x] T005 [US1] Add dynamic import for DocumentationPageContent component in apps/web/app/docs/deployment/page.tsx with SSR enabled
+- [x] T006 [US1] Add metadata export with title "Deployment Guide - Stride" and description in apps/web/app/docs/deployment/page.tsx
+- [x] T007 [US1] Add sections array with all deployment guides (Overview, Docker, Infrastructure Configuration, SMTP Configuration) in apps/web/app/docs/deployment/page.tsx
+- [x] T008 [US1] Create apps/web/app/docs/deployment/[guide]/page.tsx dynamic route for individual deployment guides
+- [x] T009 [US1] Implement route parameter validation with strict whitelist ['docker', 'infrastructure-configuration', 'smtp-configuration'] in apps/web/app/docs/deployment/[guide]/page.tsx
+- [x] T010 [US1] Add notFound() call for invalid guide names in apps/web/app/docs/deployment/[guide]/page.tsx
+- [x] T011 [US1] Implement getDocContent function that maps guide names to markdown files in apps/web/app/docs/deployment/[guide]/page.tsx
+- [x] T012 [US1] Add generateMetadata function with unique titles and descriptions per guide in apps/web/app/docs/deployment/[guide]/page.tsx
+- [x] T013 [US1] Implement error handling for missing files with "Documentation Not Found" message in apps/web/app/docs/deployment/[guide]/page.tsx (check file existence first per FR4 error detection order)
+- [x] T014 [US1] Implement error handling for read errors with "Documentation Error" message and server logging in apps/web/app/docs/deployment/[guide]/page.tsx (check file readability second per FR4 error detection order)
+- [x] T015 [US1] Implement empty file detection (trim and check length) with "Documentation Empty" message in apps/web/app/docs/deployment/[guide]/page.tsx (check file content third per FR4 error detection order: (1) existence, (2) readability, (3) content)
+- [x] T016 [US1] Add sections array with all deployment guides in navigation sidebar in apps/web/app/docs/deployment/[guide]/page.tsx
+- [x] T017 [US1] Add dynamic import for DocumentationPageContent component with SSR enabled in apps/web/app/docs/deployment/[guide]/page.tsx
 
 **Checkpoint**: At this point, User Story 1 should be fully functional - users can access all deployment documentation routes without 404 errors
 
@@ -87,8 +87,8 @@ Where:
 
 ### Navigation Integration
 
-- [ ] T018 [US2] Add "Deployment" section to documentationSections array in apps/web/app/docs/page.tsx with icon, description, and subsections
-- [ ] T019 [US2] Add deployment breadcrumb labels (deployment, docker, infrastructure-configuration, smtp-configuration) to DOCS_SEGMENT_LABELS in apps/web/src/lib/navigation/docs-breadcrumbs.ts
+- [x] T018 [US2] Add "Deployment" section to documentationSections array in apps/web/app/docs/page.tsx with icon, description, and subsections
+- [x] T019 [US2] Add deployment breadcrumb labels (deployment, docker, infrastructure-configuration, smtp-configuration) to DOCS_SEGMENT_LABELS in apps/web/src/lib/navigation/docs-breadcrumbs.ts
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently - users can access deployment docs via direct links and discover them through navigation
 
@@ -100,16 +100,16 @@ Where:
 
 ### Verification Tasks
 
-- [ ] T020 Test all deployment routes return 200 status (no 404s): /docs/deployment, /docs/deployment/docker, /docs/deployment/infrastructure-configuration, /docs/deployment/smtp-configuration
-- [ ] T021 Verify all existing links to deployment docs work correctly (test links from integration docs, user docs)
-- [ ] T022 Test breadcrumbs for all deployment routes show correct hierarchy
-- [ ] T023 Verify markdown rendering works correctly for all deployment guides
-- [ ] T024 Test error handling: missing file, read error, empty file scenarios
-- [ ] T025 Verify authentication works (routes protected by existing docs/layout.tsx)
-- [ ] T026 Test navigation from docs index page to deployment section
-- [ ] T027 Verify navigation sidebar shows all deployment guides on every deployment page
-- [ ] T028 Test invalid route parameter returns 404 (e.g., /docs/deployment/invalid)
-- [ ] T029 Verify page metadata (titles, descriptions) are correct for all routes
+- [x] T020 Test all deployment routes return 200 status (no 404s): /docs/deployment, /docs/deployment/docker, /docs/deployment/infrastructure-configuration, /docs/deployment/smtp-configuration
+- [x] T021 Verify all existing links to deployment docs work correctly (test links from integration docs, user docs)
+- [x] T022 Test breadcrumbs for all deployment routes show correct hierarchy
+- [x] T023 Verify markdown rendering works correctly for all deployment guides
+- [x] T024 Test error handling: missing file, read error, empty file scenarios
+- [x] T025 Verify authentication works (routes protected by existing docs/layout.tsx)
+- [x] T026 Test navigation from docs index page to deployment section
+- [x] T027 Verify navigation sidebar shows all deployment guides on every deployment page
+- [x] T028 Test invalid route parameter returns 404 (e.g., /docs/deployment/invalid)
+- [x] T029 Verify page metadata (titles, descriptions) are correct for all routes
 
 **Checkpoint**: All deployment documentation routes are functional, accessible, and properly integrated with navigation
 

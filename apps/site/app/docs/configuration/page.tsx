@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { PageContainer } from "@stride/ui";
+import { parseDocFrontmatter, type ParsedDoc } from "@stride/ui";
 
 // Dynamically import DocumentationPageContent to code-split heavy markdown rendering dependencies
 const DynamicDocumentationPageContent = dynamic(
@@ -40,8 +41,10 @@ interface DocPageProps {
  *
  * Reads from docs/configuration/ or docs/ at repository root (single source of truth)
  * Path resolution: from apps/site, go up 2 levels to repo root, then into docs/configuration/ or docs/
+ * 
+ * Parses frontmatter and returns both content (with frontmatter stripped) and metadata
  */
-async function getDocContent(section: string): Promise<string> {
+async function getDocContent(section: string): Promise<ParsedDoc> {
   // Path from apps/site to repo root
   const repoRoot = join(process.cwd(), "..", "..");
   let filePath: string;
@@ -64,11 +67,16 @@ async function getDocContent(section: string): Promise<string> {
   }
 
   try {
-    const content = await readFile(filePath, "utf-8");
-    return content;
+    const rawContent = await readFile(filePath, "utf-8");
+    const parsed = parseDocFrontmatter(rawContent);
+    return parsed;
   } catch (error) {
     console.error(`Failed to read doc file from ${filePath}:`, error);
-    return `# Documentation Not Found\n\nThe requested documentation section could not be loaded.\n\nPlease check that the documentation file exists at the repository root.`;
+    const errorContent = `# Documentation Not Found\n\nThe requested documentation section could not be loaded.\n\nPlease check that the documentation file exists at the repository root.`;
+    return {
+      content: errorContent,
+      frontmatter: {},
+    };
   }
 }
 
@@ -77,7 +85,7 @@ export default async function ConfigurationPage({
 }: DocPageProps) {
   const params = await searchParams;
   const section = params.section || "reference";
-  const content = await getDocContent(section);
+  const { content, frontmatter } = await getDocContent(section);
 
   const sections = [
     {
@@ -113,6 +121,7 @@ export default async function ConfigurationPage({
         enableMermaid={false}
         enableLinkPreviews={false}
         LinkComponent={Link}
+        lastUpdated={frontmatter.lastUpdated}
       />
     </PageContainer>
   );

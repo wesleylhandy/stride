@@ -1,3 +1,9 @@
+---
+purpose: Comprehensive guide for developers working on the Stride codebase
+targetAudience: Developers, contributors
+lastUpdated: 2026-01-12
+---
+
 # Developer Guide
 
 Welcome to the Stride developer guide. This document provides comprehensive information for developers working on the Stride codebase.

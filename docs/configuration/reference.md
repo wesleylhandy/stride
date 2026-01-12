@@ -1,3 +1,9 @@
+---
+purpose: Complete reference for Stride YAML configuration files
+targetAudience: Developers, project administrators
+lastUpdated: 2026-01-12
+---
+
 # Configuration Reference
 
 Complete reference for Stride YAML configuration files.

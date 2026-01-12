@@ -1,3 +1,9 @@
+---
+purpose: 5-minute quick start guide for testing user management features locally
+targetAudience: Developers testing the user management implementation
+lastUpdated: 2026-01-12
+---
+
 # Quick Test Guide: User Management
 
 **5-Minute Quick Start** for testing user management features locally.

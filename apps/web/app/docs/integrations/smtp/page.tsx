@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { PageContainer } from '@stride/ui';
+import { parseDocFrontmatter, type ParsedDoc } from '@stride/ui';
 
 const DynamicDocumentationPageContent = dynamic(
   () => import('@stride/ui').then((mod) => ({ default: mod.DocumentationPageContent })),
@@ -27,22 +28,27 @@ export const metadata: Metadata = {
   description: 'Configure SMTP email for user invitations with any SMTP-compatible service',
 };
 
-async function getDocContent(): Promise<string> {
+async function getDocContent(): Promise<ParsedDoc> {
   // Path from apps/web to repo root
   const repoRoot = join(process.cwd(), '..', '..');
   const filePath = join(repoRoot, 'docs', 'integrations', 'smtp.md');
 
   try {
-    const content = await readFile(filePath, 'utf-8');
-    return content;
+    const rawContent = await readFile(filePath, 'utf-8');
+    const parsed = parseDocFrontmatter(rawContent);
+    return parsed;
   } catch (error) {
     console.error(`Failed to read doc file from ${filePath}:`, error);
-    return `# Documentation Not Found\n\nThe SMTP documentation could not be loaded.\n\nPlease check that the documentation file exists at the repository root.`;
+    const errorContent = `# Documentation Not Found\n\nThe SMTP documentation could not be loaded.\n\nPlease check that the documentation file exists at the repository root.`;
+    return {
+      content: errorContent,
+      frontmatter: {},
+    };
   }
 }
 
 export default async function SMTPDocsPage() {
-  const content = await getDocContent();
+  const { content, frontmatter } = await getDocContent();
 
   const sections = [
     { key: 'overview', label: 'Overview', href: '/docs/integrations' },
@@ -64,6 +70,7 @@ export default async function SMTPDocsPage() {
         enableMermaid={false}
         enableLinkPreviews={false}
         LinkComponent={Link}
+        lastUpdated={frontmatter.lastUpdated}
       />
     </PageContainer>
   );

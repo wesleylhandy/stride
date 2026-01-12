@@ -1,8 +1,10 @@
-# Docker Deployment Guide: Stride
+---
+purpose: Complete guide for deploying Stride using Docker Compose
+targetAudience: System administrators, DevOps engineers, self-hosting users
+lastUpdated: 2026-01-12
+---
 
-**Purpose**: Complete guide for deploying Stride using Docker Compose  
-**Target Audience**: System administrators, DevOps engineers, self-hosting users  
-**Last Updated**: 2024-12-19
+# Docker Deployment Guide: Stride
 
 ## Table of Contents
 
@@ -66,6 +68,7 @@ docker compose up -d
 ```
 
 This starts all services in detached mode:
+
 - PostgreSQL database
 - Next.js web application
 - AI Gateway (optional)
@@ -79,6 +82,7 @@ docker compose exec web pnpm --filter @stride/database prisma migrate deploy
 ### 5. Access Application
 
 Open your browser to:
+
 - **Web Application**: http://localhost:3000
 - **AI Gateway** (if enabled): http://localhost:3001
 
@@ -90,6 +94,7 @@ Create a `.env` file in the project root with the following variables:
 
 ```env
 # Database Configuration
+# DATABASE_URL is auto-generated from DB_PASSWORD, but can be overridden
 DB_PASSWORD=your_secure_database_password
 DATABASE_URL=postgresql://stride:${DB_PASSWORD}@stride-postgres:5432/stride
 
@@ -99,8 +104,16 @@ NEXT_PUBLIC_APP_URL=https://your-domain.com
 APP_VERSION=1.0.0
 
 # Authentication Secrets (REQUIRED - Change in production!)
+# JWT_SECRET is validated at startup and will cause the app to fail if missing
 JWT_SECRET=your-jwt-secret-min-32-characters
+# SESSION_SECRET is recommended but not currently validated in code
 SESSION_SECRET=your-session-secret-min-32-characters
+
+# Encryption (Optional - falls back to JWT_SECRET if not set)
+ENCRYPTION_SECRET=your-encryption-secret-min-32-characters
+
+# JWT Configuration (Optional)
+JWT_EXPIRES_IN=7d
 
 # AI Gateway (Optional)
 AI_GATEWAY_URL=http://ai-gateway:3001
@@ -108,14 +121,16 @@ LLM_ENDPOINT=http://localhost:11434
 # Or use commercial APIs:
 # OPENAI_API_KEY=sk-...
 # ANTHROPIC_API_KEY=sk-ant-...
+# GOOGLE_AI_API_KEY=AIza-...
 
-# Email Configuration (Optional - see docs/deployment/smtp-configuration.md)
+# Email Configuration (Optional - see docs/integrations/smtp.md)
 # The application works fully without SMTP. Email is only needed for automatic invitation emails.
 # If SMTP is not configured, you can still create invitations and share links manually.
 SMTP_HOST=smtp.example.com
 SMTP_PORT=587
 SMTP_USER=your-email@example.com
 SMTP_PASSWORD=your-smtp-password
+SMTP_SECURE=false
 SMTP_FROM=noreply@your-domain.com
 
 # OAuth Configuration (Optional - for repository integration)
@@ -123,6 +138,8 @@ GITHUB_CLIENT_ID=your-github-client-id
 GITHUB_CLIENT_SECRET=your-github-client-secret
 GITLAB_CLIENT_ID=your-gitlab-client-id
 GITLAB_CLIENT_SECRET=your-gitlab-client-secret
+# GitLab Base URL (Optional - only needed for self-hosted GitLab)
+GITLAB_BASE_URL=https://gitlab.com
 
 # Marketing Site Configuration (Optional - for apps/site)
 NEXT_PUBLIC_GITHUB_REPOSITORY_URL=https://github.com/your-org/stride
@@ -146,6 +163,7 @@ ERROR_TRACKING_ENABLED=true
 ⚠️ **CRITICAL**: Before deploying to production:
 
 1. **Generate secure secrets**:
+
    ```bash
    # Generate random secrets (use these commands or a password manager)
    openssl rand -hex 32  # For JWT_SECRET
@@ -166,38 +184,59 @@ ERROR_TRACKING_ENABLED=true
 
 ### Environment Variable Reference
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `DB_PASSWORD` | Yes | `stride_dev_password` | PostgreSQL database password |
-| `DATABASE_URL` | Yes | Auto-generated | Full database connection string |
-| `NODE_ENV` | Yes | `development` | Environment mode (`production`, `development`) |
-| `NEXT_PUBLIC_APP_URL` | Yes | `http://localhost:3000` | Public URL of the application |
-| `APP_VERSION` | No | - | Application version (used for error tracking) |
-| `JWT_SECRET` | Yes | - | Secret for JWT token signing (min 32 chars) |
-| `SESSION_SECRET` | Yes | - | Secret for session encryption (min 32 chars) |
-| `AI_GATEWAY_URL` | No | `http://ai-gateway:3001` | AI Gateway service URL |
-| `LLM_ENDPOINT` | No | `http://localhost:11434` | Local LLM endpoint (Ollama) |
-| `OPENAI_API_KEY` | No | - | OpenAI API key (alternative to local LLM) |
-| `ANTHROPIC_API_KEY` | No | - | Anthropic API key (alternative to local LLM) |
-| `SMTP_HOST` | No* | - | SMTP server hostname (required only if using email invitations) |
-| `SMTP_PORT` | No* | `587` | SMTP server port (required only if using email invitations) |
-| `SMTP_USER` | No* | - | SMTP authentication username (required only if using email invitations) |
-| `SMTP_PASSWORD` | No* | - | SMTP authentication password (required only if using email invitations) |
-| `SMTP_FROM` | No | `SMTP_USER` | Default sender email address |
+#### Required Variables
 
-**Note**: SMTP configuration is optional. The application works fully without it. See [SMTP Configuration Guide](./smtp-configuration.md) for setup instructions and troubleshooting.
-| `GITHUB_CLIENT_ID` | No | - | GitHub OAuth client ID (for repository integration) |
-| `GITHUB_CLIENT_SECRET` | No | - | GitHub OAuth client secret |
-| `GITLAB_CLIENT_ID` | No | - | GitLab OAuth client ID (for repository integration) |
-| `GITLAB_CLIENT_SECRET` | No | - | GitLab OAuth client secret |
-| `NEXT_PUBLIC_GITHUB_REPOSITORY_URL` | No | `https://github.com` | GitHub repository URL for marketing site's "View on GitHub" button |
-| `RATE_LIMIT_ENABLED` | No | `true` | Enable rate limiting |
-| `RATE_LIMIT_MAX_REQUESTS` | No | `100` | Maximum requests per time window |
-| `RATE_LIMIT_WINDOW_MS` | No | `60000` | Rate limit time window (milliseconds) |
-| `LOG_LEVEL` | No | `info` | Logging level (`debug`, `info`, `warn`, `error`) |
-| `LOG_FORMAT` | No | `json` | Log format (`json`, `pretty`) |
-| `SENTRY_DSN` | No | - | Sentry DSN for error tracking |
-| `ERROR_TRACKING_ENABLED` | No | `false` | Enable error tracking |
+| Variable       | Default        | Description                                                                                                                                        |
+| -------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`   | -              | Secret for JWT token signing (min 32 chars). **Validated at startup** - application will fail if missing.                                          |
+| `DATABASE_URL` | Auto-generated | Full database connection string. **Validated at startup** - application will fail if missing. Auto-generated from `DB_PASSWORD` in Docker Compose. |
+
+#### Optional Variables with Defaults
+
+| Variable                            | Default                    | Description                                                                                           |
+| ----------------------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `DB_PASSWORD`                       | `stride_dev_password`      | PostgreSQL database password (used to generate `DATABASE_URL` in Docker Compose)                      |
+| `NODE_ENV`                          | `development`              | Environment mode (`production`, `development`)                                                        |
+| `NEXT_PUBLIC_APP_URL`               | `http://localhost:3000`    | Public URL of the application                                                                         |
+| `SESSION_SECRET`                    | -                          | Secret for session encryption (min 32 chars). Recommended but not currently validated in code.        |
+| `ENCRYPTION_SECRET`                 | Falls back to `JWT_SECRET` | Secret for encrypting sensitive data (repository credentials). Falls back to `JWT_SECRET` if not set. |
+| `JWT_EXPIRES_IN`                    | `7d`                       | JWT token expiration time (e.g., `7d`, `24h`, `1h`)                                                   |
+| `AI_GATEWAY_URL`                    | `http://ai-gateway:3001`   | AI Gateway service URL                                                                                |
+| `LLM_ENDPOINT`                      | `http://localhost:11434`   | Local LLM endpoint (Ollama)                                                                           |
+| `SMTP_PORT`                         | `587`                      | SMTP server port                                                                                      |
+| `SMTP_SECURE`                       | `false`                    | Use TLS/SSL for SMTP connection (`true` or `false`)                                                   |
+| `SMTP_FROM`                         | `SMTP_USER`                | Default sender email address                                                                          |
+| `GITLAB_BASE_URL`                   | `https://gitlab.com`       | GitLab base URL (only needed for self-hosted GitLab instances)                                        |
+| `NEXT_PUBLIC_GITHUB_REPOSITORY_URL` | `https://github.com`       | GitHub repository URL for marketing site's "View on GitHub" button                                    |
+| `RATE_LIMIT_ENABLED`                | `true`                     | Enable rate limiting                                                                                  |
+| `RATE_LIMIT_MAX_REQUESTS`           | `100`                      | Maximum requests per time window                                                                      |
+| `RATE_LIMIT_WINDOW_MS`              | `60000`                    | Rate limit time window (milliseconds)                                                                 |
+| `LOG_LEVEL`                         | `info`                     | Logging level (`debug`, `info`, `warn`, `error`)                                                      |
+| `LOG_FORMAT`                        | `json`                     | Log format (`json`, `pretty`)                                                                         |
+| `ERROR_TRACKING_ENABLED`            | `false`                    | Enable error tracking                                                                                 |
+
+#### Optional Variables (No Defaults)
+
+| Variable               | Description                                                             |
+| ---------------------- | ----------------------------------------------------------------------- |
+| `APP_VERSION`          | Application version (used for error tracking and logging)               |
+| `OPENAI_API_KEY`       | OpenAI API key (alternative to local LLM)                               |
+| `ANTHROPIC_API_KEY`    | Anthropic API key (alternative to local LLM)                            |
+| `GOOGLE_AI_API_KEY`    | Google AI API key (alternative to local LLM)                            |
+| `SMTP_HOST`            | SMTP server hostname (required only if using email invitations)         |
+| `SMTP_USER`            | SMTP authentication username (required only if using email invitations) |
+| `SMTP_PASSWORD`        | SMTP authentication password (required only if using email invitations) |
+| `GITHUB_CLIENT_ID`     | GitHub OAuth client ID (for repository integration)                     |
+| `GITHUB_CLIENT_SECRET` | GitHub OAuth client secret                                              |
+| `GITLAB_CLIENT_ID`     | GitLab OAuth client ID (for repository integration)                     |
+| `GITLAB_CLIENT_SECRET` | GitLab OAuth client secret                                              |
+| `SENTRY_DSN`           | Sentry DSN for error tracking                                           |
+
+**Notes**:
+
+- **SMTP configuration is optional**. The application works fully without it. See [SMTP Integration Guide](/docs/integrations/smtp) for setup instructions and troubleshooting.
+- **OAuth configuration is optional**. Only needed if you want to integrate with GitHub/GitLab repositories.
+- **AI Gateway configuration is optional**. Only needed if you want to use AI features (triage, summaries, etc.).
 
 ## Starting Services
 
@@ -287,12 +326,14 @@ After database initialization, access the application at http://localhost:3000. 
 ### Health Checks
 
 1. **Application Health**:
+
    ```bash
    curl http://localhost:3000/api/health
    # Should return: {"status":"ok"}
    ```
 
 2. **Database Health**:
+
    ```bash
    docker compose exec stride-postgres pg_isready -U stride -d stride
    # Should return: stride-postgres:5432 - accepting connections
@@ -348,10 +389,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2'
+          cpus: "2"
           memory: 2G
         reservations:
-          cpus: '1'
+          cpus: "1"
           memory: 1G
     restart: always
 
@@ -359,10 +400,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1'
+          cpus: "1"
           memory: 1G
         reservations:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 512M
     restart: always
 ```
@@ -429,21 +470,25 @@ docker compose exec stride-postgres psql -U stride -d stride
 ### Update Process
 
 1. **Pull latest changes**:
+
    ```bash
    git pull origin main
    ```
 
 2. **Rebuild images**:
+
    ```bash
    docker compose build
    ```
 
 3. **Apply database migrations**:
+
    ```bash
    docker compose exec web pnpm --filter @stride/database prisma migrate deploy
    ```
 
 4. **Restart services**:
+
    ```bash
    docker compose up -d
    ```
@@ -472,6 +517,7 @@ docker compose up -d --no-deps web
 **Problem**: Service exits immediately or fails to start
 
 **Solutions**:
+
 1. Check logs: `docker compose logs <service-name>`
 2. Verify environment variables are set correctly
 3. Check port conflicts: `lsof -i :3000` (or port in use)
@@ -482,6 +528,7 @@ docker compose up -d --no-deps web
 **Problem**: `Can't reach database server` or connection timeout
 
 **Solutions**:
+
 1. Verify database is running: `docker compose ps stride-postgres`
 2. Check database logs: `docker compose logs stride-postgres`
 3. Verify `DATABASE_URL` matches docker-compose service name
@@ -493,6 +540,7 @@ docker compose up -d --no-deps web
 **Problem**: `Migration failed` or schema errors
 
 **Solutions**:
+
 1. Check migration logs: `docker compose logs web | grep -i migration`
 2. Verify database is accessible
 3. Run migrations manually: `docker compose exec web pnpm --filter @stride/database prisma migrate deploy`
@@ -503,6 +551,7 @@ docker compose up -d --no-deps web
 **Problem**: Containers crash with OOM (Out of Memory) errors
 
 **Solutions**:
+
 1. Increase Docker memory limit
 2. Check resource usage: `docker stats`
 3. Reduce concurrent operations
@@ -513,12 +562,13 @@ docker compose up -d --no-deps web
 **Problem**: `Port 3000 is already in use`
 
 **Solutions**:
+
 1. Find process using port: `lsof -i :3000`
 2. Stop conflicting service
 3. Change port in `docker-compose.yml`:
    ```yaml
    ports:
-     - "3001:3000"  # Map host port 3001 to container port 3000
+     - "3001:3000" # Map host port 3001 to container port 3000
    ```
 
 ### Application Not Accessible
@@ -526,6 +576,7 @@ docker compose up -d --no-deps web
 **Problem**: Cannot access http://localhost:3000
 
 **Solutions**:
+
 1. Verify service is running: `docker compose ps`
 2. Check service logs: `docker compose logs web`
 3. Verify port mapping in `docker-compose.yml`
@@ -560,6 +611,7 @@ find "$BACKUP_DIR" -name "backup_*.sql.gz" -mtime +30 -delete
 ```
 
 Add to cron for daily backups:
+
 ```bash
 0 2 * * * /path/to/stride/scripts/backup-db.sh
 ```
@@ -608,9 +660,7 @@ docker compose up -d
 
 ## Additional Resources
 
-- [Quickstart Guide](../specs/001-stride-application/quickstart.md) - Development setup
-- [Database Setup](../../README-DATABASE.md) - Database-specific documentation
-- [Implementation Plan](../specs/001-stride-application/impl-plan.md) - Technical architecture
+- [Infrastructure Configuration Guide](/docs/deployment/infrastructure-configuration) - Configure Git OAuth and AI Gateway
 - [Docker Documentation](https://docs.docker.com/) - Official Docker docs
 - [Docker Compose Documentation](https://docs.docker.com/compose/) - Docker Compose reference
 
@@ -622,4 +672,3 @@ For issues or questions:
 2. Review service logs: `docker compose logs`
 3. Check GitHub Issues
 4. Consult documentation in `docs/` directory
-

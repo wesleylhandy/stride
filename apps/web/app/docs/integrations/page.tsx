@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { PageContainer } from '@stride/ui';
+import { parseDocFrontmatter, type ParsedDoc } from '@stride/ui';
 
 // Dynamically import DocumentationPageContent to code-split heavy markdown rendering dependencies
 const DynamicDocumentationPageContent = dynamic(
@@ -33,23 +34,30 @@ export const metadata: Metadata = {
  * 
  * Reads from docs/integrations/ at repository root (single source of truth)
  * Path resolution: from apps/web, go up 2 levels to repo root, then into docs/integrations/
+ * 
+ * Parses frontmatter and returns both content (with frontmatter stripped) and metadata
  */
-async function getDocContent(): Promise<string> {
+async function getDocContent(): Promise<ParsedDoc> {
   // Path from apps/web to repo root
   const repoRoot = join(process.cwd(), '..', '..');
   const filePath = join(repoRoot, 'docs', 'integrations', 'index.md');
 
   try {
-    const content = await readFile(filePath, 'utf-8');
-    return content;
+    const rawContent = await readFile(filePath, 'utf-8');
+    const parsed = parseDocFrontmatter(rawContent);
+    return parsed;
   } catch (error) {
     console.error(`Failed to read doc file from ${filePath}:`, error);
-    return `# Documentation Not Found\n\nThe requested documentation could not be loaded.\n\nPlease check that the documentation file exists at the repository root.`;
+    const errorContent = `# Documentation Not Found\n\nThe requested documentation could not be loaded.\n\nPlease check that the documentation file exists at the repository root.`;
+    return {
+      content: errorContent,
+      frontmatter: {},
+    };
   }
 }
 
 export default async function IntegrationsDocsPage() {
-  const content = await getDocContent();
+  const { content, frontmatter } = await getDocContent();
 
   // Integration status table (static for now, can be made dynamic with API later)
   const integrationStatus = [
@@ -80,6 +88,7 @@ export default async function IntegrationsDocsPage() {
         enableMermaid={false}
         enableLinkPreviews={false}
         LinkComponent={Link}
+        lastUpdated={frontmatter.lastUpdated}
       />
     </PageContainer>
   );

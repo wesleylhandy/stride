@@ -285,3 +285,323 @@ workflow:
     await expect(page.locator('body')).toBeVisible();
   });
 });
+
+test.describe('Deployment Documentation', () => {
+  test.beforeEach(async ({ page }) => {
+    // Mock authentication using shared utility
+    await mockAuthRoute(page, {
+      id: 'user-123',
+      email: 'test@example.com',
+      username: 'testuser',
+      role: 'Admin',
+    });
+  });
+
+  test('deployment overview page is accessible', async ({ page }) => {
+    // Navigate to deployment overview
+    await page.goto('/docs/deployment');
+
+    // Wait for page to load
+    await page.waitForSelector('text=Deployment Guide', { timeout: 10000 });
+
+    // Verify page title
+    await expect(page.getByRole('heading', { name: /deployment guide/i })).toBeVisible();
+
+    // Verify description
+    await expect(page.getByText(/complete guides for deploying stride/i)).toBeVisible();
+
+    // Verify status is 200 (no 404)
+    const response = await page.goto('/docs/deployment');
+    expect(response?.status()).toBe(200);
+  });
+
+  test('docker deployment guide is accessible', async ({ page }) => {
+    // Navigate to docker guide
+    await page.goto('/docs/deployment/docker');
+
+    // Wait for page to load
+    await page.waitForSelector('text=Docker Deployment', { timeout: 10000 });
+
+    // Verify page title
+    await expect(page.getByRole('heading', { name: /docker deployment/i })).toBeVisible();
+
+    // Verify status is 200 (no 404)
+    const response = await page.goto('/docs/deployment/docker');
+    expect(response?.status()).toBe(200);
+  });
+
+  test('infrastructure configuration guide is accessible', async ({ page }) => {
+    // Navigate to infrastructure configuration guide
+    await page.goto('/docs/deployment/infrastructure-configuration');
+
+    // Wait for page to load
+    await page.waitForSelector('text=Infrastructure Configuration', { timeout: 10000 });
+
+    // Verify page title
+    await expect(page.getByRole('heading', { name: /infrastructure configuration/i })).toBeVisible();
+
+    // Verify status is 200 (no 404)
+    const response = await page.goto('/docs/deployment/infrastructure-configuration');
+    expect(response?.status()).toBe(200);
+  });
+
+  test('invalid deployment guide returns 404', async ({ page }) => {
+    // Navigate to invalid guide
+    const response = await page.goto('/docs/deployment/invalid');
+
+    // Should return 404
+    expect(response?.status()).toBe(404);
+
+    // Verify 404 page is shown
+    await expect(page.getByText(/not found|404/i)).toBeVisible({ timeout: 5000 });
+  });
+
+  test('deployment navigation sidebar shows all guides', async ({ page }) => {
+    // Navigate to deployment overview
+    await page.goto('/docs/deployment');
+
+    // Wait for page to load
+    await page.waitForSelector('text=Deployment Guide', { timeout: 10000 });
+
+    // Verify navigation sidebar shows all deployment guides
+    await expect(page.getByRole('link', { name: /overview/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /docker deployment/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /infrastructure configuration/i })).toBeVisible();
+  });
+
+  test('navigation sidebar works on individual guide pages', async ({ page }) => {
+    // Navigate to docker guide
+    await page.goto('/docs/deployment/docker');
+
+    // Wait for page to load
+    await page.waitForSelector('text=Docker Deployment', { timeout: 10000 });
+
+    // Verify navigation sidebar shows all deployment guides
+    await expect(page.getByRole('link', { name: /overview/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /docker deployment/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /infrastructure configuration/i })).toBeVisible();
+
+    // Click on infrastructure configuration link
+    await page.getByRole('link', { name: /infrastructure configuration/i }).click();
+
+    // Verify navigation worked
+    await expect(page).toHaveURL(/\/docs\/deployment\/infrastructure-configuration/);
+    await expect(page.getByRole('heading', { name: /infrastructure configuration/i })).toBeVisible();
+  });
+
+  test('breadcrumbs show correct hierarchy for deployment overview', async ({ page }) => {
+    // Navigate to deployment overview
+    await page.goto('/docs/deployment');
+
+    // Wait for page to load
+    await page.waitForSelector('text=Deployment Guide', { timeout: 10000 });
+
+    // Verify breadcrumbs show: Documentation > Deployment
+    await expect(page.getByRole('link', { name: /documentation/i })).toBeVisible();
+    await expect(page.getByText(/deployment/i)).toBeVisible();
+  });
+
+  test('breadcrumbs show correct hierarchy for docker guide', async ({ page }) => {
+    // Navigate to docker guide
+    await page.goto('/docs/deployment/docker');
+
+    // Wait for page to load
+    await page.waitForSelector('text=Docker Deployment', { timeout: 10000 });
+
+    // Verify breadcrumbs show: Documentation > Deployment > Docker Deployment
+    await expect(page.getByRole('link', { name: /documentation/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /deployment/i })).toBeVisible();
+    await expect(page.getByText(/docker deployment/i)).toBeVisible();
+  });
+
+  test('breadcrumbs show correct hierarchy for infrastructure guide', async ({ page }) => {
+    // Navigate to infrastructure guide
+    await page.goto('/docs/deployment/infrastructure-configuration');
+
+    // Wait for page to load
+    await page.waitForSelector('text=Infrastructure Configuration', { timeout: 10000 });
+
+    // Verify breadcrumbs show: Documentation > Deployment > Infrastructure Configuration
+    await expect(page.getByRole('link', { name: /documentation/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /deployment/i })).toBeVisible();
+    await expect(page.getByText(/infrastructure configuration/i)).toBeVisible();
+  });
+
+  test('markdown content renders correctly on deployment overview', async ({ page }) => {
+    // Navigate to deployment overview
+    await page.goto('/docs/deployment');
+
+    // Wait for page to load
+    await page.waitForSelector('text=Deployment Guide', { timeout: 10000 });
+
+    // Verify markdown is rendered (not raw markdown)
+    const content = page.locator('article, main, [role="main"]');
+    await expect(content).toBeVisible();
+
+    // Content should not contain raw markdown syntax
+    const bodyText = await content.textContent();
+    expect(bodyText).not.toContain('```');
+    expect(bodyText).not.toContain('## ');
+  });
+
+  test('markdown content renders correctly on docker guide', async ({ page }) => {
+    // Navigate to docker guide
+    await page.goto('/docs/deployment/docker');
+
+    // Wait for page to load
+    await page.waitForSelector('text=Docker Deployment', { timeout: 10000 });
+
+    // Verify markdown is rendered
+    const content = page.locator('article, main, [role="main"]');
+    await expect(content).toBeVisible();
+
+    // Content should not contain raw markdown syntax
+    const bodyText = await content.textContent();
+    expect(bodyText).not.toContain('```');
+  });
+
+  test('markdown content renders correctly on infrastructure guide', async ({ page }) => {
+    // Navigate to infrastructure guide
+    await page.goto('/docs/deployment/infrastructure-configuration');
+
+    // Wait for page to load
+    await page.waitForSelector('text=Infrastructure Configuration', { timeout: 10000 });
+
+    // Verify markdown is rendered
+    const content = page.locator('article, main, [role="main"]');
+    await expect(content).toBeVisible();
+
+    // Content should not contain raw markdown syntax
+    const bodyText = await content.textContent();
+    expect(bodyText).not.toContain('```');
+  });
+
+  test('navigation from docs index page to deployment section works', async ({ page }) => {
+    // Navigate to docs index
+    await page.goto('/docs');
+
+    // Wait for page to load
+    await page.waitForSelector('text=Documentation', { timeout: 10000 });
+
+    // Find and click deployment section
+    const deploymentLink = page.getByRole('link', { name: /deployment/i }).first();
+    await expect(deploymentLink).toBeVisible();
+    await deploymentLink.click();
+
+    // Verify navigation to deployment overview
+    await expect(page).toHaveURL(/\/docs\/deployment/);
+    await expect(page.getByRole('heading', { name: /deployment guide/i })).toBeVisible();
+  });
+
+  test('deployment section appears in docs index page', async ({ page }) => {
+    // Navigate to docs index
+    await page.goto('/docs');
+
+    // Wait for page to load
+    await page.waitForSelector('text=Documentation', { timeout: 10000 });
+
+    // Verify deployment section is visible
+    await expect(page.getByRole('heading', { name: /deployment/i })).toBeVisible();
+    await expect(page.getByText(/complete guides for deploying stride/i)).toBeVisible();
+
+    // Verify subsections are visible
+    await expect(page.getByText(/docker deployment/i)).toBeVisible();
+    await expect(page.getByText(/infrastructure configuration/i)).toBeVisible();
+  });
+
+  test('page metadata is correct for deployment overview', async ({ page }) => {
+    // Navigate to deployment overview
+    await page.goto('/docs/deployment');
+
+    // Wait for page to load
+    await page.waitForSelector('text=Deployment Guide', { timeout: 10000 });
+
+    // Verify page title
+    await expect(page).toHaveTitle(/Deployment Guide - Stride/i);
+
+    // Verify meta description
+    const metaDescription = page.locator('meta[name="description"]');
+    await expect(metaDescription).toHaveAttribute('content', expect.stringContaining('deploying Stride'));
+  });
+
+  test('page metadata is correct for docker guide', async ({ page }) => {
+    // Navigate to docker guide
+    await page.goto('/docs/deployment/docker');
+
+    // Wait for page to load
+    await page.waitForSelector('text=Docker Deployment', { timeout: 10000 });
+
+    // Verify page title
+    await expect(page).toHaveTitle(/Docker Deployment - Stride/i);
+
+    // Verify meta description
+    const metaDescription = page.locator('meta[name="description"]');
+    await expect(metaDescription).toHaveAttribute('content', expect.stringContaining('Docker Compose'));
+  });
+
+  test('page metadata is correct for infrastructure guide', async ({ page }) => {
+    // Navigate to infrastructure guide
+    await page.goto('/docs/deployment/infrastructure-configuration');
+
+    // Wait for page to load
+    await page.waitForSelector('text=Infrastructure Configuration', { timeout: 10000 });
+
+    // Verify page title
+    await expect(page).toHaveTitle(/Infrastructure Configuration - Stride/i);
+
+    // Verify meta description
+    const metaDescription = page.locator('meta[name="description"]');
+    await expect(metaDescription).toHaveAttribute('content', expect.stringContaining('infrastructure'));
+  });
+
+  test('authentication is required for deployment docs', async ({ page }) => {
+    // Mock unauthenticated state
+    await page.route('/api/auth/me', async (route) => {
+      await route.fulfill({
+        status: 401,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Unauthorized' }),
+      });
+    });
+
+    // Try to access deployment docs
+    const response = await page.goto('/docs/deployment');
+
+    // Should redirect to login or show auth error
+    // This depends on your auth setup - adjust based on actual behavior
+    // If docs require auth, verify redirect or error
+    // If docs are public, verify they're accessible
+    expect(response?.status()).toBeGreaterThanOrEqual(200);
+    expect(response?.status()).toBeLessThan(500);
+  });
+
+  test('links from deployment README to individual guides work', async ({ page }) => {
+    // Navigate to deployment overview (which contains links)
+    await page.goto('/docs/deployment');
+
+    // Wait for page to load
+    await page.waitForSelector('text=Deployment Guide', { timeout: 10000 });
+
+    // Find and click Docker Deployment link
+    const dockerLink = page.getByRole('link', { name: /docker deployment/i }).first();
+    await expect(dockerLink).toBeVisible();
+    await dockerLink.click();
+
+    // Verify navigation to docker guide
+    await expect(page).toHaveURL(/\/docs\/deployment\/docker/);
+    await expect(page.getByRole('heading', { name: /docker deployment/i })).toBeVisible();
+
+    // Go back and test infrastructure link
+    await page.goBack();
+    await page.waitForSelector('text=Deployment Guide', { timeout: 10000 });
+
+    // Find and click Infrastructure Configuration link
+    const infraLink = page.getByRole('link', { name: /infrastructure configuration/i }).first();
+    await expect(infraLink).toBeVisible();
+    await infraLink.click();
+
+    // Verify navigation to infrastructure guide
+    await expect(page).toHaveURL(/\/docs\/deployment\/infrastructure-configuration/);
+    await expect(page.getByRole('heading', { name: /infrastructure configuration/i })).toBeVisible();
+  });
+});

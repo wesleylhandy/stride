@@ -1,3 +1,10 @@
+---
+purpose: Configure GitHub or GitLab OAuth for repository webhook integration and automatic issue status updates
+targetAudience: System administrators, DevOps engineers, developers
+lastUpdated: 2026-01-12
+status: Optional
+---
+
 # Git OAuth Integration
 
 **Status**: Optional  

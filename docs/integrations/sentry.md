@@ -1,3 +1,10 @@
+---
+purpose: Configure Sentry for error tracking and performance monitoring
+targetAudience: System administrators, DevOps engineers
+lastUpdated: 2026-01-12
+status: Optional
+---
+
 # Sentry Error Tracking Integration
 
 **Status**: Optional  

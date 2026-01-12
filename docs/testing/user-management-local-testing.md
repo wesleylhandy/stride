@@ -1,8 +1,10 @@
-# Local Testing Guide: User Management Feature
+---
+purpose: Step-by-step guide for testing user management features locally without paying for email services
+targetAudience: Developers testing the user management implementation
+lastUpdated: 2026-01-12
+---
 
-**Purpose**: Step-by-step guide for testing user management features locally without paying for email services  
-**Target Audience**: Developers testing the user management implementation  
-**Last Updated**: 2025-01-09
+# Local Testing Guide: User Management Feature
 
 ## Table of Contents
 

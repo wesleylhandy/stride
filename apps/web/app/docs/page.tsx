@@ -41,6 +41,16 @@ const documentationSections: DocumentationSection[] = [
       { label: 'Monitoring Webhooks', href: '/docs/integrations/monitoring-webhooks' },
     ],
   },
+  {
+    title: 'Deployment',
+    description: 'Complete guides for deploying Stride (Docker, infrastructure configuration)',
+    href: '/docs/deployment',
+    icon: '🚀',
+    subsections: [
+      { label: 'Docker Deployment', href: '/docs/deployment/docker' },
+      { label: 'Infrastructure Configuration', href: '/docs/deployment/infrastructure-configuration' },
+    ],
+  },
   // Future documentation sections can be added here:
   // {
   //   title: 'Installation',

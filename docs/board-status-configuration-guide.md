@@ -1,3 +1,9 @@
+---
+purpose: Guide for configuring project workflow to enable moving issues between status blocks on the Kanban board
+targetAudience: Developers, project administrators
+lastUpdated: 2026-01-12
+---
+
 # Board Status Configuration Guide
 
 This guide explains how to configure your project so you can move issues between status blocks on the Kanban board.

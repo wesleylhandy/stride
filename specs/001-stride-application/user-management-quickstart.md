@@ -23,7 +23,7 @@ If SMTP is not configured:
 - ✅ Invitations can be created (manual link sharing)
 - ❌ Automatic email invitations are disabled
 
-**To enable email invitations**, configure SMTP in your environment variables. See the [SMTP Configuration Guide](../../docs/deployment/smtp-configuration.md) for detailed setup instructions and troubleshooting.
+**To enable email invitations**, configure SMTP in your environment variables. See the [SMTP Integration Guide](../../docs/integrations/smtp.md) for detailed setup instructions and troubleshooting.
 
 **Quick setup** (add to your `.env` file):
 ```bash

@@ -1,7 +1,10 @@
-# Version Compatibility Reference
+---
+purpose: Track compatibility and migration notes for major dependency versions
+targetAudience: Developers, DevOps engineers
+lastUpdated: 2026-01-12
+---
 
-**Last Updated**: 2024-12-19  
-**Purpose**: Track compatibility and migration notes for major dependency versions
+# Version Compatibility Reference
 
 ## Current Versions
 

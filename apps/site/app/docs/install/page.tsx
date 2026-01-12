@@ -1,88 +1,82 @@
+import { readFile } from "fs/promises";
+import { join } from "path";
+import type { Metadata } from "next";
 import Link from "next/link";
-import { CodeBlock } from "../../components/docs/CodeBlock";
+import dynamic from "next/dynamic";
+import { PageContainer } from "@stride/ui";
+import { parseDocFrontmatter, type ParsedDoc } from "@stride/ui";
 
-export default function InstallPage() {
-  return (
-    <>
-      <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl dark:text-foreground-dark">
-        Installation Guide
-      </h1>
-      <p className="mt-6 text-lg leading-8 text-foreground-secondary dark:text-foreground-dark-secondary">
-        Get Stride up and running in minutes with Docker Compose.
-      </p>
-
-      <div className="mt-10 space-y-8">
-        <section>
-          <h2 className="text-2xl font-semibold text-foreground dark:text-foreground-dark">
-            Prerequisites
-          </h2>
-          <ul className="mt-4 list-disc space-y-2 pl-6 text-foreground-secondary dark:text-foreground-dark-secondary">
-            <li>Docker and Docker Compose installed</li>
-            <li>At least 2GB of available RAM</li>
-            <li>Port 3000 available (or configure a different port)</li>
-          </ul>
-        </section>
-
-        <section>
-          <h2 className="text-2xl font-semibold text-foreground dark:text-foreground-dark">
-            Quick Start
-          </h2>
-          <div className="mt-4">
-            <CodeBlock
-              code={`# Clone the repository
-git clone https://github.com/your-org/stride.git
-cd stride
-
-# Copy environment file
-cp .env.example .env
-
-# Start all services
-docker compose up -d
-
-# Run database migrations
-docker compose exec web pnpm --filter @stride/database prisma migrate deploy
-
-# Access the application
-open http://localhost:3000`}
-              language="bash"
-            />
-          </div>
-        </section>
-
-        <section>
-          <h2 className="text-2xl font-semibold text-foreground dark:text-foreground-dark">
-            Configuration
-          </h2>
+// Dynamically import DocumentationPageContent to code-split heavy markdown rendering dependencies
+const DynamicDocumentationPageContent = dynamic(
+  () =>
+    import("@stride/ui").then((mod) => ({
+      default: mod.DocumentationPageContent,
+    })),
+  {
+    ssr: true, // Keep SSR for SEO since this is documentation content
+    loading: () => (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
           <p className="mt-4 text-foreground-secondary dark:text-foreground-dark-secondary">
-            Edit the <code className="rounded bg-surface-secondary dark:bg-surface-dark-secondary px-1.5 py-0.5 text-sm font-mono border border-border dark:border-border-dark">.env</code> file
-            to configure:
+            Loading documentation...
           </p>
-          <ul className="mt-4 list-disc space-y-2 pl-6 text-foreground-secondary dark:text-foreground-dark-secondary">
-            <li>Database connection settings</li>
-            <li>JWT secret key</li>
-            <li>OAuth credentials for GitHub/GitLab</li>
-            <li>AI Gateway endpoint (optional)</li>
-          </ul>
-          <p className="mt-4 text-foreground-secondary dark:text-foreground-dark-secondary">
-            For detailed configuration options, see the <Link href="/docs/configuration" className="text-accent hover:text-accent-hover dark:text-accent dark:hover:text-accent-hover underline">Configuration Documentation</Link>.
-          </p>
-        </section>
-
-        <section>
-          <h2 className="text-2xl font-semibold text-foreground dark:text-foreground-dark">
-            Next Steps
-          </h2>
-          <p className="mt-4 text-foreground-secondary dark:text-foreground-dark-secondary">
-            Once Stride is running, you'll be prompted to:
-          </p>
-          <ol className="mt-4 list-decimal space-y-2 pl-6 text-foreground-secondary dark:text-foreground-dark-secondary">
-            <li>Create your admin account</li>
-            <li>Link your first repository</li>
-            <li>Create your first project</li>
-          </ol>
-        </section>
+        </div>
       </div>
-    </>
+    ),
+  }
+);
+
+export const metadata: Metadata = {
+  title: "Installation Guide - Stride",
+  description: "Quick start guide for installing and running Stride with Docker Compose",
+};
+
+/**
+ * Get documentation content from centralized source of truth
+ *
+ * Reads from docs/install.md at repository root (single source of truth)
+ * Path resolution: from apps/site, go up 2 levels to repo root, then into docs/
+ * 
+ * Parses frontmatter and returns both content (with frontmatter stripped) and metadata
+ */
+async function getDocContent(): Promise<ParsedDoc> {
+  // Path from apps/site to repo root
+  const repoRoot = join(process.cwd(), "..", "..");
+  const filePath = join(repoRoot, "docs", "install.md");
+
+  try {
+    const rawContent = await readFile(filePath, "utf-8");
+    const parsed = parseDocFrontmatter(rawContent);
+    return parsed;
+  } catch (error) {
+    console.error(`Failed to read doc file from ${filePath}:`, error);
+    const errorContent = `# Documentation Not Found\n\nThe installation guide could not be loaded.\n\nPlease check that the documentation file exists at the repository root.`;
+    return {
+      content: errorContent,
+      frontmatter: {},
+    };
+  }
+}
+
+export default async function InstallPage() {
+  const { content, frontmatter } = await getDocContent();
+
+  // No sections prop - uses layout-level navigation (DocsNavigation component)
+  // This prevents duplicate navigation tabs
+
+  return (
+    <PageContainer variant="constrained">
+      <DynamicDocumentationPageContent
+        title="Installation Guide"
+        description="Quick start guide for installing and running Stride with Docker Compose"
+        content={content}
+        enableMermaid={false}
+        enableLinkPreviews={false}
+        LinkComponent={Link}
+        lastUpdated={frontmatter.lastUpdated}
+      />
+    </PageContainer>
   );
 }
 
