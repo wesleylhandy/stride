@@ -1,0 +1,120 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Documentation Search Index Schema",
+  "description": "JSON schema for documentation search index generated at build time",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Index version for cache busting",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when index was generated"
+    },
+    "totalEntries": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total number of documentation entries in index"
+    },
+    "size": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Index file size in bytes"
+    },
+    "entries": {
+      "type": "array",
+      "description": "Array of documentation entries",
+      "items": {
+        "$ref": "#/definitions/DocumentationEntry"
+      }
+    }
+  },
+  "required": ["version", "generatedAt", "totalEntries", "entries"],
+  "definitions": {
+    "DocumentationEntry": {
+      "type": "object",
+      "description": "A single documentation entry in the search index",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier (relative path from docs/)",
+          "minLength": 1,
+          "pattern": "^[a-z0-9/_-]+$"
+        },
+        "title": {
+          "type": "string",
+          "description": "Documentation title (first h1 or filename)",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "path": {
+          "type": "string",
+          "description": "Route path in web app",
+          "pattern": "^/docs/.+$"
+        },
+        "section": {
+          "type": "string",
+          "description": "Section/category name",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "subsection": {
+          "type": "string",
+          "description": "Subsection name (optional)",
+          "maxLength": 50
+        },
+        "headings": {
+          "type": "array",
+          "description": "All headings (h1-h3) from document",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "minItems": 0
+        },
+        "content": {
+          "type": "string",
+          "description": "Full text content (plain text, markdown stripped)",
+          "minLength": 50
+        },
+        "snippet": {
+          "type": "string",
+          "description": "Preview snippet (2-3 lines, ~150 chars)",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "anchors": {
+          "type": "array",
+          "description": "Anchor links to headings",
+          "items": {
+            "$ref": "#/definitions/Anchor"
+          },
+          "minItems": 0
+        }
+      },
+      "required": ["id", "title", "path", "section", "headings", "content", "snippet", "anchors"]
+    },
+    "Anchor": {
+      "type": "object",
+      "description": "Anchor link to a heading within a document",
+      "properties": {
+        "heading": {
+          "type": "string",
+          "description": "Heading text",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "anchor": {
+          "type": "string",
+          "description": "URL hash fragment (e.g., '#installation')",
+          "pattern": "^#[a-z0-9-]+$"
+        }
+      },
+      "required": ["heading", "anchor"]
+    }
+  }
+}

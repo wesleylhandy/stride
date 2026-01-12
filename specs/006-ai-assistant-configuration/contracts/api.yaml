@@ -1,0 +1,405 @@
+openapi: 3.0.3
+info:
+  title: AI Configuration Assistant API
+  description: API endpoints for AI-powered configuration assistant
+  version: 1.0.0
+
+paths:
+  /api/projects/{projectId}/assistant/chat:
+    post:
+      summary: Send a message to the AI assistant (project context)
+      description: Sends a user message to the AI assistant and receives a response. Creates or uses existing session.
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Project ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message
+              properties:
+                message:
+                  type: string
+                  description: User's message to the assistant
+                  example: "How do I set up a Kanban workflow with priority fields?"
+                sessionId:
+                  type: string
+                  format: uuid
+                  nullable: true
+                  description: Existing session ID (optional, creates new session if not provided)
+      responses:
+        '200':
+          description: Assistant response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssistantResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (no access to project)
+        '503':
+          description: AI Gateway unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/projects/{projectId}/assistant/history:
+    get:
+      summary: Get conversation history
+      description: Retrieves conversation history for a session
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Project ID
+        - name: sessionId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: Session ID (optional, returns most recent session if not provided)
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 100
+          description: Number of messages to retrieve
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+          description: Pagination offset
+      responses:
+        '200':
+          description: Conversation history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationHistory'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+
+  /api/projects/{projectId}/assistant/apply-suggestion:
+    post:
+      summary: Apply a configuration suggestion
+      description: Applies an AI-generated configuration suggestion to the project
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Project ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - suggestion
+              properties:
+                suggestion:
+                  $ref: '#/components/schemas/ConfigurationSuggestion'
+      responses:
+        '200':
+          description: Configuration applied successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '400':
+          description: Invalid suggestion or validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (admin role required)
+
+  /api/settings/infrastructure/assistant/chat:
+    post:
+      summary: Send a message to the AI assistant (infrastructure context)
+      description: Sends a user message to the AI assistant for infrastructure configuration. Admin only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message
+              properties:
+                message:
+                  type: string
+                  description: User's message to the assistant
+                  example: "How do I configure GitHub OAuth?"
+                sessionId:
+                  type: string
+                  format: uuid
+                  nullable: true
+                  description: Existing session ID (optional)
+      responses:
+        '200':
+          description: Assistant response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssistantResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (admin role required)
+        '503':
+          description: AI Gateway unavailable
+
+  /api/settings/infrastructure/assistant/history:
+    get:
+      summary: Get infrastructure assistant conversation history
+      description: Retrieves conversation history for infrastructure context. Admin only.
+      parameters:
+        - name: sessionId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Conversation history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationHistory'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+
+components:
+  schemas:
+    AssistantResponse:
+      type: object
+      required:
+        - sessionId
+        - message
+        - metadata
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+          description: Session ID (new or existing)
+        message:
+          type: string
+          description: Assistant's response message
+        metadata:
+          $ref: '#/components/schemas/AssistantMessageMetadata'
+        suggestions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfigurationSuggestion'
+          description: Configuration suggestions (if applicable)
+
+    ConversationHistory:
+      type: object
+      required:
+        - sessionId
+        - messages
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssistantMessage'
+        totalCount:
+          type: integer
+          description: Total number of messages in session
+
+    AssistantMessage:
+      type: object
+      required:
+        - id
+        - role
+        - content
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+          description: Message content (markdown supported)
+        metadata:
+          $ref: '#/components/schemas/AssistantMessageMetadata'
+        createdAt:
+          type: string
+          format: date-time
+
+    AssistantMessageMetadata:
+      type: object
+      properties:
+        configReferences:
+          type: array
+          items:
+            type: object
+            properties:
+              path:
+                type: string
+                example: "workflow.statuses[0]"
+              type:
+                type: string
+                enum: [yaml, database, both]
+        documentationLinks:
+          type: array
+          items:
+            type: object
+            properties:
+              file:
+                type: string
+                example: "docs/configuration/reference.md"
+              section:
+                type: string
+                example: "#workflow-configuration"
+        suggestions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfigurationSuggestion'
+        comparisonResults:
+          type: object
+          properties:
+            differences:
+              type: array
+              items:
+                type: object
+                properties:
+                  path:
+                    type: string
+                  yamlValue:
+                    type: string
+                    description: JSON string representation
+                  dbValue:
+                    type: string
+                    description: JSON string representation
+                  type:
+                    type: string
+                    enum: [missing_in_db, missing_in_yaml, value_mismatch]
+
+    ConfigurationSuggestion:
+      type: object
+      required:
+        - type
+        - config
+        - explanation
+      properties:
+        type:
+          type: string
+          enum: [workflow, custom_field, automation_rule, infrastructure]
+          description: Type of configuration suggestion
+        config:
+          type: object
+          description: Suggested configuration (structure varies by type)
+          example:
+            workflow:
+              default_status: "todo"
+              statuses:
+                - key: "todo"
+                  name: "To Do"
+                  type: "open"
+        explanation:
+          type: string
+          description: Explanation of the suggestion
+
+    Error:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error type
+        message:
+          type: string
+          description: Human-readable error message
+
+    ValidationError:
+      type: object
+      required:
+        - error
+        - message
+        - details
+      properties:
+        error:
+          type: string
+          example: "Validation failed"
+        message:
+          type: string
+        details:
+          type: object
+          description: Field-level validation errors
+          additionalProperties:
+            type: array
+            items:
+              type: string
+
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session
+
+security:
+  - cookieAuth: []

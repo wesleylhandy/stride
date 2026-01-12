@@ -12,7 +12,15 @@
 - Q: What should be the primary focus of the README? → A: Developer-first experience with emphasis on quick setup, clear configuration, and contribution guidelines. The README should sell the project to developers.
 - Q: What level of detail should configuration documentation include? → A: Comprehensive but scannable. Include environment variables, Docker setup, database configuration, and links to detailed docs.
 - Q: Should the README include screenshots or demos? → A: Yes, visual elements help sell the product. Include screenshots of key features and a demo GIF/video if possible.
-- Q: What license should be used? → A: MIT License - standard for open-source projects, permissive and developer-friendly.
+- Q: What license should be used? → A: MIT License - standard for open-source projects, permissive and developer-friendly. (UPDATED: See Session 2026-01-23)
+
+### Session 2026-01-23
+
+- Q: What license should be used given requirements to prevent commercial sale while allowing use, modification, and extension? → A: AGPL-3.0 (GNU Affero General Public License) - strong copyleft license that requires source disclosure for network services, making commercial sale without contribution impractical while remaining OSI-approved open source.
+- Q: Which features should be highlighted in the Key Features section of the README? → A: Include all major differentiating features (8-10 features) to accurately represent the application's capabilities: issue management, configuration as code, Git integration, sprint/cycle management, AI-powered triage, monitoring webhooks, root cause diagnostics, keyboard-driven UX, Mermaid diagram rendering, and contextual link previews.
+- Q: What should the Configuration section cover regarding integrations? → A: Document all integrations (GitHub/GitLab OAuth, AI providers, monitoring webhooks, SMTP) with clear distinction between infrastructure-level (environment variables, system-wide settings) and project-level (UI-based per-project configuration), plus links to detailed integration guides.
+- Q: What workflows should be documented in the Usage section? → A: Include all major user workflows: issue creation and management, sprint planning and cycle management, AI triage workflow, monitoring webhook integration, configuration as code editing, Git branch/PR linking, root cause diagnostics, keyboard shortcuts and command palette usage, with brief descriptions and links to detailed user documentation.
+- Q: Should the Quick Start section mention optional integrations or stay minimal? → A: Keep Quick Start focused on core setup only (Docker, admin account), add brief note that optional integrations (AI, monitoring, SMTP) are available and documented in Configuration section. Maintains "5 minutes" setup goal while acknowledging advanced features.
 
 ## User Scenarios & Testing
 
@@ -68,7 +76,7 @@ A developer wants to contribute code to Stride and can understand the developmen
 ### FR1: Project Overview Section
 - **Description**: Clear, concise description of what Stride is
 - **Value Proposition**: Highlight developer-first, open-source, self-hosted benefits
-- **Key Features**: List 3-5 core features that differentiate Stride
+- **Key Features**: List all major differentiating features (8-10 features) including: issue management with Kanban board, configuration as code (stride.config.yaml), Git integration (GitHub/GitLab webhooks), sprint/cycle management, AI-powered triage (multiple provider support), monitoring webhooks (Sentry/Datadog/New Relic), root cause diagnostics dashboard, keyboard-driven command palette UX, Mermaid diagram rendering, and contextual link previews (Notion/Google Drive/Confluence)
 - **Visual Elements**: Include project logo/banner, screenshots of key features
 - **Badges**: Include badges for license, build status, version, etc.
 
@@ -78,6 +86,7 @@ A developer wants to contribute code to Stride and can understand the developmen
 - **First Run**: Instructions for initial admin account creation
 - **Verification**: How to verify the installation works
 - **Time Estimate**: "Get started in 5 minutes" messaging
+- **Optional Integrations Note**: Brief mention that optional integrations (AI providers, monitoring webhooks, SMTP) are available and documented in Configuration section, keeping Quick Start focused on core setup
 
 ### FR3: Configuration Section
 - **Environment Variables**: Complete list with descriptions and defaults
@@ -85,15 +94,26 @@ A developer wants to contribute code to Stride and can understand the developmen
 - **Example Configuration**: `.env.example` file reference
 - **Database Setup**: PostgreSQL configuration details
 - **Authentication**: JWT and session secrets setup
-- **Integrations**: GitHub, GitLab, AI Gateway configuration
+- **Configuration Levels**: Clear explanation of infrastructure-level (environment variables, system-wide) vs project-level (UI-based per-project) configuration
+- **Integrations**: Comprehensive coverage of all integrations with level distinction:
+  - **Infrastructure-Level** (environment variables): AI Gateway URL, SMTP settings, Sentry DSN, Git OAuth credentials (GitHub/GitLab Client ID/Secret)
+  - **Project-Level** (UI configuration): AI provider configuration (per-project), repository connections, monitoring webhook setup
+  - **Integration Coverage**: GitHub/GitLab OAuth, AI providers (Ollama, OpenAI, Anthropic, Google Gemini), monitoring webhooks (Sentry, Datadog, New Relic), SMTP email
+  - **Links to Detailed Guides**: References to `docs/integrations/` documentation for each integration type
 - **Production Deployment**: Links to deployment documentation
 
 ### FR4: Usage Section
 - **Application Overview**: How to use the main application
-- **Key Workflows**: Common user flows (create issue, manage sprint, etc.)
-- **Keyboard Shortcuts**: Command palette and shortcuts
-- **Configuration as Code**: How to use `stride.config.yaml`
-- **Links to Documentation**: References to detailed docs
+- **Key Workflows**: Document all major user workflows with brief descriptions:
+  - Issue creation and management (Kanban board, status transitions)
+  - Sprint planning and cycle management (creating sprints, assigning issues, burndown charts)
+  - AI triage workflow (triggering AI analysis, interpreting suggestions, accepting/modifying recommendations)
+  - Monitoring webhook integration (automatic issue creation from error events)
+  - Configuration as code editing (using `stride.config.yaml` editor)
+  - Git branch/PR linking (automatic status updates from Git activity)
+  - Root cause diagnostics (viewing error traces and diagnostic information)
+  - Keyboard shortcuts and command palette usage
+- **Links to Documentation**: References to detailed user documentation (`docs/user/`) for each workflow
 
 ### FR5: Development Section
 - **Monorepo Structure**: Explanation of apps/ and packages/
@@ -113,7 +133,7 @@ A developer wants to contribute code to Stride and can understand the developmen
 - **Code of Conduct**: Link to or include code of conduct
 
 ### FR7: License Section
-- **MIT License**: Full MIT License text
+- **AGPL-3.0 License**: Full AGPL-3.0 License text
 - **Copyright Notice**: Proper copyright attribution
 - **License File**: Reference to LICENSE file in repo root
 
@@ -156,7 +176,7 @@ A developer wants to contribute code to Stride and can understand the developmen
 1. ✅ New developers can set up Stride locally in under 10 minutes using only the README
 2. ✅ All required configuration is documented with clear examples
 3. ✅ Contributing guidelines are clear and actionable
-4. ✅ MIT License is properly included in repository
+4. ✅ AGPL-3.0 License is properly included in repository
 5. ✅ README effectively communicates developer-first value proposition
 6. ✅ All links and commands are verified to work
 7. ✅ README is visually appealing with badges, screenshots, and proper formatting

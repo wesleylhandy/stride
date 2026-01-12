@@ -17,6 +17,20 @@ Welcome to Stride! This guide will help you get started with using Stride for ma
 
 ### First-Time Setup
 
+#### Step 1: Infrastructure Configuration (Admin Only)
+
+Before creating your first project, configure global infrastructure settings if you plan to use Git OAuth or AI features:
+
+1. **Navigate to Admin Settings**: Go to `/settings/infrastructure` (admin-only)
+2. **Configure Git OAuth** (optional): Set up GitHub or GitLab OAuth credentials if you want to connect repositories
+3. **Configure AI Gateway** (optional): Set up AI Gateway URL and provider credentials if you want to use AI features
+
+**Alternative**: Configure via environment variables (recommended for production). See [Infrastructure Configuration Guide](/docs/deployment/infrastructure-configuration) for details.
+
+**Note**: Infrastructure configuration is optional - Stride works fully without it. Configure only if you need Git repository integration or AI features.
+
+#### Step 2: Create Admin Account
+
 When you first access Stride, you'll need to create an admin account:
 
 1. Navigate to your Stride instance (e.g., http://localhost:3000)
@@ -70,8 +84,11 @@ The project key is used to prefix issue keys (e.g., "PROJ-1", "PROJ-2").
 From a project view, you can:
 - **Edit Project**: Update name and description
 - **Configure Workflow**: Edit the workflow configuration (YAML)
-- **Manage Repository**: Connect Git repositories (GitHub, GitLab)
+- **Manage Repository**: Connect Git repositories (GitHub, GitLab) - requires infrastructure OAuth configuration
+- **Configure AI Providers**: Set up project-specific AI providers (optional, can override global defaults)
 - **View Issues**: See all issues in the project
+
+**Note**: Repository connections and AI provider configuration require infrastructure-level configuration to be set up first. See [Infrastructure Configuration Guide](/docs/deployment/infrastructure-configuration) for details.
 
 ## Issues
 

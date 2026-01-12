@@ -106,11 +106,19 @@ Monitor application errors and performance with Sentry.
 
 Enable AI-powered issue triage with Ollama (self-hosted), OpenAI, Anthropic, or Google Gemini.
 
+**Configuration Levels**:
+- **Infrastructure (Global)**: AI Gateway URL and default provider credentials - see [Infrastructure Configuration Guide](/docs/deployment/infrastructure-configuration)
+- **Project-Level**: Per-project AI provider configuration (API keys, models, endpoints) - see [AI Providers Setup Guide](/docs/integrations/ai-providers)
+
 **Quick Start**: See [AI Providers Setup Guide](/docs/integrations/ai-providers)
 
 ### [Git OAuth](/docs/integrations/git-oauth)
 
 Connect GitHub or GitLab repositories for webhook integration and automatic issue status updates.
+
+**Configuration Levels**:
+- **Infrastructure (Global)**: OAuth App credentials (Client ID, Client Secret) - see [Infrastructure Configuration Guide](/docs/deployment/infrastructure-configuration)
+- **Project-Level**: Per-project repository connections (access tokens) - see [Git OAuth Setup Guide](/docs/integrations/git-oauth)
 
 **Quick Start**: See [Git OAuth Setup Guide](/docs/integrations/git-oauth)
 
@@ -121,6 +129,33 @@ Configure webhooks from Sentry, Datadog, or New Relic to automatically create is
 **Quick Start**: See [Monitoring Webhooks Setup Guide](/docs/integrations/monitoring-webhooks)
 
 ---
+
+## Configuration Levels
+
+Stride supports two levels of configuration for integrations:
+
+### Infrastructure Configuration (Global)
+
+**System-wide settings** that apply to all projects. Configured via:
+- Environment variables (infrastructure-as-code, recommended for production)
+- Admin Settings UI (`/settings/infrastructure`, admin-only)
+
+**Applies to**:
+- Git OAuth credentials (GitHub, GitLab) - used to initiate OAuth flows
+- AI Gateway service URL and default provider credentials - system-wide defaults
+
+**Documentation**: See [Infrastructure Configuration Guide](/docs/deployment/infrastructure-configuration) for complete setup instructions.
+
+### Project-Level Configuration (Per-Project)
+
+**Project-specific settings** that can override global defaults. Configured via:
+- Project Settings UI (`/projects/[projectId]/settings/integrations`)
+
+**Applies to**:
+- Repository connections (per-project access tokens, obtained via OAuth flow)
+- AI provider configuration (per-project API keys, models, endpoints)
+
+**Documentation**: See individual integration guides for project-level setup.
 
 ## Configuration Methods
 
@@ -150,6 +185,16 @@ SMTP_PORT=587
 SMTP_USER=your-email@example.com
 SMTP_PASSWORD=your-password
 ```
+
+### Admin Settings UI (Infrastructure Configuration)
+
+For infrastructure-level configuration (Git OAuth, AI Gateway), you can also use the Admin Settings UI:
+
+1. Navigate to `/settings/infrastructure` (admin-only)
+2. Configure Git OAuth credentials or AI Gateway settings
+3. Save configuration (stored in database)
+
+**Note**: Environment variables always override UI-based configuration. See [Infrastructure Configuration Guide](/docs/deployment/infrastructure-configuration) for precedence rules.
 
 ---
 

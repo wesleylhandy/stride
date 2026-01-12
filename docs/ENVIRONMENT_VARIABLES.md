@@ -52,6 +52,29 @@ grep "^JWT_SECRET" .env
 2. **Gitignore**: `.env.local` files are gitignored - use them for local-only secrets
 3. **Production**: Set environment variables in your deployment platform (Vercel, Docker, etc.)
 
+## Site Metadata Configuration (apps/site)
+
+The marketing site (`apps/site`) supports configurable metadata via environment variables:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `NEXT_PUBLIC_SITE_TITLE` | Site title (used in `<title>` and OpenGraph) | `"Stride - Developer-First Flow Tracker"` |
+| `NEXT_PUBLIC_SITE_DESCRIPTION` | Main meta description | `"Self-hosted, open-source flow tracker that matches the speed and developer experience of Linear..."` |
+| `NEXT_PUBLIC_SITE_OG_DESCRIPTION` | OpenGraph/Twitter description (can differ from main) | `"Self-hosted, open-source flow tracker with blazing fast UX and deep Git integration."` |
+| `NEXT_PUBLIC_SITE_AUTHOR` | Site author name | `"Stride Team"` |
+| `NEXT_PUBLIC_SITE_URL` | Canonical site URL | `"https://stride.dev"` |
+
+**Example**:
+```bash
+# In root .env or apps/site/.env
+NEXT_PUBLIC_SITE_TITLE="My Company - Project Tracker"
+NEXT_PUBLIC_SITE_DESCRIPTION="Custom description for search engines"
+NEXT_PUBLIC_SITE_OG_DESCRIPTION="Custom description for social sharing"
+NEXT_PUBLIC_SITE_URL="https://mycompany.com"
+```
+
+**Note**: These can also be customized by editing `apps/site/lib/site-config.ts` directly.
+
 ## Security
 
 ⚠️ **Never commit `.env` files with real secrets to git!**

@@ -2,19 +2,20 @@
 
 **Feature Branch**: `003-readme-documentation`  
 **Created**: 2024-12-19  
-**Status**: Planning Complete (Phase 0-1)  
+**Updated**: 2026-01-23  
+**Status**: Planning Updated (Phase 0-1)  
 **Feature Spec**: `specs/003-readme-documentation/spec.md`
 
 ## Summary
 
-Create a comprehensive, developer-first README.md for the Stride project that serves as the primary entry point for developers discovering the project. The README should include quick start instructions, configuration guide, contributing guidelines, and MIT license. This documentation is critical for project adoption and will be the first impression for potential users and contributors.
+Create a comprehensive, developer-first README.md for the Stride project that serves as the primary entry point for developers discovering the project. The README should include quick start instructions, comprehensive configuration guide covering all integrations (with infrastructure vs project-level distinction), usage workflows, contributing guidelines, and AGPL-3.0 license. This documentation is critical for project adoption and will be the first impression for potential users and contributors.
 
 ## Technical Context
 
 ### Technology Stack
 - **Format**: GitHub Flavored Markdown (GFM)
 - **Location**: Repository root (`README.md`)
-- **License Format**: MIT License in `LICENSE` file
+- **License Format**: AGPL-3.0 (GNU Affero General Public License) in `LICENSE` file
 - **Image Storage**: `docs/images/` or `public/` directory
 - **Link Strategy**: Relative links for internal docs, absolute for external
 
@@ -22,6 +23,9 @@ Create a comprehensive, developer-first README.md for the Stride project that se
 - **Existing Documentation**: 
   - `specs/001-stride-application/quickstart.md` - Quick start guide
   - `specs/001-stride-application/spec.md` - Feature specification
+  - `docs/integrations/` - Integration guides (AI providers, monitoring webhooks, SMTP, Git OAuth)
+  - `docs/user/` - User documentation (AI triage, workflows)
+  - `docs/deployment/` - Deployment documentation
   - `docker-compose.yml` - Docker configuration
   - `.specify/memory/constitution.md` - Development principles
 - **Project Structure**: 
@@ -39,6 +43,9 @@ Create a comprehensive, developer-first README.md for the Stride project that se
 - **GitHub**: Repository hosting, badges, issue templates
 - **Docker Hub**: Container images (if published)
 - **Documentation Sites**: Links to detailed documentation (if hosted separately)
+- **Application Integrations** (to document in README):
+  - **Infrastructure-Level**: AI Gateway URL, SMTP settings, Sentry DSN, Git OAuth credentials
+  - **Project-Level**: AI provider configuration (Ollama, OpenAI, Anthropic, Google Gemini), repository connections, monitoring webhook setup (Sentry, Datadog, New Relic)
 
 ### Architecture Decisions
 - **Documentation Structure**:
@@ -48,12 +55,13 @@ Create a comprehensive, developer-first README.md for the Stride project that se
   - Quick start in README, detailed guides in `docs/`
 - **Content Organization**:
   - Hero section with value proposition
-  - Quick start (5-minute setup)
-  - Configuration guide
-  - Usage examples
+  - Key Features (8-10 major features: issue management, config as code, Git integration, sprints, AI triage, monitoring webhooks, root cause diagnostics, keyboard UX, Mermaid diagrams, link previews)
+  - Quick start (5-minute setup, minimal with optional integrations note)
+  - Configuration guide (all integrations with infrastructure vs project-level distinction)
+  - Usage workflows (all major workflows: issue management, sprints, AI triage, monitoring, config editing, Git linking, diagnostics, keyboard shortcuts)
   - Development setup
   - Contributing guidelines
-  - License
+  - License (AGPL-3.0)
 - **Visual Elements**:
   - Project badges (license, build status, version)
   - Screenshots of key features
@@ -126,9 +134,9 @@ All clarifications resolved. See `research.md` for detailed decisions and ration
 - [x] Link structure planned
 
 ### License File
-- [x] MIT License template created (`LICENSE-template.md`)
-- [x] Copyright notice properly formatted
-- [x] License structure defined for README reference
+- [ ] AGPL-3.0 License template created (`LICENSE-template.md`)
+- [ ] Copyright notice properly formatted
+- [ ] License structure defined for README reference
 
 ### Supporting Files
 - [x] `.env.example` requirements identified (needs creation)
@@ -185,7 +193,7 @@ specs/003-readme-documentation/
 
 ```text
 README.md                # Main README file (output)
-LICENSE                  # MIT License file (output)
+LICENSE                  # AGPL-3.0 License file (output)
 .env.example            # Environment variable template (output if needed)
 CONTRIBUTING.md         # Contributing guidelines (optional output)
 CODE_OF_CONDUCT.md      # Code of conduct (optional output)

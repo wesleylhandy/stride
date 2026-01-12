@@ -53,16 +53,24 @@ Before configuring AI providers:
 
 Stride supports two levels of AI provider configuration:
 
-1. **Infrastructure Setup** (System-wide): Configure AI Gateway service and global provider settings via environment variables
-2. **Project-Level Configuration** (Per-project): Configure project-specific providers, API keys, and models via the web UI
+1. **Infrastructure Configuration (Global)**: AI Gateway service URL and default provider credentials - system-wide, applies to all projects
+2. **Project-Level Configuration (Per-project)**: Project-specific providers, API keys, and models - can override global defaults
 
-**Infrastructure Setup** is required for the AI Gateway service to run. **Project-Level Configuration** allows you to configure multiple providers per project with encrypted credential storage and fine-grained model selection.
+**Infrastructure Configuration** is required for the AI Gateway service to run. **Project-Level Configuration** allows you to configure multiple providers per project with encrypted credential storage and fine-grained model selection.
 
 ---
 
-## Infrastructure Setup
+## Infrastructure Configuration (Global)
 
-**System-wide configuration** for AI Gateway service. Required for AI features to work. Configure via environment variables and Docker Compose.
+**System-wide configuration** for AI Gateway service and default provider credentials. Required for AI features to work.
+
+**Configuration Methods**:
+- **Environment Variables** (recommended): Set `AI_GATEWAY_URL`, `LLM_ENDPOINT`, `OPENAI_API_KEY`, etc. in `.env` file
+- **Admin Settings UI**: Configure via `/settings/infrastructure` (admin-only)
+
+**Documentation**: See [Infrastructure Configuration Guide](/docs/deployment/infrastructure-configuration) for complete setup instructions.
+
+**Precedence**: Environment variables always override UI-based configuration. See [Infrastructure Configuration Guide](/docs/deployment/infrastructure-configuration) for details.
 
 ### Environment Variables
 
@@ -776,21 +784,30 @@ For self-hosted LLMs (Ollama), you can optionally test the connection:
 
 **Storage Location**: Per-project storage in database (not in environment variables or configuration files)
 
-### UI-Based Configuration vs Infrastructure Setup
+### UI-Based Configuration vs Infrastructure Configuration
 
-**Infrastructure Setup** (Environment Variables):
+**Infrastructure Configuration** (Global):
 - System-wide configuration
 - Required for AI Gateway service
-- Configured via `.env` file and `docker-compose.yml`
-- Global provider settings
+- Configured via `.env` file and `docker-compose.yml` OR Admin Settings UI (`/settings/infrastructure`)
+- Global provider settings (defaults)
+- Environment variables override UI-based configuration
 
 **Project-Level Configuration** (Web UI):
 - Per-project configuration
-- Configured via Project Settings → Integrations page
+- Configured via Project Settings → Integrations page (`/projects/[projectId]/settings/integrations`)
 - Project-specific credentials and models
-- Overrides infrastructure defaults (if applicable)
+- Overrides infrastructure defaults when configured
 
-**Precedence**: Project-level configuration takes precedence over infrastructure-level defaults when both are configured.
+**Precedence** (for AI configuration):
+1. Per-project configuration (highest priority, if configured)
+2. Global infrastructure configuration (defaults, if per-project not configured)
+3. Environment variables (if infrastructure config not in database)
+
+**Workflow**:
+1. Admin configures global AI Gateway URL and default credentials (infrastructure)
+2. Project admin configures project-specific providers (optional, can override global defaults)
+3. AI triage uses project-specific config if available, otherwise falls back to global defaults
 
 ### Configuration Examples
 

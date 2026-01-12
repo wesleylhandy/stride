@@ -50,7 +50,22 @@ Before configuring Git OAuth:
 
 ## Configuration
 
-### Environment Variables
+Stride supports two levels of Git OAuth configuration:
+
+1. **Infrastructure Configuration (Global)**: OAuth App credentials (Client ID, Client Secret) - system-wide, used to initiate OAuth flows
+2. **Project-Level Configuration**: Per-project repository connections (access tokens) - project-specific, obtained via OAuth flow
+
+### Infrastructure Configuration (Global)
+
+**System-wide OAuth App credentials** that apply to all projects. These credentials are used to initiate OAuth flows when connecting repositories.
+
+**Configuration Methods**:
+- **Environment Variables** (recommended): Set `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `GITLAB_CLIENT_ID`, `GITLAB_CLIENT_SECRET` in `.env` file
+- **Admin Settings UI**: Configure via `/settings/infrastructure` (admin-only)
+
+**Documentation**: See [Infrastructure Configuration Guide](/docs/deployment/infrastructure-configuration) for complete setup instructions.
+
+**Environment Variables**:
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
@@ -58,8 +73,27 @@ Before configuring Git OAuth:
 | `GITHUB_CLIENT_SECRET` | Yes* | - | GitHub OAuth App Client Secret |
 | `GITLAB_CLIENT_ID` | Yes* | - | GitLab OAuth Application ID |
 | `GITLAB_CLIENT_SECRET` | Yes* | - | GitLab OAuth Application Secret |
+| `GITLAB_BASE_URL` | No | `https://gitlab.com` | GitLab base URL (for self-hosted GitLab) |
 
 *Required only if repository integration is enabled (at least one Git service)
+
+**Precedence**: Environment variables always override UI-based configuration. See [Infrastructure Configuration Guide](/docs/deployment/infrastructure-configuration) for details.
+
+### Project-Level Configuration
+
+**Per-project repository connections** that store user access tokens for repository operations. These are obtained via OAuth flow using the global infrastructure credentials.
+
+**Configuration**: Configure via Project Settings → Repository (`/projects/[projectId]/settings/repository`)
+
+**Workflow**:
+1. Admin configures global OAuth App credentials (infrastructure)
+2. User connects repository to project (uses global OAuth credentials)
+3. OAuth flow exchanges credentials for user access token
+4. Access token stored per-project for repository operations
+
+**Relationship**:
+- **Infrastructure (Global)**: OAuth App credentials (Client ID, Client Secret) - one set for entire system
+- **Project-Level**: User access tokens (obtained via OAuth) - one per project/repository connection
 
 ---
 

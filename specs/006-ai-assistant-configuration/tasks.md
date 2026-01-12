@@ -1,0 +1,292 @@
+# Tasks: AI Assistant for Project Configuration
+
+**Input**: Design documents from `/specs/006-ai-assistant-configuration/`
+**Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
+
+**Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
+
+## Format: `[ID] [P?] [Story] Description`
+
+- **[P]**: Can run in parallel (different files, no dependencies)
+- **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3)
+- Include exact file paths in descriptions
+
+## Path Conventions
+
+- **Monorepo structure**: `apps/web/`, `packages/ai-gateway/`, `packages/database/`
+- **Next.js App Router**: `apps/web/app/api/`, `apps/web/app/projects/[projectId]/settings/`
+- **Components**: `packages/ui/src/` or `apps/web/src/components/`
+- **Database**: `packages/database/prisma/`
+
+---
+
+## Phase 1: Setup (Shared Infrastructure)
+
+**Purpose**: Project initialization and database schema setup
+
+- [ ] T001 Create Prisma migration for ConfigurationAssistantSession and AssistantMessage models in packages/database/prisma/migrations/
+- [ ] T002 [P] Add ConfigurationAssistantSession and AssistantMessage models to packages/database/prisma/schema.prisma
+- [ ] T003 [P] Create system prompt file for configuration assistant in packages/ai-gateway/prompts/configuration-assistant-prompt.md
+- [ ] T004 [P] Create documentation index mapping topics to markdown file paths and sections in apps/web/src/lib/assistant/doc-index.ts
+
+---
+
+## Phase 2: Foundational (Blocking Prerequisites)
+
+**Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented
+
+**⚠️ CRITICAL**: No user story work can begin until this phase is complete
+
+- [ ] T005 Create Prisma client types for ConfigurationAssistantSession and AssistantMessage (run `pnpm --filter @stride/database prisma generate`)
+- [ ] T006 [P] Create repository/service layer for assistant sessions in apps/web/src/lib/assistant/session-repository.ts
+- [ ] T007 [P] Create repository/service layer for assistant messages in apps/web/src/lib/assistant/message-repository.ts
+- [ ] T008 Implement context management strategy (summarization/sliding window/selective inclusion) to prevent context window overflow in apps/web/src/lib/assistant/context-manager.ts
+- [ ] T009 [P] Create prompt builder utility for constructing assistant prompts with context in apps/web/src/lib/assistant/prompt-builder.ts
+- [ ] T010 [P] Create documentation retrieval service in apps/web/src/lib/assistant/doc-retrieval.ts (load relevant docs based on query, uses doc-index.ts from T004)
+- [ ] T011 Create rate limiting middleware for assistant endpoints (per-user message limits) in apps/web/src/lib/assistant/rate-limit.ts
+- [ ] T011A [P] Create AI Gateway rate limiting utility (separate limits for AI Gateway API calls to protect service) in apps/web/src/lib/assistant/ai-gateway-rate-limit.ts
+- [ ] T012 Create access control utility for checking assistant permissions (role-based, project opt-in) in apps/web/src/lib/assistant/access-control.ts
+- [ ] T013 [P] Create configuration comparison utility (YAML vs database) in apps/web/src/lib/assistant/config-comparison.ts
+- [ ] T014 Create configuration suggestion application service (with conflict detection) in apps/web/src/lib/assistant/suggestion-applier.ts
+
+**Checkpoint**: Foundation ready - user story implementation can now begin in parallel
+
+---
+
+## Phase 3: User Story 1 - Admin Configures Project with AI Assistance (Priority: P1) 🎯 MVP
+
+**Goal**: Admin can use AI assistant to get step-by-step guidance for configuring projects (workflow, custom fields, automation rules) and apply suggested configurations.
+
+**Independent Test**: Admin opens project settings, clicks "Ask AI Assistant", asks "How do I set up a Kanban workflow with priority fields?", receives guidance, and can apply the suggested configuration. The assistant understands current project state and suggests appropriate configurations.
+
+### Implementation for User Story 1
+
+- [ ] T015 [P] [US1] Create ConfigurationAssistantSession Prisma model repository methods (findOrCreate, findById, update) in apps/web/src/lib/assistant/session-repository.ts
+- [ ] T016 [P] [US1] Create AssistantMessage Prisma model repository methods (create, findBySession, paginate) in apps/web/src/lib/assistant/message-repository.ts
+- [ ] T017 [US1] Implement system prompt loader for configuration assistant in packages/ai-gateway/src/lib/load-config-assistant-prompt.ts
+- [ ] T018 [US1] Create API route handler for POST /api/projects/[projectId]/assistant/chat in apps/web/app/api/projects/[projectId]/assistant/chat/route.ts
+- [ ] T019 [US1] Implement chat message processing (create/get session, build prompt with context management from T008, call AI Gateway) in apps/web/app/api/projects/[projectId]/assistant/chat/route.ts
+- [ ] T020 [US1] Create API route handler for GET /api/projects/[projectId]/assistant/history in apps/web/app/api/projects/[projectId]/assistant/history/route.ts
+- [ ] T021 [US1] Create API route handler for POST /api/projects/[projectId]/assistant/apply-suggestion in apps/web/app/api/projects/[projectId]/assistant/apply-suggestion/route.ts
+- [ ] T022 [US1] Implement configuration suggestion application logic (validate, detect conflicts, apply) in apps/web/app/api/projects/[projectId]/assistant/apply-suggestion/route.ts
+- [ ] T023 [P] [US1] Create ConfigurationAssistant server component (fetches session, renders initial messages) in apps/web/src/components/features/projects/ConfigurationAssistant.tsx
+- [ ] T024 [P] [US1] Create ConfigurationAssistantClient client component (handles input, sends messages, real-time updates) in apps/web/src/components/features/projects/ConfigurationAssistantClient.tsx
+- [ ] T025 [P] [US1] Create AssistantMessage component for displaying messages in apps/web/src/components/features/projects/AssistantMessage.tsx
+- [ ] T026 [P] [US1] Create AssistantInput component for message input in apps/web/src/components/features/projects/AssistantInput.tsx
+- [ ] T027 [US1] Create ConfigurationSuggestion component with apply button in apps/web/src/components/features/projects/ConfigurationSuggestion.tsx
+- [ ] T028 [US1] Integrate ConfigurationAssistant component into project settings page in apps/web/app/projects/[projectId]/settings/page.tsx
+- [ ] T029 [US1] Add "Ask AI Assistant" button/trigger in project settings UI
+- [ ] T030 [US1] Implement error handling for AI Gateway failures (503, timeout, invalid response) in chat route
+- [ ] T031 [US1] Implement graceful degradation when AI provider not configured (show setup instructions) in ConfigurationAssistantClient.tsx
+- [ ] T032 [US1] Add rate limiting to chat endpoint (20 messages per minute per user) using rate-limit.ts from T011
+- [ ] T032A [US1] Integrate AI Gateway rate limiting (separate limits for AI Gateway calls) in chat route using ai-gateway-rate-limit.ts from T011A
+- [ ] T033 [US1] Implement access control check (admin-only by default, project opt-in config) in chat route
+
+**Checkpoint**: At this point, User Story 1 should be fully functional and testable independently. Admin can chat with assistant, get configuration guidance, and apply suggestions.
+
+---
+
+## Phase 4: User Story 2 - AI Assistant Validates Configuration Against Best Practices (Priority: P1)
+
+**Goal**: AI assistant analyzes existing project configuration and provides validation feedback with specific recommendations based on best practices and documentation.
+
+**Independent Test**: Admin opens AI assistant, asks "Review my project configuration", assistant analyzes current config against documentation and best practices, provides specific recommendations with explanations and references.
+
+### Implementation for User Story 2
+
+- [ ] T034 [US2] Enhance prompt builder to include configuration validation context in apps/web/src/lib/assistant/prompt-builder.ts
+- [ ] T035 [US2] Create configuration validation service (analyze config against schema and best practices) in apps/web/src/lib/assistant/config-validator.ts
+- [ ] T036 [US2] Enhance chat route to detect validation requests and include current project config in prompt context
+- [ ] T037 [US2] Update system prompt to include validation guidelines and best practices reference
+- [ ] T038 [US2] Enhance assistant response parsing to extract validation findings and recommendations
+- [ ] T039 [US2] Update AssistantMessage component to display validation findings with structured formatting
+- [ ] T040 [US2] Add documentation reference links to validation responses (metadata.documentationLinks)
+- [ ] T041 [US2] Implement configuration schema validation (Zod schema check) in config-validator.ts
+
+**Checkpoint**: At this point, User Stories 1 AND 2 should both work independently. Assistant can provide guidance and validate existing configurations.
+
+---
+
+## Phase 5: User Story 3 - AI Assistant Compares Configuration to Database Settings (Priority: P2)
+
+**Goal**: AI assistant can compare YAML configuration file to database state and explain differences, helping admins understand configuration drift.
+
+**Independent Test**: Admin asks "Compare my YAML config to the database", assistant fetches both, compares them, and explains any differences with recommendations for reconciliation.
+
+### Implementation for User Story 3
+
+- [ ] T042 [US3] Enhance config-comparison.ts to perform deep comparison of YAML and database configs
+- [ ] T043 [US3] Create comparison result formatter (differences, explanations, recommendations) in apps/web/src/lib/assistant/config-comparison.ts
+- [ ] T044 [US3] Enhance chat route to detect comparison requests and trigger comparison logic
+- [ ] T045 [US3] Update prompt builder to include comparison results in context when user asks for comparison
+- [ ] T046 [US3] Enhance assistant response to explain differences and suggest reconciliation approach
+- [ ] T047 [US3] Create ComparisonResults component to display differences in structured format in apps/web/src/components/features/projects/ComparisonResults.tsx
+- [ ] T048 [US3] Add comparison results to message metadata (metadata.comparisonResults)
+- [ ] T049 [US3] Implement caching for comparison results (per request lifecycle) to avoid redundant comparisons
+
+**Checkpoint**: At this point, User Stories 1, 2, AND 3 should all work independently. Assistant can guide, validate, and compare configurations.
+
+---
+
+## Phase 6: User Story 4 - AI Assistant Helps with Infrastructure Configuration (Priority: P2)
+
+**Goal**: System admin can use AI assistant for infrastructure configuration guidance (AI Gateway, OAuth setup, environment variables).
+
+**Independent Test**: System admin opens infrastructure settings, asks AI assistant "How do I configure GitHub OAuth?", receives step-by-step guidance including OAuth app creation steps and environment variable setup.
+
+### Implementation for User Story 4
+
+- [ ] T050 [P] [US4] Create API route handler for POST /api/settings/infrastructure/assistant/chat in apps/web/app/api/settings/infrastructure/assistant/chat/route.ts
+- [ ] T051 [P] [US4] Create API route handler for GET /api/settings/infrastructure/assistant/history in apps/web/app/api/settings/infrastructure/assistant/history/route.ts
+- [ ] T052 [US4] Enhance session repository to support infrastructure context (contextType: "infrastructure", projectId: null)
+- [ ] T053 [US4] Enhance access control to require system admin role for infrastructure assistant
+- [ ] T054 [US4] Enhance prompt builder to include infrastructure configuration context (global settings, OAuth config, AI Gateway config)
+- [ ] T055 [US4] Create infrastructure assistant UI component (reuse ConfigurationAssistant with infrastructure context) in apps/web/src/components/features/settings/InfrastructureAssistant.tsx
+- [ ] T056 [US4] Integrate InfrastructureAssistant component into infrastructure settings page in apps/web/app/settings/infrastructure/page.tsx
+- [ ] T057 [US4] Add "Ask AI Assistant" button/trigger in infrastructure settings UI
+- [ ] T058 [US4] Update documentation retrieval to include infrastructure docs (deployment, OAuth setup guides)
+- [ ] T059 [US4] Enhance system prompt with infrastructure configuration knowledge (OAuth setup, AI Gateway, precedence rules)
+
+**Checkpoint**: At this point, User Stories 1-4 should all work independently. Assistant works in both project and infrastructure contexts.
+
+---
+
+## Phase 7: User Story 5 - AI Assistant References Documentation (Priority: P2)
+
+**Goal**: AI assistant references relevant documentation sections when providing recommendations, ensuring accuracy and providing authoritative sources.
+
+**Independent Test**: Admin asks "What are all the workflow status types?", assistant responds with accurate information from documentation and provides links/references to relevant docs.
+
+### Implementation for User Story 5
+
+- [ ] T060 [US5] Enhance documentation retrieval to match query keywords to relevant doc sections in apps/web/src/lib/assistant/doc-retrieval.ts
+- [ ] T061 [US5] Enhance documentation index (from T004) with additional topic mappings and section anchors in apps/web/src/lib/assistant/doc-index.ts
+- [ ] T062 [US5] Enhance prompt builder to include relevant documentation sections in context
+- [ ] T063 [US5] Update assistant response parsing to extract and store documentation references in message metadata
+- [ ] T064 [US5] Create DocumentationLinks component to display doc references with links in apps/web/src/components/features/projects/DocumentationLinks.tsx
+- [ ] T065 [US5] Enhance AssistantMessage component to render documentation links from metadata
+- [ ] T066 [US5] Update system prompt to emphasize referencing documentation in responses
+- [ ] T067 [US5] Implement documentation reference tracking (which docs were used in which responses) for analytics
+
+**Checkpoint**: At this point, all user stories should be independently functional. Assistant provides accurate, well-documented guidance.
+
+---
+
+## Phase 8: Polish & Cross-Cutting Concerns
+
+**Purpose**: Improvements that affect multiple user stories
+
+- [ ] T069 [P] Add session list UI (show recent sessions, last 30 days) in apps/web/src/components/features/projects/SessionList.tsx
+- [ ] T070 [P] Create API route for session archive/delete in apps/web/app/api/projects/[projectId]/assistant/sessions/[sessionId]/route.ts and apps/web/app/api/settings/infrastructure/assistant/sessions/[sessionId]/route.ts
+- [ ] T070A [P] Add session archive/delete UI actions (buttons, confirmation dialogs) in SessionList.tsx
+- [ ] T071 [P] Add conversation pagination UI (load more messages) in ConfigurationAssistantClient.tsx
+- [ ] T072 [P] Enhance error messages for better user experience (rate limit exceeded, AI Gateway unavailable, etc.)
+- [ ] T073 [P] Add loading states and typing indicators in chat interface
+- [ ] T074 [P] Implement conflict resolution UI (show both versions when applying suggestion conflicts with current config) in ConfigurationSuggestion.tsx
+- [ ] T075 [P] Add accessibility features (keyboard navigation, screen reader support, focus management) to chat components
+- [ ] T076 [P] Add logging and observability (log assistant usage, response times, errors) in chat routes
+- [ ] T076A [P] Implement response time monitoring and validation against SC-008 target (30 seconds for 95% of queries) in apps/web/src/lib/assistant/performance-monitor.ts
+- [ ] T077 [P] Update documentation with AI assistant feature in docs/user/ai-assistant.md
+- [ ] T078 [P] Add unit tests for prompt builder, config comparison, doc retrieval in apps/web/src/lib/assistant/__tests__/
+- [ ] T079 [P] Add integration tests for chat flow in apps/web/__tests__/integration/assistant/
+- [ ] T080 Run quickstart.md validation to ensure all examples work
+
+---
+
+## Dependencies & Execution Order
+
+### Phase Dependencies
+
+- **Setup (Phase 1)**: No dependencies - can start immediately
+- **Foundational (Phase 2)**: Depends on Setup completion - BLOCKS all user stories
+- **User Stories (Phase 3-7)**: All depend on Foundational phase completion
+  - User stories can then proceed in parallel (if staffed)
+  - Or sequentially in priority order (US1 → US2 → US3/US4/US5)
+- **Polish (Phase 8)**: Depends on all desired user stories being complete
+
+### User Story Dependencies
+
+- **User Story 1 (P1)**: Can start after Foundational (Phase 2) - No dependencies on other stories - **MVP**
+- **User Story 2 (P1)**: Can start after Foundational (Phase 2) - Enhances US1 but independently testable
+- **User Story 3 (P2)**: Can start after Foundational (Phase 2) - Uses config comparison utility from Phase 2
+- **User Story 4 (P2)**: Can start after Foundational (Phase 2) - Reuses chat infrastructure from US1 but different context
+- **User Story 5 (P2)**: Can start after Foundational (Phase 2) - Enhances all previous stories with documentation references
+
+### Within Each User Story
+
+- Database models/repositories before API routes
+- API routes before UI components
+- Core implementation before integration
+- Story complete before moving to next priority
+
+### Parallel Opportunities
+
+- All Setup tasks marked [P] can run in parallel
+- All Foundational tasks marked [P] can run in parallel (within Phase 2)
+- Once Foundational phase completes, user stories can start in parallel (if team capacity allows)
+- Models/repositories within a story marked [P] can run in parallel
+- UI components within a story marked [P] can run in parallel
+- Different user stories can be worked on in parallel by different team members
+
+---
+
+## Parallel Example: User Story 1
+
+```bash
+# Launch all repository/model tasks for User Story 1 together:
+Task: "Create ConfigurationAssistantSession Prisma model repository methods in apps/web/src/lib/assistant/session-repository.ts"
+Task: "Create AssistantMessage Prisma model repository methods in apps/web/src/lib/assistant/message-repository.ts"
+
+# Launch all UI components for User Story 1 together:
+Task: "Create ConfigurationAssistant server component in apps/web/src/components/features/projects/ConfigurationAssistant.tsx"
+Task: "Create ConfigurationAssistantClient client component in apps/web/src/components/features/projects/ConfigurationAssistantClient.tsx"
+Task: "Create AssistantMessage component in apps/web/src/components/features/projects/AssistantMessage.tsx"
+Task: "Create AssistantInput component in apps/web/src/components/features/projects/AssistantInput.tsx"
+```
+
+---
+
+## Implementation Strategy
+
+### MVP First (User Story 1 Only)
+
+1. Complete Phase 1: Setup (database schema, prompt file)
+2. Complete Phase 2: Foundational (repositories, utilities, access control) - **CRITICAL - blocks all stories**
+3. Complete Phase 3: User Story 1 (chat interface, apply suggestions)
+4. **STOP and VALIDATE**: Test User Story 1 independently
+5. Deploy/demo if ready
+
+### Incremental Delivery
+
+1. Complete Setup + Foundational → Foundation ready
+2. Add User Story 1 → Test independently → Deploy/Demo (MVP!)
+3. Add User Story 2 → Test independently → Deploy/Demo (validation)
+4. Add User Stories 3-5 → Test independently → Deploy/Demo (full feature)
+5. Add Polish phase → Final improvements
+6. Each story adds value without breaking previous stories
+
+### Parallel Team Strategy
+
+With multiple developers:
+
+1. Team completes Setup + Foundational together
+2. Once Foundational is done:
+   - Developer A: User Story 1 (MVP)
+   - Developer B: User Story 2 (validation)
+   - Developer C: User Stories 3-5 (comparison, infrastructure, docs)
+3. Stories complete and integrate independently
+
+---
+
+## Notes
+
+- [P] tasks = different files, no dependencies
+- [Story] label maps task to specific user story for traceability
+- Each user story should be independently completable and testable
+- Reuse existing AI Gateway infrastructure (selectProviderForProject, callAIGateway)
+- Follow existing patterns from AI triage feature for consistency
+- Context management is critical - implement strategy to prevent context window overflow (T008 in Phase 2)
+- Rate limiting must be enforced at API route level (both per-user limits and AI Gateway limits - T011, T011A)
+- Access control must check role-based permissions (admin default, opt-in for members)
+- Configuration application must validate against schema and detect conflicts
+- All tasks include exact file paths for clarity

@@ -47,7 +47,7 @@
 ### 2. GitHub Badges Standards
 
 **Decision**: Use shields.io for badges with the following badges:
-- License (MIT)
+- License (AGPL-3.0)
 - Build Status (if CI/CD configured)
 - Version (from package.json)
 - Node.js version requirement
@@ -61,7 +61,7 @@
 
 **Badge Format**:
 ```markdown
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![License](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)
 ![Node.js](https://img.shields.io/badge/node-%3E%3D24.0.0-brightgreen.svg)
 ![pnpm](https://img.shields.io/badge/pnpm-%3E%3D10.26.0-orange.svg)
 ```
@@ -135,23 +135,26 @@
 
 ---
 
-### 5. MIT License Formatting Standards
+### 5. AGPL-3.0 License Formatting Standards
 
-**Decision**: Use standard MIT License template with proper copyright notice
+**Decision**: Use standard AGPL-3.0 (GNU Affero General Public License) template with proper copyright notice
 
 **Rationale**:
-- MIT License is standard and well-understood
-- Proper copyright protects project maintainers
+- AGPL-3.0 is OSI-approved open source license
+- Strong copyleft requires source disclosure for network services
+- Prevents commercial exploitation without contribution
+- Allows use, modification, and extension by any team size
+- Aligns with project requirements to prevent commercial sale while remaining open source
 - Standard format ensures legal clarity
 
 **License Format**:
 ```
-MIT License
+GNU AFFERO GENERAL PUBLIC LICENSE
+Version 3, 19 November 2007
 
-Copyright (c) 2024 [Copyright Holder]
+Copyright (c) [YEAR] [COPYRIGHT HOLDER]
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-...
+[Full AGPL-3.0 License text from GNU]
 ```
 
 **Copyright Holder**: Should be project owner/organization name
@@ -159,11 +162,13 @@ Permission is hereby granted, free of charge, to any person obtaining a copy
 **File Location**: `LICENSE` in repository root (standard GitHub location)
 
 **Alternatives Considered**:
-- Other licenses (Apache, GPL): Rejected - MIT is most permissive and developer-friendly
+- MIT License: Rejected - allows commercial sale, contradicts project requirements
+- BSL (Business Source License): Considered - prevents commercial sale but not OSI-approved
+- Custom non-commercial license: Considered - but loses "open source" designation per OSI definition
 - License in README only: Rejected - separate LICENSE file is GitHub standard
 
 **References**:
-- MIT License template
+- AGPL-3.0 License text (GNU)
 - GitHub license file standards
 - Open source license best practices
 
@@ -312,7 +317,7 @@ Permission is hereby granted, free of charge, to any person obtaining a copy
 2. **Badges**: shields.io badges for license, build, versions
 3. **Length**: 300-500 lines with progressive disclosure
 4. **Contributing**: Essential info in README, detailed in CONTRIBUTING.md
-5. **License**: Standard MIT License in LICENSE file
+5. **License**: Standard AGPL-3.0 License in LICENSE file
 6. **Screenshots**: 2-3 key feature screenshots, optional demo GIF
 7. **Documentation**: Repository-based with `docs/` directory
 8. **Code of Conduct**: Contributor Covenant 2.1

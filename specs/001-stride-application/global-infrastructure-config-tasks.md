@@ -252,13 +252,13 @@ Where:
 
 ### Documentation
 
-- [ ] T672 Create infrastructure configuration documentation in docs/deployment/infrastructure-configuration.md with environment variable and UI setup instructions
-- [ ] T673 Update docs/integrations/index.md to add infrastructure configuration section distinguishing infrastructure vs project-level configuration
-- [ ] T674 Update docs/integrations/git-oauth.md to add global infrastructure configuration section explaining OAuth App credentials vs per-project access tokens
-- [ ] T675 Update docs/integrations/ai-providers.md to add global infrastructure configuration section explaining AI Gateway URL and default provider credentials
-- [ ] T676 Add configuration precedence explanation to docs/deployment/infrastructure-configuration.md (env vars override UI, per-provider precedence)
-- [ ] T677 Add troubleshooting section for infrastructure configuration in docs/deployment/infrastructure-configuration.md covering env vars not loading, UI overridden by env vars, OAuth flow failures, AI Gateway connection failures
-- [ ] T678 Update onboarding documentation to include infrastructure setup as first step in docs/user/README.md or onboarding guide
+- [x] T672 Create infrastructure configuration documentation in docs/deployment/infrastructure-configuration.md with environment variable and UI setup instructions
+- [x] T673 Update docs/integrations/index.md to add infrastructure configuration section distinguishing infrastructure vs project-level configuration
+- [x] T674 Update docs/integrations/git-oauth.md to add global infrastructure configuration section explaining OAuth App credentials vs per-project access tokens
+- [x] T675 Update docs/integrations/ai-providers.md to add global infrastructure configuration section explaining AI Gateway URL and default provider credentials
+- [x] T676 Add configuration precedence explanation to docs/deployment/infrastructure-configuration.md (env vars override UI, per-provider precedence)
+- [x] T677 Add troubleshooting section for infrastructure configuration in docs/deployment/infrastructure-configuration.md covering env vars not loading, UI overridden by env vars, OAuth flow failures, AI Gateway connection failures
+- [x] T678 Update onboarding documentation to include infrastructure setup as first step in docs/user/README.md or onboarding guide
 
 **Acceptance Criteria**:
 
@@ -270,16 +270,16 @@ Where:
 
 ### Testing
 
-- [ ] T679 [P] Create unit tests for configuration precedence resolver in apps/web/src/lib/config/__tests__/infrastructure-precedence.test.ts
-- [ ] T680 [P] Create unit tests for validation schemas in apps/web/src/lib/config/schemas/__tests__/infrastructure-schema.test.ts
-- [ ] T681 [P] Create unit tests for encryption utility in apps/web/src/lib/config/__tests__/encrypt-infrastructure.test.ts
-- [ ] T682 Create integration tests for API routes (GET, PUT) in apps/web/src/tests/api/admin-settings-infrastructure.test.ts
-- [ ] T683 Create integration tests for admin-only access enforcement in apps/web/src/tests/api/admin-settings-infrastructure.test.ts
-- [ ] T684 Create integration tests for configuration precedence (env vars override UI) in apps/web/src/tests/api/admin-settings-infrastructure.test.ts
-- [ ] T685 Create E2E test for admin infrastructure settings access in apps/web/e2e/features/infrastructure-settings.spec.ts
-- [ ] T686 Create E2E test for non-admin infrastructure status view in apps/web/e2e/features/infrastructure-settings.spec.ts
-- [ ] T687 Create E2E test for configuration update via UI in apps/web/e2e/features/infrastructure-settings.spec.ts
-- [ ] T688 Create E2E test for environment variable precedence in apps/web/e2e/features/infrastructure-settings.spec.ts
+- [x] T679 [P] Create unit tests for configuration precedence resolver in apps/web/src/lib/config/__tests__/infrastructure-precedence.test.ts
+- [x] T680 [P] Create unit tests for validation schemas in apps/web/src/lib/config/schemas/__tests__/infrastructure-schema.test.ts
+- [x] T681 [P] Create unit tests for encryption utility in apps/web/src/lib/config/__tests__/encrypt-infrastructure.test.ts
+- [x] T682 Create integration tests for API routes (GET, PUT) in apps/web/src/tests/api/admin-settings-infrastructure.test.ts
+- [x] T683 Create integration tests for admin-only access enforcement in apps/web/src/tests/api/admin-settings-infrastructure.test.ts
+- [x] T684 Create integration tests for configuration precedence (env vars override UI) in apps/web/src/tests/api/admin-settings-infrastructure.test.ts
+- [x] T685 Create E2E test for admin infrastructure settings access in apps/web/e2e/features/infrastructure-settings.spec.ts
+- [x] T686 Create E2E test for non-admin infrastructure status view in apps/web/e2e/features/infrastructure-settings.spec.ts
+- [x] T687 Create E2E test for configuration update via UI in apps/web/e2e/features/infrastructure-settings.spec.ts
+- [x] T688 Create E2E test for environment variable precedence in apps/web/e2e/features/infrastructure-settings.spec.ts
 
 **Acceptance Criteria**:
 
