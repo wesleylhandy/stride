@@ -1,38 +1,27 @@
-# MIT License Template
+# GNU AGPL-3.0 License Template
 
 **Created**: 2024-12-19  
-**Purpose**: MIT License file content for repository root
+**Updated**: 2026-01-23  
+**Purpose**: GNU Affero General Public License v3.0 file content for repository root
 
 ## License File Content
 
-```
-MIT License
+The LICENSE file in the repository root contains the full text of the GNU Affero General Public License Version 3, 19 November 2007.
 
-Copyright (c) 2026 Stride Contributors
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
+The official license text can be obtained from:
+- https://www.gnu.org/licenses/agpl-3.0.txt
 
 ## Notes
 
-- **Copyright Holder**: Update "Stride Contributors" with actual copyright holder if different
-- **Year**: Update year if needed (currently 2026)
+- **License Type**: GNU Affero General Public License v3.0 (AGPL-3.0)
+- **Copyright**: The license text includes copyright notice for the Free Software Foundation
 - **File Location**: Save as `LICENSE` (no extension) in repository root
 - **Format**: Plain text file, no markdown formatting
+- **Source**: Official text from https://www.gnu.org/licenses/agpl-3.0.txt
+
+## Why AGPL-3.0?
+
+The GNU Affero General Public License is specifically designed for network server software. It ensures that if you modify the program and run it on a server, you must make the source code available to users of that server. This is important for web applications like Stride.
+
+For more information, see: https://www.gnu.org/licenses/agpl-3.0.html
 

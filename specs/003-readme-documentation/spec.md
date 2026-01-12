@@ -21,6 +21,11 @@
 - Q: What should the Configuration section cover regarding integrations? → A: Document all integrations (GitHub/GitLab OAuth, AI providers, monitoring webhooks, SMTP) with clear distinction between infrastructure-level (environment variables, system-wide settings) and project-level (UI-based per-project configuration), plus links to detailed integration guides.
 - Q: What workflows should be documented in the Usage section? → A: Include all major user workflows: issue creation and management, sprint planning and cycle management, AI triage workflow, monitoring webhook integration, configuration as code editing, Git branch/PR linking, root cause diagnostics, keyboard shortcuts and command palette usage, with brief descriptions and links to detailed user documentation.
 - Q: Should the Quick Start section mention optional integrations or stay minimal? → A: Keep Quick Start focused on core setup only (Docker, admin account), add brief note that optional integrations (AI, monitoring, SMTP) are available and documented in Configuration section. Maintains "5 minutes" setup goal while acknowledging advanced features.
+- Q: What should be the scope and location of CONTRIBUTING.md? → A: Comprehensive standalone CONTRIBUTING.md file with detailed tooling instructions (speckit installation, AI-powered IDE/CLI usage), mergeability criteria, and best practices. README should have brief contributing section with link to CONTRIBUTING.md for detailed guidelines.
+- Q: What mergeability criteria should be documented in CONTRIBUTING.md? → A: Comprehensive mergeability criteria covering all quality gates: tests passing, lint/type checks, review approval, constitution alignment, test coverage thresholds, documentation updates required, breaking changes noted, and tooling-specific gates (speckit tasks complete, AI-assisted changes documented).
+- Q: What level of detail should tooling instructions include in CONTRIBUTING.md? → A: Detailed step-by-step installation and setup for speckit, AI IDE/CLI configuration, usage examples, common workflows, troubleshooting tips, plus guide on how to start Next.js app locally for development.
+- Q: What open source best practices should be included in CONTRIBUTING.md? → A: Comprehensive guide covering standard open source practices (code of conduct, PR etiquette, issue templates, communication guidelines) plus project-specific guidance (speckit workflow integration, AI tooling conventions, project culture, review process expectations, maintainer contact info).
+- Q: Should AI-assisted changes be documented in contributions? → A: No documentation required - AI assistance is normal tooling and doesn't need special documentation. Contributors are expected to review and understand all code they submit regardless of how it was generated.
 
 ## User Scenarios & Testing
 
@@ -124,10 +129,19 @@ A developer wants to contribute code to Stride and can understand the developmen
 - **Type Checking**: TypeScript setup and checking
 
 ### FR6: Contributing Section
-- **Development Setup**: Detailed local development instructions
-- **Code Standards**: Link to or include coding standards (from constitution)
+- **Location**: Brief contributing section in README with link to comprehensive CONTRIBUTING.md file
+- **CONTRIBUTING.md File**: Standalone comprehensive file with detailed guidelines (see FR6b below)
+- **README Content**: Essential contributing info (quick contribution workflow, link to CONTRIBUTING.md)
+- **Code Standards**: Link to coding standards (from constitution)
+
+### FR6b: CONTRIBUTING.md File Requirements
+- **Tooling Instructions**: Detailed step-by-step instructions including: speckit installation and configuration, AI-powered IDE/CLI setup and usage (Cursor, VS Code with AI extensions), usage examples and common workflows, troubleshooting tips, and guide on starting Next.js app locally for development
+- **Development Setup**: Detailed local development instructions including database setup, environment configuration, and running the application
+- **Code Standards**: Link to coding standards (from constitution)
 - **Git Workflow**: Branch naming, commit messages, PR process
 - **Testing Requirements**: What tests are required for PRs
+- **Mergeability Criteria**: Comprehensive guidelines for what is mergable vs what is not, including: all tests passing, lint and type checks passing, code review approval required, constitution alignment verified, test coverage thresholds met, documentation updates required (for feature changes), breaking changes documented, tooling-specific gates (speckit tasks complete if applicable), and explicit criteria for rejection (incomplete implementations, failing tests, style violations, security issues). Note: AI assistance is normal tooling and doesn't require special documentation - contributors are responsible for understanding all code they submit regardless of generation method.
+- **Open Source Best Practices**: Comprehensive guide including: standard open source practices (code of conduct, PR etiquette, issue templates, communication guidelines, community standards), plus project-specific guidance (speckit workflow integration, AI tooling conventions and usage patterns, project culture and values, review process expectations, maintainer contact information, contributor recognition)
 - **Documentation**: How to update documentation
 - **Issue Reporting**: How to report bugs and request features
 - **Code of Conduct**: Link to or include code of conduct

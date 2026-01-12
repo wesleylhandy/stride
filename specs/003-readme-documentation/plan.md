@@ -8,7 +8,7 @@
 
 ## Summary
 
-Create a comprehensive, developer-first README.md for the Stride project that serves as the primary entry point for developers discovering the project. The README should include quick start instructions, comprehensive configuration guide covering all integrations (with infrastructure vs project-level distinction), usage workflows, contributing guidelines, and AGPL-3.0 license. This documentation is critical for project adoption and will be the first impression for potential users and contributors.
+Create a comprehensive, developer-first README.md for the Stride project that serves as the primary entry point for developers discovering the project. The README should include quick start instructions, comprehensive configuration guide covering all integrations (with infrastructure vs project-level distinction), usage workflows, contributing guidelines (with link to CONTRIBUTING.md), and AGPL-3.0 license. Additionally, create a comprehensive standalone CONTRIBUTING.md file with detailed tooling instructions (speckit, AI-powered IDE/CLI), mergeability criteria, and open source best practices. This documentation is critical for project adoption and will be the first impression for potential users and contributors.
 
 ## Technical Context
 
@@ -77,8 +77,9 @@ Create a comprehensive, developer-first README.md for the Stride project that se
 - ✅ **RESOLVED**: Code of Conduct requirements - See `research.md` section 8
 - ✅ **RESOLVED**: Support channels - See `research.md` section 9
 - ✅ **RESOLVED**: Roadmap visibility - See `research.md` section 10
+- ✅ **RESOLVED**: CONTRIBUTING.md scope and requirements - See spec clarifications (Session 2026-01-23)
 
-All clarifications resolved. See `research.md` for detailed decisions and rationale.
+All clarifications resolved. See `research.md` for detailed decisions and rationale, and spec clarifications for CONTRIBUTING.md requirements.
 
 ## Constitution Check
 
@@ -142,6 +143,7 @@ All clarifications resolved. See `research.md` for detailed decisions and ration
 - [x] `.env.example` requirements identified (needs creation)
 - [x] Code of Conduct requirements identified (Contributor Covenant)
 - [x] Contributing guidelines structure planned
+- [x] CONTRIBUTING.md comprehensive requirements defined (tooling instructions, mergeability criteria, best practices)
 
 ### Quickstart Integration
 - [x] Quick start integration strategy documented (`quickstart.md`)
@@ -160,9 +162,22 @@ All clarifications resolved. See `research.md` for detailed decisions and ration
 - [ ] Configuration section
 - [ ] Usage section
 - [ ] Development section
-- [ ] Contributing section
+- [ ] Contributing section (brief with link to CONTRIBUTING.md)
 - [ ] License section
 - [ ] Additional sections (architecture, stack, support)
+
+### CONTRIBUTING.md Creation Tasks
+- [ ] Create CONTRIBUTING.md file structure
+- [ ] Tooling instructions section (speckit installation, AI IDE/CLI setup, Next.js local dev)
+- [ ] Development setup section (database, environment, running app)
+- [ ] Code standards section (link to constitution)
+- [ ] Git workflow section (branch naming, commits, PR process)
+- [ ] Testing requirements section
+- [ ] Mergeability criteria section (comprehensive quality gates)
+- [ ] Open source best practices section (standard + project-specific)
+- [ ] Documentation update guidelines
+- [ ] Issue reporting guidelines
+- [ ] Code of conduct reference
 
 ### Visual Assets
 - [ ] Screenshots captured/created
@@ -203,6 +218,14 @@ docs/
 ```
 
 **Structure Decision**: README.md will be the primary entry point in repository root. Supporting documentation files (LICENSE, CONTRIBUTING.md, etc.) will also be in root for GitHub visibility. Detailed documentation remains in `docs/` directory.
+
+**CONTRIBUTING.md Requirements** (from clarifications):
+- Comprehensive standalone file with detailed tooling instructions
+- Step-by-step setup: speckit installation/configuration, AI-powered IDE/CLI setup (Cursor, VS Code), Next.js local development guide
+- Comprehensive mergeability criteria (tests, lint/type checks, review approval, constitution alignment, coverage thresholds, documentation updates, breaking changes, tooling gates)
+- Open source best practices: standard practices plus project-specific guidance (speckit workflow, AI tooling conventions, project culture, review expectations)
+- Development setup: database configuration, environment setup, running application
+- Note: AI assistance is normal tooling and doesn't require special documentation
 
 ## Complexity Tracking
 
