@@ -55,7 +55,7 @@ export async function generateMetadata({ params }: { params: Promise<{ guide: st
   
   if (!VALID_GUIDES.includes(guide as any)) {
     return {
-      title: 'Deployment Guide Not Found - Stride',
+      title: 'Deployment Guide Not Found',
       description: 'The requested deployment guide could not be found',
     };
   }
@@ -64,7 +64,7 @@ export async function generateMetadata({ params }: { params: Promise<{ guide: st
   const description = GUIDE_DESCRIPTIONS[guide];
 
   return {
-    title: `${displayName} - Stride`,
+    title: displayName,
     description,
   };
 }

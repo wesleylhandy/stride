@@ -8,11 +8,33 @@ import { requireAuthServer } from '@/middleware/auth';
 import { headers } from 'next/headers';
 import { KanbanBoardClient } from '@/components/KanbanBoardClient';
 import { PageContainer } from '@stride/ui';
+import type { Metadata } from 'next';
 
 interface PageParams {
   params: Promise<{
     projectId: string;
   }>;
+}
+
+/**
+ * Generate metadata for board page
+ */
+export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
+  const { projectId } = await params;
+  
+  const project = await projectRepository.findById(projectId);
+  
+  if (!project) {
+    return {
+      title: 'Projects | Board',
+      description: 'Board view',
+    };
+  }
+
+  return {
+    title: `Projects | ${project.name} | Board`,
+    description: `Kanban board for ${project.name}`,
+  };
 }
 
 /**

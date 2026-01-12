@@ -6,6 +6,12 @@ import { ProjectCard } from '@/components/ProjectCard';
 import { ProjectsEmptyState } from '@/components/ProjectsEmptyState';
 import { PaginationControls } from '@/components/PaginationControls';
 import { PageContainer } from '@stride/ui';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Projects',
+  description: 'View and manage your projects',
+};
 
 interface ProjectsPageProps {
   searchParams: Promise<{

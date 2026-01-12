@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { PageContainer } from '@stride/ui';
 
 export const metadata: Metadata = {
-  title: 'Documentation - Stride',
+  title: 'Documentation',
   description: 'Complete documentation for Stride workflow management platform',
 };
 

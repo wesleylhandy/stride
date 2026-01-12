@@ -3,6 +3,12 @@ import { hasAdminUser } from '@/lib/setup/first-run';
 import { getTokenFromHeaders, verifySession } from '@/lib/auth/session';
 import { isOnboardingComplete } from '@/lib/onboarding/status';
 import { headers } from 'next/headers';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Onboarding',
+  description: 'Complete setup and onboarding',
+};
 
 /**
  * Onboarding flow entry point

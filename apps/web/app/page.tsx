@@ -1,8 +1,14 @@
-import { redirect } from 'next/navigation';
-import { isFirstRun } from '@/lib/setup/first-run';
-import { getTokenFromHeaders, verifySession } from '@/lib/auth/session';
-import { isOnboardingComplete } from '@/lib/onboarding/status';
-import { headers } from 'next/headers';
+import { redirect } from "next/navigation";
+import { isFirstRun } from "@/lib/setup/first-run";
+import { getTokenFromHeaders, verifySession } from "@/lib/auth/session";
+import { isOnboardingComplete } from "@/lib/onboarding/status";
+import { headers } from "next/headers";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Home",
+  description: "Stride workflow management platform",
+};
 
 /**
  * Root page - redirects based on application state:
@@ -13,25 +19,25 @@ import { headers } from 'next/headers';
 export default async function HomePage() {
   // Check if this is first run (no admin user exists)
   const firstRun = await isFirstRun();
-  
+
   if (firstRun) {
-    redirect('/setup');
+    redirect("/setup");
   }
 
   // Check if user is logged in
   const headersList = await headers();
   const token = getTokenFromHeaders(headersList);
-  
+
   if (!token) {
     // No session token - admin exists, so redirect to login
-    redirect('/login');
+    redirect("/login");
   }
 
   const session = await verifySession(token);
-  
+
   if (!session) {
     // Invalid or expired session - admin exists, so redirect to login
-    redirect('/login');
+    redirect("/login");
   }
 
   // User is logged in - check onboarding completion status
@@ -39,9 +45,9 @@ export default async function HomePage() {
 
   if (onboardingComplete) {
     // Onboarding complete - redirect to dashboard or projects
-    redirect('/dashboard');
+    redirect("/dashboard");
   } else {
     // Onboarding incomplete - redirect to onboarding flow
-    redirect('/onboarding');
+    redirect("/onboarding");
   }
 }

@@ -24,7 +24,7 @@ const DynamicDocumentationPageContent = dynamic(
 );
 
 export const metadata: Metadata = {
-  title: 'SMTP Email Integration - Stride',
+  title: 'SMTP Email Integration',
   description: 'Configure SMTP email for user invitations with any SMTP-compatible service',
 };
 

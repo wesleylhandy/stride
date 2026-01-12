@@ -24,7 +24,7 @@ const DynamicDocumentationPageContent = dynamic(
 );
 
 export const metadata: Metadata = {
-  title: 'Git OAuth Integration - Stride',
+  title: 'Git OAuth Integration',
   description: 'Configure GitHub or GitLab OAuth for repository integration',
 };
 

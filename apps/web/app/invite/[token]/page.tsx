@@ -1,12 +1,18 @@
 import { redirect } from 'next/navigation';
 import { InviteAcceptForm } from '@/components/InviteAcceptForm';
 import type { InvitationDetails } from '@/components/InviteAcceptForm';
+import type { Metadata } from 'next';
 
 interface PageParams {
   params: Promise<{
     token: string;
   }>;
 }
+
+export const metadata: Metadata = {
+  title: 'Accept Invitation',
+  description: 'Accept your invitation to join Stride',
+};
 
 /**
  * Invitation Acceptance Page (Server Component)

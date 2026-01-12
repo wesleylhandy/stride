@@ -24,7 +24,7 @@ const DynamicDocumentationPageContent = dynamic(
 );
 
 export const metadata: Metadata = {
-  title: 'Monitoring Webhooks Integration - Stride',
+  title: 'Monitoring Webhooks Integration',
   description: 'Configure webhooks from Sentry, Datadog, or New Relic for automatic issue creation',
 };
 

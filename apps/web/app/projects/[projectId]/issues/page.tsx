@@ -5,11 +5,33 @@ import { projectRepository, issueRepository, prisma } from '@stride/database';
 import type { ProjectConfig, StatusConfig } from '@stride/types';
 import { PageContainer } from '@stride/ui';
 import { Badge } from '@stride/ui';
+import type { Metadata } from 'next';
 
 interface PageParams {
   params: Promise<{
     projectId: string;
   }>;
+}
+
+/**
+ * Generate metadata for issues list page
+ */
+export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
+  const { projectId } = await params;
+  
+  const project = await projectRepository.findById(projectId);
+  
+  if (!project) {
+    return {
+      title: 'Projects | Issues',
+      description: 'Issues list',
+    };
+  }
+
+  return {
+    title: `Projects | ${project.name} | Issues`,
+    description: `Issues for ${project.name}`,
+  };
 }
 
 /**

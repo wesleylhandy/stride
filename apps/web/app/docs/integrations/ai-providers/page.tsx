@@ -24,7 +24,7 @@ const DynamicDocumentationPageContent = dynamic(
 );
 
 export const metadata: Metadata = {
-  title: 'AI Providers Integration - Stride',
+  title: 'AI Providers Integration',
   description: 'Configure AI providers (Ollama, OpenAI, Anthropic) for AI-powered issue triage',
 };
 

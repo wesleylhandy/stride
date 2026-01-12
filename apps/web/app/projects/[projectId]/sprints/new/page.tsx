@@ -7,6 +7,7 @@ import { headers } from 'next/headers';
 import { SprintPlanningClient } from '@/components/SprintPlanningClient';
 import { BurndownChartClient } from '@/components/BurndownChartClient';
 import { PageContainer } from '@stride/ui';
+import type { Metadata } from 'next';
 
 interface PageParams {
   params: Promise<{
@@ -15,6 +16,27 @@ interface PageParams {
   searchParams: Promise<{
     cycleId?: string;
   }>;
+}
+
+/**
+ * Generate metadata for sprint planning page
+ */
+export async function generateMetadata({ params }: { params: Promise<{ projectId: string }> }): Promise<Metadata> {
+  const { projectId } = await params;
+  
+  const project = await projectRepository.findById(projectId);
+  
+  if (!project) {
+    return {
+      title: 'Projects | Sprints',
+      description: 'Sprint planning',
+    };
+  }
+
+  return {
+    title: `Projects | ${project.name} | Sprints`,
+    description: `Sprint planning for ${project.name}`,
+  };
 }
 
 /**

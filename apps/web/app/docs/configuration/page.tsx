@@ -25,7 +25,7 @@ const DynamicDocumentationPageContent = dynamic(
 );
 
 export const metadata: Metadata = {
-  title: 'Configuration Documentation - Stride',
+  title: 'Configuration Documentation',
   description: 'Complete reference for Stride YAML configuration files',
 };
 

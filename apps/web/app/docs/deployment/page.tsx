@@ -26,7 +26,7 @@ const DynamicDocumentationPageContent = dynamic(
 );
 
 export const metadata: Metadata = {
-  title: 'Deployment Guide - Stride',
+  title: 'Deployment Guide',
   description: 'Complete guides for deploying Stride (Docker, infrastructure configuration)',
 };
 

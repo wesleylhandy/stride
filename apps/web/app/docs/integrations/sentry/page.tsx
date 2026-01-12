@@ -24,7 +24,7 @@ const DynamicDocumentationPageContent = dynamic(
 );
 
 export const metadata: Metadata = {
-  title: 'Sentry Error Tracking Integration - Stride',
+  title: 'Sentry Error Tracking Integration',
   description: 'Configure Sentry for error tracking and performance monitoring',
 };
 

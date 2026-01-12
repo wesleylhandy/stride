@@ -5,6 +5,12 @@ import { prisma } from '@stride/database';
 import { UserRole } from '@stride/types';
 import { AdminInfrastructureSettings } from '@/components/features/settings/AdminInfrastructureSettings';
 import { InfrastructureStatusView } from '@/components/features/settings/InfrastructureStatusView';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Settings | Infrastructure',
+  description: 'Configure global infrastructure settings (Git OAuth and AI Gateway)',
+};
 
 /**
  * Infrastructure Settings Page

@@ -25,7 +25,7 @@ const DynamicDocumentationPageContent = dynamic(
 );
 
 export const metadata: Metadata = {
-  title: 'Integration Guide - Stride',
+  title: 'Integration Guide',
   description: 'Complete guide to configuring Stride service integrations',
 };
 

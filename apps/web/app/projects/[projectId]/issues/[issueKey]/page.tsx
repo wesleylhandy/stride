@@ -7,12 +7,42 @@ import { canUseAITriage } from '@/lib/ai/permissions';
 import { requireAuthServer } from '@/middleware/auth';
 import { headers } from 'next/headers';
 import { PageContainer } from '@stride/ui';
+import type { Metadata } from 'next';
 
 interface PageParams {
   params: Promise<{
     projectId: string;
     issueKey: string;
   }>;
+}
+
+/**
+ * Generate metadata for issue detail page
+ */
+export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
+  const { projectId, issueKey } = await params;
+  
+  const project = await projectRepository.findById(projectId);
+  const issue = project ? await issueRepository.findByKey(projectId, issueKey) : null;
+  
+  if (!project) {
+    return {
+      title: `Projects | ${issueKey}`,
+      description: `Issue ${issueKey}`,
+    };
+  }
+
+  if (!issue) {
+    return {
+      title: `Projects | ${project.name} | ${issueKey}`,
+      description: `Issue ${issueKey} in ${project.name}`,
+    };
+  }
+
+  return {
+    title: `Projects | ${project.name} | ${issueKey}`,
+    description: issue.description || `Issue ${issueKey}: ${issue.title}`,
+  };
 }
 
 /**

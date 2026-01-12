@@ -3,11 +3,33 @@ import { requireAuthServer } from '@/middleware/auth';
 import { headers } from 'next/headers';
 import { projectRepository } from '@stride/database';
 import { ProjectSettingsPageClient } from '@/components/features/projects/ProjectSettingsPageClient';
+import type { Metadata } from 'next';
 
 interface PageParams {
   params: Promise<{
     projectId: string;
   }>;
+}
+
+/**
+ * Generate metadata for project integrations settings page
+ */
+export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
+  const { projectId } = await params;
+  
+  const project = await projectRepository.findById(projectId);
+  
+  if (!project) {
+    return {
+      title: 'Projects | Settings | Integrations',
+      description: 'Project integrations settings',
+    };
+  }
+
+  return {
+    title: `Projects | ${project.name} | Settings | Integrations`,
+    description: `Integration settings for ${project.name}`,
+  };
 }
 
 /**

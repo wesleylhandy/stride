@@ -7,11 +7,38 @@ import { ChangePasswordForm } from '../../components/features/settings/ChangePas
 import { UserManagementClient } from '../users/UserManagementClient';
 import { UserRole } from '@stride/types';
 import type { User } from '@stride/types';
+import type { Metadata } from 'next';
 
 interface PageParams {
   params: Promise<{
     section: string;
   }>;
+}
+
+/**
+ * Generate metadata for settings section pages
+ */
+export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
+  const { section } = await params;
+  
+  if (section === 'account') {
+    return {
+      title: 'Settings | Account',
+      description: 'Manage your account information and security settings',
+    };
+  }
+  
+  if (section === 'users') {
+    return {
+      title: 'Settings | Users',
+      description: 'Manage users and permissions',
+    };
+  }
+  
+  return {
+    title: 'Settings',
+    description: 'Settings',
+  };
 }
 
 /**
