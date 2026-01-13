@@ -42,8 +42,7 @@ Before configuring Git OAuth:
    - GitLab: User Settings → Applications (or Group/Project Settings)
 
 3. **Callback URL**: Know your application's callback URL:
-   - Format: `https://your-domain.com/api/auth/github/callback` (GitHub)
-   - Format: `https://your-domain.com/api/auth/gitlab/callback` (GitLab)
+   - Format: `https://your-domain.com/api/repositories/oauth/callback` (shared for all projects)
 
 4. **Network Access**: Application must be able to reach Git service APIs:
    - GitHub: `https://api.github.com`
@@ -88,19 +87,27 @@ Stride supports two levels of Git OAuth configuration:
 
 ### Project-Level Configuration
 
-**Per-project repository connections** that store user access tokens for repository operations. These are obtained via OAuth flow using the global infrastructure credentials.
+**Per-project repository connections** that store user access tokens for repository operations. Access tokens can be obtained via OAuth flow (requires global OAuth App credentials) or provided directly as Personal Access Tokens (PAT).
 
 **Configuration**: Configure via Project Settings → Repository (`/projects/[projectId]/settings/repository`)
 
-**Workflow**:
-1. Admin configures global OAuth App credentials (infrastructure)
-2. User connects repository to project (uses global OAuth credentials)
-3. OAuth flow exchanges credentials for user access token
-4. Access token stored per-project for repository operations
+**Two Connection Methods**:
+
+1. **OAuth Flow** (requires global OAuth App credentials):
+   - Admin configures global OAuth App credentials (infrastructure)
+   - User connects repository via "Connect GitHub/GitLab" button
+   - OAuth flow exchanges credentials for user access token
+   - Access token stored per-project
+
+2. **Personal Access Token (PAT)** (no OAuth App credentials required):
+   - User generates PAT from GitHub/GitLab
+   - User connects repository via "Or Connect Manually" option
+   - PAT entered directly and stored per-project
+   - No global OAuth configuration needed
 
 **Relationship**:
-- **Infrastructure (Global)**: OAuth App credentials (Client ID, Client Secret) - one set for entire system
-- **Project-Level**: User access tokens (obtained via OAuth) - one per project/repository connection
+- **Infrastructure (Global)**: OAuth App credentials (Client ID, Client Secret) - only needed for OAuth flows
+- **Project-Level**: User access tokens (from OAuth flow or PAT) - one per project/repository connection
 
 ---
 
@@ -119,7 +126,7 @@ Stride supports two levels of Git OAuth configuration:
 2. **Configure OAuth App**:
    - **Application name**: `Stride` (or your app name)
    - **Homepage URL**: `https://your-domain.com` (your Stride instance URL)
-   - **Authorization callback URL**: `https://your-domain.com/api/auth/github/callback`
+   - **Authorization callback URL**: `https://your-domain.com/api/repositories/oauth/callback`
    - Click "Register application"
 
 3. **Get Client Credentials**:
@@ -175,7 +182,7 @@ docker-compose restart web
 
 2. **Configure OAuth Application**:
    - **Name**: `Stride` (or your app name)
-   - **Redirect URI**: `https://your-domain.com/api/auth/gitlab/callback`
+   - **Redirect URI**: `https://your-domain.com/api/repositories/oauth/callback`
    - **Scopes**: Select `api`, `read_repository`, `write_repository`
    - Click "Save application"
 
@@ -219,6 +226,115 @@ After updating environment variables, restart the web container:
 ```bash
 docker-compose restart web
 ```
+
+---
+
+## Local Development
+
+For local development, you have several flexible options for connecting repositories:
+
+### Option 1: Use Personal Access Token (PAT) - Recommended for Local Development
+
+**Simplest option - No OAuth App credentials required**
+
+Stride supports connecting repositories using Personal Access Tokens (PAT) directly at the project level. This bypasses OAuth entirely and is perfect for local development.
+
+**Steps**:
+1. Generate a GitHub Personal Access Token:
+   - Go to [GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)](https://github.com/settings/tokens/new?scopes=repo&description=Stride)
+   - Select scopes: `repo` (full control of private repositories)
+   - Generate and copy the token (starts with `ghp_`)
+
+2. Connect repository in Stride:
+   - Navigate to Project Settings → Repository
+   - Choose "Or Connect Manually" option
+   - Enter repository URL and paste your PAT
+   - Click "Connect Repository"
+
+**Advantages**:
+- ✅ No OAuth App setup required
+- ✅ No callback URL configuration needed
+- ✅ Works immediately on localhost
+- ✅ Simple token-based authentication
+- ✅ Perfect for development and testing
+
+**Note**: PATs are stored per-project and encrypted. You don't need to configure global OAuth App credentials to use PATs.
+
+### Option 2: OAuth with Localhost Callback
+
+**Use OAuth flow with localhost callback URLs**
+
+GitHub allows OAuth Apps to use `http://localhost` callback URLs, making OAuth possible for local development.
+
+**Steps**:
+1. Create GitHub OAuth App:
+   - Go to [GitHub Settings → Developer settings → OAuth Apps](https://github.com/settings/developers)
+   - Click "New OAuth App"
+   - **Authorization callback URL**: `http://localhost:3000/api/repositories/oauth/callback`
+
+2. Configure environment variables:
+   ```env
+   NEXT_PUBLIC_APP_URL=http://localhost:3000
+   GITHUB_CLIENT_ID=your-github-client-id
+   GITHUB_CLIENT_SECRET=your-github-client-secret
+   ```
+
+3. Use OAuth flow in Stride UI
+
+**Advantages**:
+- ✅ Full OAuth flow experience
+- ✅ Works with localhost
+- ✅ No tunneling required
+- ✅ Single callback URL works for all projects
+
+### Option 3: OAuth with Tunneling Service
+
+**Use a tunneling service for OAuth callbacks**
+
+For services that require HTTPS (like GitLab) or to test production-like OAuth flows, use a tunneling service.
+
+**Using ngrok**:
+1. Install ngrok: `brew install ngrok` or [download](https://ngrok.com/download)
+2. Start tunnel: `ngrok http 3000`
+3. Copy HTTPS URL (e.g., `https://abc123.ngrok.io`)
+4. Create OAuth App with callback: `https://abc123.ngrok.io/api/repositories/oauth/callback`
+5. Configure environment:
+   ```env
+   NEXT_PUBLIC_APP_URL=https://abc123.ngrok.io
+   GITHUB_CLIENT_ID=your-github-client-id
+   GITHUB_CLIENT_SECRET=your-github-client-secret
+   ```
+
+**Using cloudflared**:
+1. Install cloudflared: `brew install cloudflare/cloudflare/cloudflared`
+2. Start tunnel: `cloudflared tunnel --url http://localhost:3000`
+3. Use the provided HTTPS URL
+
+**Advantages**:
+- ✅ Works with services requiring HTTPS
+- ✅ Production-like OAuth flow
+- ✅ Can test webhooks (if tunnel is persistent)
+
+**Limitations**:
+- ❌ Requires additional setup
+- ❌ Tunnel URLs change (unless using paid tier)
+- ❌ More complex than PAT
+
+### Understanding OAuth App Credentials vs PAT
+
+**OAuth App Credentials (Client ID/Secret)**:
+- **Purpose**: Used to initiate OAuth authorization flows
+- **Scope**: Global infrastructure configuration (system-wide)
+- **When needed**: Only if you want to use OAuth flow (browser-based authorization)
+- **Not needed for**: Direct PAT connections (Option 1)
+
+**Personal Access Tokens (PAT)**:
+- **Purpose**: Direct API authentication without OAuth flow
+- **Scope**: Per-project (each repository connection uses its own token)
+- **When used**: Manual repository connections (project-level)
+- **Advantages**: Simpler, no OAuth App setup, works immediately
+
+**Recommendation for Local Development**: Use Option 1 (PAT) for the simplest setup. Use OAuth options (2 or 3) only if you need to test OAuth flows specifically.
 
 ---
 
@@ -330,8 +446,7 @@ GITLAB_BASE_URL=https://gitlab.your-domain.com  # Self-hosted GitLab URL
 
 **Solution**:
 1. **Verify Callback URL**: Check OAuth app callback URL matches:
-   - GitHub: `https://your-domain.com/api/auth/github/callback`
-   - GitLab: `https://your-domain.com/api/auth/gitlab/callback`
+   - Format: `https://your-domain.com/api/repositories/oauth/callback`
 2. **Check Application URL**: Verify `NEXT_PUBLIC_APP_URL` is set correctly:
    ```env
    NEXT_PUBLIC_APP_URL=https://your-domain.com

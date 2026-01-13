@@ -130,7 +130,7 @@ sudo systemctl restart stride-web
 3. Configure:
    - **Application name**: `Stride` (or your app name)
    - **Homepage URL**: `https://your-domain.com`
-   - **Authorization callback URL**: `https://your-domain.com/api/projects/[projectId]/repositories/callback`
+   - **Authorization callback URL**: `https://your-domain.com/api/repositories/oauth/callback`
 4. Click "Register application"
 5. Copy Client ID and generate Client Secret
 
@@ -140,7 +140,7 @@ sudo systemctl restart stride-web
 2. Click "New Application"
 3. Configure:
    - **Name**: `Stride` (or your app name)
-   - **Redirect URI**: `https://your-domain.com/api/projects/[projectId]/repositories/callback`
+   - **Redirect URI**: `https://your-domain.com/api/repositories/oauth/callback`
    - **Scopes**: Select `api`, `read_repository`, `write_repository`
 4. Click "Save application"
 5. Copy Application ID and Secret
@@ -347,7 +347,7 @@ curl -H "Authorization: Bearer $ADMIN_TOKEN" \
 **Solution**:
 1. **Verify OAuth credentials**: Check Client ID and Secret are correct
 2. **Verify callback URL**: Ensure OAuth app callback URL matches:
-   - Format: `https://your-domain.com/api/projects/[projectId]/repositories/callback`
+   - Format: `https://your-domain.com/api/repositories/oauth/callback`
    - Must match exactly (including protocol, domain, path)
 3. **Test OAuth connection**: Use "Test Connection" button in Admin Settings UI
 4. **Check logs**: Review application logs for OAuth errors:

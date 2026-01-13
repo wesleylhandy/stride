@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireAuth } from "@/middleware/auth";
 import { issueRepository, projectRepository } from "@stride/database";
+import type { Prisma } from "@stride/database";
 import {
   updateIssueSchema,
 } from "@/lib/validation/issue";
@@ -78,6 +79,7 @@ export async function GET(
 
 /**
  * PUT /api/projects/[projectId]/issues/[issueKey]
+ * PATCH /api/projects/[projectId]/issues/[issueKey]
  * Update an issue
  */
 export async function PUT(
@@ -127,15 +129,36 @@ export async function PUT(
     const body = await request.json();
     const validated = updateIssueSchema.parse(body);
 
-    // Convert null to undefined for repository
-    const updateData = {
-      ...validated,
-      description: validated.description ?? undefined,
-      assigneeId: validated.assigneeId ?? undefined,
-      cycleId: validated.cycleId ?? undefined,
-      priority: validated.priority ?? undefined,
-      storyPoints: validated.storyPoints ?? undefined,
-    };
+    // Build update data, converting null to undefined for most fields
+    // (Prisma ignores undefined, leaving fields unchanged)
+    // Only include fields that are explicitly provided
+    const updateData: Parameters<typeof issueRepository.update>[1] = {};
+
+    if (validated.title !== undefined) updateData.title = validated.title;
+    if (validated.description !== undefined) {
+      updateData.description = validated.description ?? undefined;
+    }
+    if (validated.status !== undefined) updateData.status = validated.status;
+    if (validated.type !== undefined) updateData.type = validated.type;
+    if (validated.priority !== undefined) {
+      updateData.priority = validated.priority ?? undefined;
+    }
+    if (validated.assigneeId !== undefined) {
+      updateData.assigneeId = validated.assigneeId ?? undefined;
+    }
+    // CRITICAL: Preserve null for cycleId - don't convert to undefined!
+    // This allows removing issues from cycles by setting cycleId to null
+    if (validated.cycleId !== undefined) {
+      // Type assertion needed because UpdateIssueInput doesn't allow null,
+      // but Prisma accepts null to clear the field
+      (updateData as { cycleId?: string | null }).cycleId = validated.cycleId;
+    }
+    if (validated.customFields !== undefined) {
+      updateData.customFields = validated.customFields;
+    }
+    if (validated.storyPoints !== undefined) {
+      updateData.storyPoints = validated.storyPoints ?? undefined;
+    }
 
     // Update issue
     const issue = await issueRepository.update(existing.id, updateData);
@@ -157,3 +180,14 @@ export async function PUT(
   }
 }
 
+/**
+ * PATCH /api/projects/[projectId]/issues/[issueKey]
+ * Update an issue (alias for PUT)
+ */
+export async function PATCH(
+  request: NextRequest,
+  { params }: RouteParams,
+) {
+  // Reuse PUT handler logic
+  return PUT(request, { params });
+}

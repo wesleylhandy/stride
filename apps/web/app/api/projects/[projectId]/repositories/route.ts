@@ -20,6 +20,7 @@ import {
   getGitHubOAuthConfig,
   getGitLabOAuthConfig,
 } from "@/lib/config/git-oauth-config";
+import { encodeOAuthState, type OAuthState } from "@/lib/integrations/oauth-state";
 import { z } from "zod";
 
 interface RouteParams {
@@ -62,17 +63,35 @@ export async function GET(
 
     // If requesting OAuth URL
     if (action === "oauth" && repositoryType) {
-      const state = crypto.randomUUID();
-      const returnTo = searchParams.get("returnTo");
-      let redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/projects/${projectId}/repositories/callback`;
-      if (returnTo) {
-        redirectUri += `?returnTo=${encodeURIComponent(returnTo)}`;
+      // OAuth only supports GitHub and GitLab
+      if (repositoryType === "Bitbucket") {
+        return NextResponse.json(
+          { error: "OAuth not supported for Bitbucket. Please use an access token instead." },
+          { status: 400 },
+        );
       }
+
+      const returnTo = searchParams.get("returnTo");
+      const repositoryUrl = searchParams.get("repositoryUrl");
+      
+      // Use global callback endpoint
+      const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/repositories/oauth/callback`;
+      
+      // Encode state with project context
+      // At this point, repositoryType is narrowed to 'GitHub' | 'GitLab'
+      const stateData: OAuthState = {
+        projectId,
+        returnTo: returnTo || undefined,
+        repositoryType: repositoryType as 'GitHub' | 'GitLab',
+        repositoryUrl: repositoryUrl || undefined,
+      };
+      const encodedState = encodeOAuthState(stateData);
 
       let authUrl: string;
 
       if (repositoryType === "GitHub") {
-        // Use global infrastructure config with fallback to env vars
+        // Use global infrastructure config
+        // TODO: In the future, support per-project OAuth config with fallback to global
         const githubConfig = await getGitHubOAuthConfig();
         if (!githubConfig) {
           return NextResponse.json(
@@ -86,9 +105,10 @@ export async function GET(
           clientSecret: githubConfig.clientSecret,
           redirectUri,
         };
-        authUrl = getGitHubAuthUrl(config, state);
+        authUrl = getGitHubAuthUrl(config, encodedState);
       } else if (repositoryType === "GitLab") {
-        // Use global infrastructure config with fallback to env vars
+        // Use global infrastructure config
+        // TODO: In the future, support per-project OAuth config with fallback to global
         const gitlabConfig = await getGitLabOAuthConfig();
         if (!gitlabConfig) {
           return NextResponse.json(
@@ -103,7 +123,7 @@ export async function GET(
           redirectUri,
           baseUrl: gitlabConfig.baseUrl,
         };
-        authUrl = getGitLabAuthUrl(config, state);
+        authUrl = getGitLabAuthUrl(config, encodedState);
       } else {
         return NextResponse.json(
           { error: "Unsupported repository type" },
@@ -111,7 +131,7 @@ export async function GET(
         );
       }
 
-      return NextResponse.json({ authUrl, state });
+      return NextResponse.json({ authUrl, state: encodedState });
     }
 
     // Get existing repository connection

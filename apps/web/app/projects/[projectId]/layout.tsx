@@ -48,7 +48,7 @@ export default async function ProjectLayoutWrapper({
     <>
       {/* Render breadcrumbs directly here - they'll appear above ProjectLayout */}
       {/* Positioned to match DashboardLayout breadcrumb container */}
-      <div className="px-4 sm:px-6 lg:px-8 mb-4">
+      <div className="px-4 sm:px-6 lg:px-8 mb-4" data-breadcrumb-container>
         <ProjectBreadcrumbs projectId={projectId} projectName={project.name} />
       </div>
       <ProjectLayout

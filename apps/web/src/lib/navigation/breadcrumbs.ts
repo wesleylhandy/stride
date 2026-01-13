@@ -207,12 +207,14 @@ function extractRoutePattern(pathname: string): string {
  * @param pathname - Current pathname (e.g., '/projects/abc-123/issues/KEY-1')
  * @param projectId - Project ID (UUID)
  * @param projectName - Project name for display
+ * @param segmentLabels - Optional map of segment values to display labels (e.g., cycleId -> cycle name)
  * @returns Array of breadcrumb items
  */
 export function generateProjectBreadcrumbs(
   pathname: string,
   projectId: string,
   projectName: string,
+  segmentLabels?: Map<string, string>,
 ): BreadcrumbItem[] {
   const items: BreadcrumbItem[] = [];
   
@@ -264,10 +266,27 @@ export function generateProjectBreadcrumbs(
     
     // Determine label for this segment
     // Handle issue keys specially - use the key as-is
+    // Handle UUIDs for cycles (cycleId) - check segmentLabels first, then fallback
     let label: string;
     if (/^[A-Z]+-\d+$/.test(segment)) {
       // Issue key format (PROJ-123) - use as-is
       label = segment;
+    } else if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(segment)) {
+      // UUID format - could be cycleId for sprints or other dynamic segments
+      // Check if we have a custom label from context (e.g., cycle name)
+      if (segmentLabels?.has(segment)) {
+        label = segmentLabels.get(segment)!;
+      } else {
+        // Check if previous segment was 'sprints' to determine if this is a cycle
+        const prevSegment = segments[i - 1];
+        if (prevSegment === 'sprints') {
+          // This is a cycle ID but no label provided - use generic placeholder
+          label = 'Sprint';
+        } else {
+          // Other UUID - use segment label
+          label = SEGMENT_LABELS[segment] || getSegmentLabel(segment);
+        }
+      }
     } else {
       // Use segment label mapping or format the segment name
       label = SEGMENT_LABELS[segment] || getSegmentLabel(segment);

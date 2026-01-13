@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@stride/database";
 import { verifyPassword } from "@/lib/auth/password";
-import { createSession, getTokenFromHeaders } from "@/lib/auth/session";
+import {
+  createSession,
+  getTokenFromHeaders,
+  getSessionExpirationDays,
+} from "@/lib/auth/session";
 import { UserRole } from "@stride/types";
 import { z } from "zod";
 import { cookies } from "next/headers";
@@ -9,6 +13,7 @@ import { cookies } from "next/headers";
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
+  rememberMe: z.boolean().optional().default(false),
 });
 
 export async function POST(request: Request) {
@@ -50,16 +55,20 @@ export async function POST(request: Request) {
       undefined;
     const userAgent = headers.get("user-agent") || undefined;
 
-    // Create session
+    // Determine session expiration based on "Remember me" preference
+    const expirationDays = getSessionExpirationDays(validated.rememberMe);
+
+    // Create session with appropriate expiration
     const token = await createSession(
       user.id,
       user.email,
       user.role as UserRole,
       ipAddress || undefined,
       userAgent,
+      expirationDays,
     );
 
-    // Set HTTP-only cookie
+    // Set HTTP-only cookie with matching expiration
     // secure flag should be true in production (HTTPS required)
     // Use COOKIE_SECURE env var to override, or detect HTTPS from request
     const isSecure =
@@ -71,7 +80,7 @@ export async function POST(request: Request) {
       httpOnly: true,
       secure: isSecure,
       sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: 60 * 60 * 24 * expirationDays, // Match session expiration
       path: "/",
     });
 

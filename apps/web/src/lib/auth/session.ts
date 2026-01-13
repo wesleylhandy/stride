@@ -14,6 +14,7 @@ const JWT_SECRET: string = JWT_SECRET_ENV;
 
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
 const SESSION_EXPIRES_IN_DAYS = 7;
+const REMEMBER_ME_EXPIRES_IN_DAYS = 90;
 
 export interface SessionPayload {
   userId: string;
@@ -28,6 +29,7 @@ export interface SessionPayload {
  * @param role - User role
  * @param ipAddress - Optional IP address
  * @param userAgent - Optional user agent string
+ * @param expirationDays - Optional expiration days (default: 7, use 90 for "Remember me")
  * @returns Session token
  */
 export async function createSession(
@@ -36,6 +38,7 @@ export async function createSession(
   role: UserRole,
   ipAddress?: string,
   userAgent?: string,
+  expirationDays: number = SESSION_EXPIRES_IN_DAYS,
 ): Promise<string> {
   // Create JWT token
   const payload: SessionPayload = {
@@ -44,19 +47,23 @@ export async function createSession(
     role,
   };
 
+  // Calculate JWT expiration based on session duration
+  // Convert days to JWT expiration format (e.g., "90d")
+  const jwtExpiresIn = `${expirationDays}d`;
+
   // Type assertion needed because jwt.sign has complex overloads
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const token = (jwt.sign as any)(
     payload,
     String(JWT_SECRET),
     {
-      expiresIn: String(JWT_EXPIRES_IN),
+      expiresIn: jwtExpiresIn,
     },
   ) as string;
 
   // Calculate expiration date
   const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + SESSION_EXPIRES_IN_DAYS);
+  expiresAt.setDate(expiresAt.getDate() + expirationDays);
 
   // Store session in database
   await prisma.session.create({
@@ -70,6 +77,15 @@ export async function createSession(
   });
 
   return token;
+}
+
+/**
+ * Get session expiration days based on "Remember me" preference
+ * @param rememberMe - Whether "Remember me" is checked
+ * @returns Number of days until session expiration
+ */
+export function getSessionExpirationDays(rememberMe: boolean): number {
+  return rememberMe ? REMEMBER_ME_EXPIRES_IN_DAYS : SESSION_EXPIRES_IN_DAYS;
 }
 
 /**

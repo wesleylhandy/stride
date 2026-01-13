@@ -29,43 +29,59 @@ export function BurndownChartClient({
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
-    const fetchBurndown = async () => {
-      setIsLoading(true);
-      setError(null);
+  const fetchBurndown = React.useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
 
-      try {
-        const response = await fetch(
-          `/api/projects/${projectId}/cycles/${cycleId}/burndown`
-        );
+    try {
+      const response = await fetch(
+        `/api/projects/${projectId}/cycles/${cycleId}/burndown`
+      );
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to fetch burndown data');
-        }
-
-        const data = await response.json();
-        setBurndownData({
-          actual: data.actual.map((point: { date: string; remaining: number }) => ({
-            date: new Date(point.date),
-            remaining: point.remaining,
-          })),
-          ideal: data.ideal.map((point: { date: string; remaining: number }) => ({
-            date: new Date(point.date),
-            remaining: point.remaining,
-          })),
-          totalStoryPoints: data.totalStoryPoints,
-        });
-      } catch (err) {
-        console.error('Failed to fetch burndown data:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch burndown data');
-      } finally {
-        setIsLoading(false);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch burndown data');
       }
+
+      const data = await response.json();
+      setBurndownData({
+        actual: data.actual.map((point: { date: string; remaining: number }) => ({
+          date: new Date(point.date),
+          remaining: point.remaining,
+        })),
+        ideal: data.ideal.map((point: { date: string; remaining: number }) => ({
+          date: new Date(point.date),
+          remaining: point.remaining,
+        })),
+        totalStoryPoints: data.totalStoryPoints,
+      });
+    } catch (err) {
+      console.error('Failed to fetch burndown data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch burndown data');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [projectId, cycleId]);
+
+  // Fetch on mount and when project/cycle changes
+  React.useEffect(() => {
+    fetchBurndown();
+  }, [fetchBurndown]);
+
+  // Listen for sprint issues updates to refetch burndown data
+  React.useEffect(() => {
+    const handleSprintIssuesUpdated = () => {
+      // Small delay to ensure API has processed the changes
+      setTimeout(() => {
+        fetchBurndown();
+      }, 500);
     };
 
-    fetchBurndown();
-  }, [projectId, cycleId]);
+    window.addEventListener('sprint-issues-updated', handleSprintIssuesUpdated);
+    return () => {
+      window.removeEventListener('sprint-issues-updated', handleSprintIssuesUpdated);
+    };
+  }, [fetchBurndown]);
 
   if (isLoading) {
     return (

@@ -3,7 +3,9 @@
 import * as React from 'react';
 import { SprintPlanning, type CycleMetrics, useToast } from '@stride/ui';
 import type { Issue, Cycle } from '@stride/types';
+import type { ProjectConfig } from '@stride/yaml-config';
 import { useRouter } from 'next/navigation';
+import { getCsrfHeaders } from '@/lib/utils/csrf';
 
 export interface SprintPlanningClientProps {
   projectId: string;
@@ -12,6 +14,7 @@ export interface SprintPlanningClientProps {
   initialBacklogIssues: Issue[];
   initialMetrics?: CycleMetrics;
   canEdit?: boolean;
+  projectConfig?: ProjectConfig;
 }
 
 /**
@@ -29,6 +32,7 @@ export function SprintPlanningClient({
   initialBacklogIssues,
   initialMetrics,
   canEdit = false,
+  projectConfig,
 }: SprintPlanningClientProps) {
   const router = useRouter();
   const toast = useToast();
@@ -36,6 +40,9 @@ export function SprintPlanningClient({
   const [backlogIssues, setBacklogIssues] = React.useState<Issue[]>(initialBacklogIssues);
   const [metrics, setMetrics] = React.useState<CycleMetrics | undefined>(initialMetrics);
   const [isAssigning, setIsAssigning] = React.useState(false);
+  
+  // Track pending optimistic updates to prevent race conditions with router.refresh()
+  const hasPendingUpdatesRef = React.useRef(false);
 
   // Fetch metrics on mount and when issues change
   React.useEffect(() => {
@@ -56,10 +63,13 @@ export function SprintPlanningClient({
     fetchMetrics();
   }, [projectId, cycle.id, sprintIssues.length]);
 
-  // Update when initial data changes
+  // Update when initial data changes, but only if we don't have pending optimistic updates
+  // This prevents router.refresh() from overwriting optimistic state with stale data
   React.useEffect(() => {
-    setSprintIssues(initialSprintIssues);
-    setBacklogIssues(initialBacklogIssues);
+    if (!hasPendingUpdatesRef.current) {
+      setSprintIssues(initialSprintIssues);
+      setBacklogIssues(initialBacklogIssues);
+    }
   }, [initialSprintIssues, initialBacklogIssues]);
 
   const handleAssignIssues = async (issueIds: string[]) => {
@@ -67,7 +77,15 @@ export function SprintPlanningClient({
       return;
     }
 
+    // Optimistic update: immediately update UI as if operation succeeded
+    const assignedIssues = backlogIssues.filter((i) => issueIds.includes(i.id));
+    const previousSprintIssues = [...sprintIssues];
+    const previousBacklogIssues = [...backlogIssues];
+    
+    setSprintIssues((prev) => [...prev, ...assignedIssues]);
+    setBacklogIssues((prev) => prev.filter((i) => !issueIds.includes(i.id)));
     setIsAssigning(true);
+    hasPendingUpdatesRef.current = true;
 
     try {
       const response = await fetch(
@@ -76,6 +94,7 @@ export function SprintPlanningClient({
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            ...getCsrfHeaders(),
           },
           body: JSON.stringify({ issueIds }),
         }
@@ -86,21 +105,25 @@ export function SprintPlanningClient({
         throw new Error(error.error || 'Failed to assign issues');
       }
 
-      const result = await response.json();
-      const updatedIssues = result.data as Issue[];
-
-      // Update local state
-      const assignedIssues = backlogIssues.filter((i) => issueIds.includes(i.id));
-      setSprintIssues((prev) => [...prev, ...assignedIssues]);
-      setBacklogIssues((prev) => prev.filter((i) => !issueIds.includes(i.id)));
-
       // Show success toast
       toast.success(`Assigned ${issueIds.length} issue${issueIds.length !== 1 ? 's' : ''} to sprint`);
 
-      // Refresh the page to get updated data
-      router.refresh();
+      // Trigger burndown chart refetch via custom event
+      window.dispatchEvent(new CustomEvent('sprint-issues-updated'));
+
+      // Wait a bit for database to commit, then refresh
+      // This prevents race condition where refresh fetches stale data
+      setTimeout(() => {
+        hasPendingUpdatesRef.current = false;
+        router.refresh();
+      }, 300);
     } catch (error) {
       console.error('Failed to assign issues:', error);
+      
+      // Revert optimistic update on error
+      setSprintIssues(previousSprintIssues);
+      setBacklogIssues(previousBacklogIssues);
+      hasPendingUpdatesRef.current = false;
       
       const errorMessage = error instanceof Error
         ? error.message
@@ -119,44 +142,78 @@ export function SprintPlanningClient({
       return;
     }
 
+    // Optimistic update: immediately update UI as if operation succeeded
+    const removedIssues = sprintIssues.filter((i) => issueIds.includes(i.id));
+    const previousSprintIssues = [...sprintIssues];
+    const previousBacklogIssues = [...backlogIssues];
+    
+    setSprintIssues((prev) => prev.filter((i) => !issueIds.includes(i.id)));
+    setBacklogIssues((prev) => [...prev, ...removedIssues]);
     setIsAssigning(true);
+    hasPendingUpdatesRef.current = true;
 
     try {
       // Remove issues by setting their cycleId to null
-      // We'll need to update each issue individually
-      for (const issueId of issueIds) {
-        const issue = sprintIssues.find((i) => i.id === issueId);
-        if (!issue) continue;
+      // Use Promise.all to make all API calls in parallel (faster, less chance of race condition)
+      const updatePromises = issueIds.map(async (issueId) => {
+        const issue = previousSprintIssues.find((i) => i.id === issueId);
+        if (!issue) return;
 
         const response = await fetch(
           `/api/projects/${projectId}/issues/${issue.key}`,
           {
-            method: 'PATCH',
+            method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
+              ...getCsrfHeaders(),
             },
             body: JSON.stringify({ cycleId: null }),
           }
         );
 
         if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || 'Failed to remove issue');
+          // Check if response has content before parsing JSON
+          const contentType = response.headers.get('content-type');
+          let errorMessage = 'Failed to remove issue';
+          
+          if (contentType && contentType.includes('application/json')) {
+            try {
+              const error = await response.json();
+              errorMessage = error.error || error.message || errorMessage;
+            } catch (parseError) {
+              // If JSON parsing fails, use status text
+              errorMessage = response.statusText || errorMessage;
+            }
+          } else {
+            errorMessage = response.statusText || errorMessage;
+          }
+          
+          throw new Error(errorMessage);
         }
-      }
+      });
 
-      // Update local state
-      const removedIssues = sprintIssues.filter((i) => issueIds.includes(i.id));
-      setSprintIssues((prev) => prev.filter((i) => !issueIds.includes(i.id)));
-      setBacklogIssues((prev) => [...prev, ...removedIssues]);
+      // Wait for all updates to complete
+      await Promise.all(updatePromises);
 
       // Show success toast
       toast.success(`Removed ${issueIds.length} issue${issueIds.length !== 1 ? 's' : ''} from sprint`);
 
-      // Refresh the page to get updated data
-      router.refresh();
+      // Trigger burndown chart refetch via custom event
+      window.dispatchEvent(new CustomEvent('sprint-issues-updated'));
+
+      // Wait a bit for database to commit, then refresh
+      // This prevents race condition where refresh fetches stale data
+      setTimeout(() => {
+        hasPendingUpdatesRef.current = false;
+        router.refresh();
+      }, 300);
     } catch (error) {
       console.error('Failed to remove issues:', error);
+      
+      // Revert optimistic update on error
+      setSprintIssues(previousSprintIssues);
+      setBacklogIssues(previousBacklogIssues);
+      hasPendingUpdatesRef.current = false;
       
       const errorMessage = error instanceof Error
         ? error.message
@@ -182,6 +239,7 @@ export function SprintPlanningClient({
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
+            ...getCsrfHeaders(),
           },
           body: JSON.stringify({ goal }),
         }
@@ -221,6 +279,7 @@ export function SprintPlanningClient({
       onRemoveIssues={handleRemoveIssues}
       onUpdateGoal={handleUpdateGoal}
       canEdit={canEdit}
+      projectConfig={projectConfig}
     />
   );
 }

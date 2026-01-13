@@ -50,6 +50,23 @@ export async function GET(request: NextRequest) {
       globalInfrastructureConfigRepository.get(),
     ]);
 
+    // Check which API keys are configured in database (without decrypting values)
+    const dbAiConfig = dbConfig?.aiConfig as
+      | {
+          openaiApiKey?: string;
+          anthropicApiKey?: string;
+          googleAiApiKey?: string;
+        }
+      | undefined;
+
+    // Check which client secrets are configured in database (without decrypting values)
+    const dbGitConfig = dbConfig?.gitConfig as
+      | {
+          github?: { clientId: string; clientSecret: string };
+          gitlab?: { clientId: string; clientSecret: string; baseUrl?: string };
+        }
+      | undefined;
+
     // Build response (never expose secrets)
     const response = {
       id: dbConfig?.id || null,
@@ -59,6 +76,7 @@ export async function GET(request: NextRequest) {
               clientId: gitConfig.github.clientId,
               configured: true,
               source: gitConfig.github.source,
+              configuredClientSecret: !!(dbGitConfig?.github?.clientSecret),
             }
           : undefined,
         gitlab: gitConfig.gitlab
@@ -67,6 +85,7 @@ export async function GET(request: NextRequest) {
               baseUrl: gitConfig.gitlab.baseUrl,
               configured: true,
               source: gitConfig.gitlab.source,
+              configuredClientSecret: !!(dbGitConfig?.gitlab?.clientSecret),
             }
           : undefined,
       },
@@ -81,6 +100,12 @@ export async function GET(request: NextRequest) {
           aiConfig.googleAiApiKey
         ),
         source: aiConfig.source,
+        // Indicate which API keys are configured (without values)
+        configuredApiKeys: {
+          openaiApiKey: !!(dbAiConfig?.openaiApiKey || aiConfig.openaiApiKey),
+          anthropicApiKey: !!(dbAiConfig?.anthropicApiKey || aiConfig.anthropicApiKey),
+          googleAiApiKey: !!(dbAiConfig?.googleAiApiKey || aiConfig.googleAiApiKey),
+        },
       },
       updatedBy: dbConfig?.updatedBy || null,
       updatedByUser: null, // TODO: Add user relation back after Prisma client is regenerated
@@ -123,8 +148,30 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json();
 
+    // Check for explicit clearing signals before validation
+    // (to distinguish between "not updating" vs "clear this provider")
+    const gitConfigBody = body.gitConfig as
+      | { github?: unknown; gitlab?: unknown }
+      | undefined;
+    const githubShouldBeCleared =
+      gitConfigBody && ('github' in gitConfigBody) && gitConfigBody.github === null;
+    const gitlabShouldBeCleared =
+      gitConfigBody && ('gitlab' in gitConfigBody) && gitConfigBody.gitlab === null;
+
+    // Remove null values for validation (schema doesn't accept null)
+    const bodyForValidation = { ...body };
+    if (bodyForValidation.gitConfig) {
+      bodyForValidation.gitConfig = { ...bodyForValidation.gitConfig };
+      if (githubShouldBeCleared) {
+        delete bodyForValidation.gitConfig.github;
+      }
+      if (gitlabShouldBeCleared) {
+        delete bodyForValidation.gitConfig.gitlab;
+      }
+    }
+
     // Validate configuration
-    const validationResult = validateInfrastructureConfig(body);
+    const validationResult = validateInfrastructureConfig(bodyForValidation);
     if (!validationResult.success) {
       return NextResponse.json(
         {
@@ -181,10 +228,22 @@ export async function PUT(request: NextRequest) {
           ...validatedConfig.gitConfig,
         };
 
+        // Handle explicit clearing
+        if (githubShouldBeCleared) {
+          delete mergedGitConfig.github;
+        }
+        if (gitlabShouldBeCleared) {
+          delete mergedGitConfig.gitlab;
+        }
+
         // Preserve existing providers that aren't being updated
         if (existingGitConfig) {
-          // If updating github, preserve gitlab from existing
-          if (validatedConfig.gitConfig.github && existingGitConfig.gitlab) {
+          // If updating github, preserve gitlab from existing (unless it's being cleared)
+          if (
+            validatedConfig.gitConfig.github &&
+            existingGitConfig.gitlab &&
+            !gitlabShouldBeCleared
+          ) {
             try {
               mergedGitConfig.gitlab = {
                 clientId: existingGitConfig.gitlab.clientId,
@@ -196,8 +255,12 @@ export async function PUT(request: NextRequest) {
               console.error("Failed to decrypt existing GitLab config:", error);
             }
           }
-          // If updating gitlab, preserve github from existing
-          if (validatedConfig.gitConfig.gitlab && existingGitConfig.github) {
+          // If updating gitlab, preserve github from existing (unless it's being cleared)
+          if (
+            validatedConfig.gitConfig.gitlab &&
+            existingGitConfig.github &&
+            !githubShouldBeCleared
+          ) {
             try {
               mergedGitConfig.github = {
                 clientId: existingGitConfig.github.clientId,
@@ -210,8 +273,64 @@ export async function PUT(request: NextRequest) {
           }
         }
 
+        // If merged config is empty (both cleared), encrypt empty object
+        // Otherwise encrypt the merged config
+        if (Object.keys(mergedGitConfig).length === 0) {
+          encryptedGitConfig = {} as Prisma.InputJsonValue;
+        } else {
+          encryptedGitConfig = encryptGitConfig(
+            mergedGitConfig,
+          ) as Prisma.InputJsonValue;
+        }
+      } else if (githubShouldBeCleared || gitlabShouldBeCleared) {
+        // Explicit clearing requested but no new config - handle clearing only
+        const existingGitConfig = existingConfig?.gitConfig as
+          | {
+              github?: { clientId: string; clientSecret: string };
+              gitlab?: {
+                clientId: string;
+                clientSecret: string;
+                baseUrl?: string;
+              };
+            }
+          | undefined;
+
+        const clearedGitConfig: {
+          github?: { clientId: string; clientSecret: string };
+          gitlab?: {
+            clientId: string;
+            clientSecret: string;
+            baseUrl?: string;
+          };
+        } = {};
+
+        // Preserve providers that aren't being cleared
+        if (existingGitConfig) {
+          if (!githubShouldBeCleared && existingGitConfig.github) {
+            try {
+              clearedGitConfig.github = {
+                clientId: existingGitConfig.github.clientId,
+                clientSecret: decrypt(existingGitConfig.github.clientSecret),
+              };
+            } catch (error) {
+              console.error("Failed to decrypt existing GitHub config:", error);
+            }
+          }
+          if (!gitlabShouldBeCleared && existingGitConfig.gitlab) {
+            try {
+              clearedGitConfig.gitlab = {
+                clientId: existingGitConfig.gitlab.clientId,
+                clientSecret: decrypt(existingGitConfig.gitlab.clientSecret),
+                baseUrl: existingGitConfig.gitlab.baseUrl,
+              };
+            } catch (error) {
+              console.error("Failed to decrypt existing GitLab config:", error);
+            }
+          }
+        }
+
         encryptedGitConfig = encryptGitConfig(
-          mergedGitConfig,
+          clearedGitConfig,
         ) as Prisma.InputJsonValue;
       } else if (existingConfig) {
         // Preserve existing encrypted gitConfig if not updating
@@ -255,6 +374,22 @@ export async function PUT(request: NextRequest) {
         updatedBy: session.userId,
       });
 
+      // Get updated config to return configuredApiKeys and configuredClientSecrets
+      const finalConfig = await globalInfrastructureConfigRepository.get();
+      const finalDbAiConfig = finalConfig?.aiConfig as
+        | {
+            openaiApiKey?: string;
+            anthropicApiKey?: string;
+            googleAiApiKey?: string;
+          }
+        | undefined;
+      const finalDbGitConfig = finalConfig?.gitConfig as
+        | {
+            github?: { clientId: string; clientSecret: string };
+            gitlab?: { clientId: string; clientSecret: string; baseUrl?: string };
+          }
+        | undefined;
+
       // Return response (never expose secrets)
       const response = {
         id: updatedConfig.id,
@@ -263,6 +398,7 @@ export async function PUT(request: NextRequest) {
             ? {
                 clientId: validatedConfig.gitConfig.github.clientId,
                 configured: true,
+                configuredClientSecret: !!finalDbGitConfig?.github?.clientSecret,
               }
             : undefined,
           gitlab: validatedConfig.gitConfig.gitlab
@@ -270,6 +406,7 @@ export async function PUT(request: NextRequest) {
                 clientId: validatedConfig.gitConfig.gitlab.clientId,
                 baseUrl: validatedConfig.gitConfig.gitlab.baseUrl,
                 configured: true,
+                configuredClientSecret: !!finalDbGitConfig?.gitlab?.clientSecret,
               }
             : undefined,
         },
@@ -283,6 +420,11 @@ export async function PUT(request: NextRequest) {
             validatedConfig.aiConfig.anthropicApiKey ||
             validatedConfig.aiConfig.googleAiApiKey
           ),
+          configuredApiKeys: {
+            openaiApiKey: !!finalDbAiConfig?.openaiApiKey,
+            anthropicApiKey: !!finalDbAiConfig?.anthropicApiKey,
+            googleAiApiKey: !!finalDbAiConfig?.googleAiApiKey,
+          },
         },
         updatedBy: session.userId,
         updatedAt: updatedConfig.updatedAt.toISOString(),

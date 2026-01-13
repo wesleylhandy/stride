@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { Button, Input, useToast } from '@stride/ui';
 import { aiGatewayConfigSchema, type AIGatewayConfig } from '@/lib/config/schemas/ai-gateway-schema';
 import { cn } from '@stride/ui';
+import { FiEdit2, FiTrash2, FiX } from 'react-icons/fi';
 
 /**
  * AI Infrastructure Configuration Form Props
@@ -19,6 +20,11 @@ export interface AIInfrastructureConfigFormProps {
     aiGatewayUrl?: string;
     llmEndpoint?: string;
     source: 'database' | 'environment' | 'default';
+    configuredApiKeys?: {
+      openaiApiKey?: boolean;
+      anthropicApiKey?: boolean;
+      googleAiApiKey?: boolean;
+    };
   };
   /**
    * Callback when form is submitted
@@ -63,9 +69,16 @@ export function AIInfrastructureConfigForm({
   testConnectionLoading = {},
 }: AIInfrastructureConfigFormProps) {
   const toast = useToast();
-
+  
   // Determine read-only state (env vars override UI)
   const isReadOnly = initialConfig?.source === 'environment';
+
+  // Track which API keys are configured (from initial config)
+  const configuredApiKeys = initialConfig?.configuredApiKeys || {};
+
+  // Track edit/delete state for each API key field
+  const [editingFields, setEditingFields] = React.useState<Set<string>>(new Set());
+  const [deletedFields, setDeletedFields] = React.useState<Set<string>>(new Set());
 
   // Form schema - make all fields optional since we're using partial config
   const formSchema = aiGatewayConfigSchema.partial();
@@ -74,8 +87,10 @@ export function AIInfrastructureConfigForm({
   const {
     register,
     handleSubmit,
-    formState: { errors, isDirty },
+    formState: { errors },
     reset,
+    watch,
+    setValue,
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -87,40 +102,115 @@ export function AIInfrastructureConfigForm({
     },
   });
 
+  // Watch all form values to compute custom dirty state
+  const watchedValues = watch();
+  
+  // Custom dirty check: form is dirty if values differ from saved state
+  // Empty fields with saved values are NOT dirty (user hasn't changed anything)
+  // Fields in edit mode or marked for deletion ARE dirty
+  const isDirty = React.useMemo(() => {
+    // Check URL fields (they're always shown, so simple comparison)
+    if (watchedValues.aiGatewayUrl !== (initialConfig?.aiGatewayUrl || '')) return true;
+    if (watchedValues.llmEndpoint !== (initialConfig?.llmEndpoint || '')) return true;
+    
+    // For API keys: dirty if editing, deleted, or has a value (user is changing)
+    const apiKeyFields = ['openaiApiKey', 'anthropicApiKey', 'googleAiApiKey'] as const;
+    for (const field of apiKeyFields) {
+      if (editingFields.has(field) || deletedFields.has(field) || watchedValues[field]) {
+        return true;
+      }
+    }
+    
+    return false;
+  }, [watchedValues, initialConfig, editingFields, deletedFields]);
+
+  // Helper functions for edit/delete actions
+  const handleEditField = (fieldName: string) => {
+    setEditingFields((prev) => new Set(prev).add(fieldName));
+    setDeletedFields((prev) => {
+      const next = new Set(prev);
+      next.delete(fieldName);
+      return next;
+    });
+    setValue(fieldName as keyof FormData, '', { shouldValidate: false });
+  };
+
+  const handleDeleteField = (fieldName: string) => {
+    setDeletedFields((prev) => new Set(prev).add(fieldName));
+    setEditingFields((prev) => {
+      const next = new Set(prev);
+      next.delete(fieldName);
+      return next;
+    });
+    setValue(fieldName as keyof FormData, '', { shouldValidate: false });
+  };
+
+  const handleCancelEdit = (fieldName: string) => {
+    setEditingFields((prev) => {
+      const next = new Set(prev);
+      next.delete(fieldName);
+      return next;
+    });
+    setValue(fieldName as keyof FormData, '', { shouldValidate: false });
+  };
+
   // Handle form submission
   const onSubmitForm = async (data: FormData) => {
     try {
-      // Filter out empty values
+      // Idempotent save: only include fields that were actually changed
       const cleanedData: AIGatewayConfig = {};
       
-      if (data.aiGatewayUrl && data.aiGatewayUrl.trim()) {
+      // Always include URL fields if they differ from initial
+      if (data.aiGatewayUrl && data.aiGatewayUrl.trim() !== (initialConfig?.aiGatewayUrl || '')) {
         cleanedData.aiGatewayUrl = data.aiGatewayUrl.trim();
       }
 
-      if (data.llmEndpoint && data.llmEndpoint.trim()) {
+      if (data.llmEndpoint && data.llmEndpoint.trim() !== (initialConfig?.llmEndpoint || '')) {
         cleanedData.llmEndpoint = data.llmEndpoint.trim();
       }
 
-      // Only include API keys if they're provided (not empty)
-      if (data.openaiApiKey && data.openaiApiKey.trim()) {
-        cleanedData.openaiApiKey = data.openaiApiKey.trim();
+      // For API keys: only include if:
+      // 1. Field is in edit mode AND has a value (updating)
+      // 2. Field is marked for deletion (deleting - handled by omitting from cleanedData)
+      // 3. Field is NOT in edit mode, NOT deleted, and NOT saved = new field (adding)
+      const apiKeyFields = [
+        { key: 'openaiApiKey' as const, field: 'openaiApiKey' },
+        { key: 'anthropicApiKey' as const, field: 'anthropicApiKey' },
+        { key: 'googleAiApiKey' as const, field: 'googleAiApiKey' },
+      ];
+
+      for (const { key, field } of apiKeyFields) {
+        const isEditing = editingFields.has(field);
+        const isDeleted = deletedFields.has(field);
+        const hasValue = data[key] && data[key]!.trim();
+        const wasSaved = configuredApiKeys[key];
+
+        if (isDeleted) {
+          // Field marked for deletion - don't include (will be removed)
+          continue;
+        }
+
+        if (isEditing && hasValue) {
+          // Field was edited and has a new value
+          cleanedData[key] = data[key]!.trim();
+        } else if (!wasSaved && hasValue) {
+          // New field (not saved before) with a value
+          cleanedData[key] = data[key]!.trim();
+        }
+        // Otherwise: field is saved but not edited/deleted = don't change (idempotent)
       }
 
-      if (data.anthropicApiKey && data.anthropicApiKey.trim()) {
-        cleanedData.anthropicApiKey = data.anthropicApiKey.trim();
-      }
-
-      if (data.googleAiApiKey && data.googleAiApiKey.trim()) {
-        cleanedData.googleAiApiKey = data.googleAiApiKey.trim();
-      }
-
-      // Empty object is valid - means delete all AI config
+      // Track if we had deletions before clearing state
+      const hadDeletions = deletedFields.size > 0;
+      
       await onSubmit(cleanedData);
       
-      // Reset form to show updated state (API keys will be empty)
+      // Reset form and state
+      setEditingFields(new Set());
+      setDeletedFields(new Set());
       reset({
-        aiGatewayUrl: cleanedData.aiGatewayUrl || '',
-        llmEndpoint: cleanedData.llmEndpoint || '',
+        aiGatewayUrl: data.aiGatewayUrl || initialConfig?.aiGatewayUrl || '',
+        llmEndpoint: data.llmEndpoint || initialConfig?.llmEndpoint || '',
         openaiApiKey: '', // Never show secrets after save
         anthropicApiKey: '', // Never show secrets after save
         googleAiApiKey: '', // Never show secrets after save
@@ -134,7 +224,7 @@ export function AIInfrastructureConfigForm({
         cleanedData.anthropicApiKey ||
         cleanedData.googleAiApiKey;
       
-      if (hasAnyField) {
+      if (hasAnyField || hadDeletions) {
         toast.success('AI Gateway configuration has been updated successfully.');
       } else {
         toast.success('AI Gateway configuration has been cleared.');
@@ -341,32 +431,185 @@ export function AIInfrastructureConfigForm({
           </div>
         ) : (
           <div className="space-y-4">
-            <Input
-              {...register('openaiApiKey')}
-              id="openai-api-key"
-              type="password"
-              label="OpenAI API Key"
-              placeholder="sk-..."
-              error={errors.openaiApiKey?.message}
-            />
+            {/* OpenAI API Key */}
+            <div>
+              {configuredApiKeys.openaiApiKey && !editingFields.has('openaiApiKey') && !deletedFields.has('openaiApiKey') ? (
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-foreground dark:text-foreground-dark">
+                    OpenAI API Key
+                  </label>
+                  <div className="flex items-center justify-between p-3 rounded-lg border border-border dark:border-border-dark bg-surface-secondary dark:bg-surface-dark-secondary">
+                    <div className="flex items-center gap-2">
+                      <span className="text-success dark:text-success-dark">✓</span>
+                      <span className="text-sm text-foreground-secondary dark:text-foreground-dark-secondary">
+                        A value is saved (hidden for security)
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditField('openaiApiKey')}
+                      >
+                        <FiEdit2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteField('openaiApiKey')}
+                      >
+                        <FiTrash2 className="h-4 w-4 text-error" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <Input
+                    {...register('openaiApiKey')}
+                    id="openai-api-key"
+                    type="password"
+                    label="OpenAI API Key"
+                    placeholder="sk-..."
+                    error={errors.openaiApiKey?.message}
+                  />
+                  {editingFields.has('openaiApiKey') && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleCancelEdit('openaiApiKey')}
+                      className="mt-2"
+                    >
+                      <FiX className="h-4 w-4 mr-1" />
+                      Cancel
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
 
-            <Input
-              {...register('anthropicApiKey')}
-              id="anthropic-api-key"
-              type="password"
-              label="Anthropic API Key"
-              placeholder="sk-ant-..."
-              error={errors.anthropicApiKey?.message}
-            />
+            {/* Anthropic API Key */}
+            <div>
+              {configuredApiKeys.anthropicApiKey && !editingFields.has('anthropicApiKey') && !deletedFields.has('anthropicApiKey') ? (
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-foreground dark:text-foreground-dark">
+                    Anthropic API Key
+                  </label>
+                  <div className="flex items-center justify-between p-3 rounded-lg border border-border dark:border-border-dark bg-surface-secondary dark:bg-surface-dark-secondary">
+                    <div className="flex items-center gap-2">
+                      <span className="text-success dark:text-success-dark">✓</span>
+                      <span className="text-sm text-foreground-secondary dark:text-foreground-dark-secondary">
+                        A value is saved (hidden for security)
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditField('anthropicApiKey')}
+                      >
+                        <FiEdit2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteField('anthropicApiKey')}
+                      >
+                        <FiTrash2 className="h-4 w-4 text-error" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <Input
+                    {...register('anthropicApiKey')}
+                    id="anthropic-api-key"
+                    type="password"
+                    label="Anthropic API Key"
+                    placeholder="sk-ant-..."
+                    error={errors.anthropicApiKey?.message}
+                  />
+                  {editingFields.has('anthropicApiKey') && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleCancelEdit('anthropicApiKey')}
+                      className="mt-2"
+                    >
+                      <FiX className="h-4 w-4 mr-1" />
+                      Cancel
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
 
-            <Input
-              {...register('googleAiApiKey')}
-              id="google-ai-api-key"
-              type="password"
-              label="Google AI API Key"
-              placeholder="AIza..."
-              error={errors.googleAiApiKey?.message}
-            />
+            {/* Google AI API Key */}
+            <div>
+              {configuredApiKeys.googleAiApiKey && !editingFields.has('googleAiApiKey') && !deletedFields.has('googleAiApiKey') ? (
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-foreground dark:text-foreground-dark">
+                    Google AI API Key
+                  </label>
+                  <div className="flex items-center justify-between p-3 rounded-lg border border-border dark:border-border-dark bg-surface-secondary dark:bg-surface-dark-secondary">
+                    <div className="flex items-center gap-2">
+                      <span className="text-success dark:text-success-dark">✓</span>
+                      <span className="text-sm text-foreground-secondary dark:text-foreground-dark-secondary">
+                        A value is saved (hidden for security)
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditField('googleAiApiKey')}
+                      >
+                        <FiEdit2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteField('googleAiApiKey')}
+                      >
+                        <FiTrash2 className="h-4 w-4 text-error" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <Input
+                    {...register('googleAiApiKey')}
+                    id="google-ai-api-key"
+                    type="password"
+                    label="Google AI API Key"
+                    placeholder="AIza..."
+                    error={errors.googleAiApiKey?.message}
+                  />
+                  {editingFields.has('googleAiApiKey') && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleCancelEdit('googleAiApiKey')}
+                      className="mt-2"
+                    >
+                      <FiX className="h-4 w-4 mr-1" />
+                      Cancel
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

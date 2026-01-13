@@ -14,7 +14,7 @@ const openAiApiKeySchema = z
 
 const anthropicApiKeySchema = z
   .string()
-  .regex(/^sk-ant-[A-Za-z0-9-]+$/, "Anthropic API key must start with 'sk-ant-'");
+  .regex(/^sk-ant-[A-Za-z0-9_-]+$/, "Anthropic API key must start with 'sk-ant-'");
 
 const googleAiApiKeySchema = z
   .string()
@@ -25,16 +25,14 @@ const googleAiApiKeySchema = z
  */
 export const aiGatewayConfigSchema = z.object({
   aiGatewayUrl: z
-    .string()
-    .url("AI Gateway URL must be a valid URL")
+    .union([z.string().url("AI Gateway URL must be a valid URL"), z.literal("")])
     .optional(),
   llmEndpoint: z
-    .string()
-    .url("LLM endpoint URL must be a valid URL")
+    .union([z.string().url("LLM endpoint URL must be a valid URL"), z.literal("")])
     .optional(),
-  openaiApiKey: openAiApiKeySchema.optional(),
-  anthropicApiKey: anthropicApiKeySchema.optional(),
-  googleAiApiKey: googleAiApiKeySchema.optional(),
+  openaiApiKey: z.union([openAiApiKeySchema, z.literal("")]).optional(),
+  anthropicApiKey: z.union([anthropicApiKeySchema, z.literal("")]).optional(),
+  googleAiApiKey: z.union([googleAiApiKeySchema, z.literal("")]).optional(),
 });
 
 /**

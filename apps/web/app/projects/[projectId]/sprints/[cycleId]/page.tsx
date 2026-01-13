@@ -1,6 +1,7 @@
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { cycleRepository, issueRepository, projectRepository } from '@stride/database';
 import type { Issue, Cycle, IssueType, Priority } from '@stride/types';
+import type { ProjectConfig } from '@stride/yaml-config';
 import { canUpdateCycle, canViewCycle } from '@/lib/auth/permissions';
 import { requireAuthServer } from '@/middleware/auth';
 import { headers } from 'next/headers';
@@ -8,23 +9,23 @@ import { SprintPlanningClient } from '@/components/SprintPlanningClient';
 import { BurndownChartClient } from '@/components/BurndownChartClient';
 import { PageContainer } from '@stride/ui';
 import type { Metadata } from 'next';
+import { BreadcrumbMetadataSetter } from '@/components/features/projects/BreadcrumbMetadataSetter';
 
 interface PageParams {
   params: Promise<{
     projectId: string;
-  }>;
-  searchParams: Promise<{
-    cycleId?: string;
+    cycleId: string;
   }>;
 }
 
 /**
  * Generate metadata for sprint planning page
  */
-export async function generateMetadata({ params }: { params: Promise<{ projectId: string }> }): Promise<Metadata> {
-  const { projectId } = await params;
+export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
+  const { projectId, cycleId } = await params;
   
   const project = await projectRepository.findById(projectId);
+  const cycle = cycleId ? await cycleRepository.findById(cycleId) : null;
   
   if (!project) {
     return {
@@ -33,31 +34,36 @@ export async function generateMetadata({ params }: { params: Promise<{ projectId
     };
   }
 
+  if (!cycle) {
+    return {
+      title: `Projects | ${project.name} | Sprints`,
+      description: `Sprint planning for ${project.name}`,
+    };
+  }
+
   return {
-    title: `Projects | ${project.name} | Sprints`,
-    description: `Sprint planning for ${project.name}`,
+    title: `Projects | ${project.name} | Sprints | ${cycle.name}`,
+    description: `Sprint planning for ${cycle.name}`,
   };
 }
 
 /**
  * Sprint Planning Page
  * 
- * Displays sprint planning interface for creating or editing a sprint.
+ * Displays sprint planning interface for a specific sprint.
  * 
  * Features:
- * - Drag-and-drop issue assignment (T224)
- * - Sprint capacity display (T225)
- * - Story points tracking (T226)
- * - Sprint goal input (T227)
- * - Issue assignment (T228)
+ * - Drag-and-drop issue assignment
+ * - Sprint capacity display
+ * - Story points tracking
+ * - Sprint goal input
+ * - Issue assignment
  */
 export default async function SprintPlanningPage({
   params,
-  searchParams,
 }: PageParams) {
   // Await params (Next.js 15+ requires this)
-  const { projectId } = await params;
-  const { cycleId } = await searchParams;
+  const { projectId, cycleId } = await params;
 
   // Get auth
   const headersList = await headers();
@@ -78,17 +84,15 @@ export default async function SprintPlanningPage({
     notFound();
   }
 
-  // If cycleId is provided, load that cycle; otherwise redirect to cycles list
-  if (!cycleId) {
-    // Redirect to cycles list or create new cycle page
-    redirect(`/projects/${projectId}/sprints`);
-  }
-
   // Fetch cycle
   const cycle = await cycleRepository.findById(cycleId);
   if (!cycle || cycle.projectId !== projectId) {
     notFound();
   }
+
+  // Fetch project configuration for issue card coloring
+  const projectConfigData = await projectRepository.getConfig(projectId);
+  const projectConfig = projectConfigData?.config as ProjectConfig | undefined;
 
   // Fetch issues assigned to this cycle
   const sprintIssues = await cycleRepository.getIssues(cycleId);
@@ -134,7 +138,10 @@ export default async function SprintPlanningPage({
   const canEdit = canUpdateCycle(session.role);
 
   return (
-    <PageContainer variant="full" className="py-6">
+    <>
+      {/* Set breadcrumb metadata for cycle name */}
+      <BreadcrumbMetadataSetter segmentLabels={{ [cycleId]: cycle.name }} />
+      <PageContainer variant="full" className="py-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-foreground dark:text-foreground-dark">
           Sprint Planning
@@ -163,9 +170,14 @@ export default async function SprintPlanningPage({
           initialSprintIssues={typedSprintIssues}
           initialBacklogIssues={typedBacklogIssues}
           canEdit={canEdit}
+          projectConfig={projectConfig}
         />
       </div>
     </PageContainer>
+    </>
   );
 }
 
+// Force dynamic rendering - this route requires authentication
+// and fetches user-specific data, so it cannot be statically generated
+export const dynamic = 'force-dynamic';

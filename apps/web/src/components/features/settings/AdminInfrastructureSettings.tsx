@@ -8,6 +8,7 @@ import { AIInfrastructureConfigForm } from './AIInfrastructureConfigForm';
 import type { GitHubOAuthConfig } from '@/lib/config/schemas/git-oauth-schema';
 import type { GitLabOAuthConfig } from '@/lib/config/schemas/git-oauth-schema';
 import type { AIGatewayConfig } from '@/lib/config/schemas/ai-gateway-schema';
+import { getCsrfHeaders } from '@/lib/utils/csrf';
 
 /**
  * Infrastructure Configuration Response Type
@@ -22,12 +23,14 @@ interface InfrastructureConfig {
       clientId: string;
       configured: boolean;
       source: 'database' | 'environment' | 'default';
+      configuredClientSecret?: boolean;
     };
     gitlab?: {
       clientId: string;
       baseUrl?: string;
       configured: boolean;
       source: 'database' | 'environment' | 'default';
+      configuredClientSecret?: boolean;
     };
   };
   aiConfig: {
@@ -35,6 +38,11 @@ interface InfrastructureConfig {
     llmEndpoint?: string;
     configured: boolean;
     source: 'database' | 'environment' | 'default';
+    configuredApiKeys?: {
+      openaiApiKey?: boolean;
+      anthropicApiKey?: boolean;
+      googleAiApiKey?: boolean;
+    };
   };
   updatedBy: string | null;
   updatedByUser: {
@@ -144,6 +152,7 @@ export function AdminInfrastructureSettings() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          ...getCsrfHeaders(),
         },
         body: JSON.stringify({
           gitConfig: { github: githubConfig },
@@ -166,6 +175,38 @@ export function AdminInfrastructureSettings() {
     }
   };
 
+  // Handle GitHub OAuth config clear (all-or-nothing)
+  const handleGitHubConfigClear = async () => {
+    setGitHubSubmitting(true);
+    try {
+      // Send github: null to signal clearing to the API
+      const response = await fetch('/api/admin/settings/infrastructure', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getCsrfHeaders(),
+        },
+        body: JSON.stringify({
+          gitConfig: { github: null }, // null signals clearing to API
+          aiConfig: {}, // Empty object, API will preserve existing aiConfig
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to clear configuration');
+      }
+
+      // Refresh configuration after clear
+      const updatedData = await response.json();
+      setConfig(updatedData);
+    } catch (err) {
+      throw err; // Re-throw to let form handle error display
+    } finally {
+      setGitHubSubmitting(false);
+    }
+  };
+
   // Handle GitLab OAuth form submission
   const handleGitLabConfigSubmit = async (gitlabConfig: GitLabOAuthConfig) => {
     setGitLabSubmitting(true);
@@ -175,6 +216,7 @@ export function AdminInfrastructureSettings() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          ...getCsrfHeaders(),
         },
         body: JSON.stringify({
           gitConfig: { gitlab: gitlabConfig },
@@ -188,6 +230,38 @@ export function AdminInfrastructureSettings() {
       }
 
       // Refresh configuration after save
+      const updatedData = await response.json();
+      setConfig(updatedData);
+    } catch (err) {
+      throw err; // Re-throw to let form handle error display
+    } finally {
+      setGitLabSubmitting(false);
+    }
+  };
+
+  // Handle GitLab OAuth config clear (all-or-nothing)
+  const handleGitLabConfigClear = async () => {
+    setGitLabSubmitting(true);
+    try {
+      // Send gitlab: null to signal clearing to the API
+      const response = await fetch('/api/admin/settings/infrastructure', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getCsrfHeaders(),
+        },
+        body: JSON.stringify({
+          gitConfig: { gitlab: null }, // null signals clearing to API
+          aiConfig: {}, // Empty object, API will preserve existing aiConfig
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to clear configuration');
+      }
+
+      // Refresh configuration after clear
       const updatedData = await response.json();
       setConfig(updatedData);
     } catch (err) {
@@ -239,6 +313,7 @@ export function AdminInfrastructureSettings() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          ...getCsrfHeaders(),
         },
         body: JSON.stringify({
           gitConfig: {}, // Empty object, API will preserve existing gitConfig
@@ -359,10 +434,12 @@ export function AdminInfrastructureSettings() {
                 ? {
                     clientId: safeConfig.gitConfig.github.clientId,
                     source: safeConfig.gitConfig.github.source,
+                    configuredClientSecret: safeConfig.gitConfig.github.configuredClientSecret,
                   }
                 : undefined
             }
             onSubmit={handleGitHubConfigSubmit}
+            onClear={handleGitHubConfigClear}
             isSubmitting={gitHubSubmitting}
             onTestConnection={handleGitHubTestConnection}
             testConnectionLoading={testConnectionLoading.github || false}
@@ -376,10 +453,12 @@ export function AdminInfrastructureSettings() {
                     clientId: safeConfig.gitConfig.gitlab.clientId,
                     baseUrl: safeConfig.gitConfig.gitlab.baseUrl,
                     source: safeConfig.gitConfig.gitlab.source,
+                    configuredClientSecret: safeConfig.gitConfig.gitlab.configuredClientSecret,
                   }
                 : undefined
             }
             onSubmit={handleGitLabConfigSubmit}
+            onClear={handleGitLabConfigClear}
             isSubmitting={gitLabSubmitting}
             onTestConnection={handleGitLabTestConnection}
             testConnectionLoading={testConnectionLoading.gitlab || false}
@@ -399,6 +478,7 @@ export function AdminInfrastructureSettings() {
             aiGatewayUrl: safeConfig.aiConfig?.aiGatewayUrl,
             llmEndpoint: safeConfig.aiConfig?.llmEndpoint,
             source: safeConfig.aiConfig?.source || 'default',
+            configuredApiKeys: safeConfig.aiConfig?.configuredApiKeys,
           }}
           onSubmit={handleAIConfigSubmit}
           isSubmitting={isSubmitting}

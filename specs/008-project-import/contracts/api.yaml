@@ -1,0 +1,301 @@
+openapi: 3.0.0
+info:
+  title: Project Import API
+  version: 1.0.0
+  description: API endpoints for repository listing and project import from git providers
+
+paths:
+  /api/repositories/list:
+    get:
+      summary: List repositories from git provider
+      description: Lists repositories accessible to the authenticated user from GitHub or GitLab
+      tags:
+        - Repositories
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: type
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [GitHub, GitLab]
+          description: Git provider type
+        - name: accessToken
+          in: query
+          required: true
+          schema:
+            type: string
+          description: OAuth access token for the git provider
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: Page number for pagination
+        - name: per_page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+            maximum: 100
+          description: Number of repositories per page
+      responses:
+        '200':
+          description: Successfully retrieved repository list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  repositories:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RepositoryInfo'
+                  pagination:
+                    $ref: '#/components/schemas/PaginationInfo'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/projects/import:
+    post:
+      summary: Import project from repository
+      description: Creates a new project by importing from a git repository, automatically connecting the repository and syncing configuration
+      tags:
+        - Projects
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportProjectRequest'
+      responses:
+        '201':
+          description: Project imported successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectImportResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Repository already connected or project key conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  schemas:
+    RepositoryInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Repository ID from git provider
+        name:
+          type: string
+          description: Repository name
+        fullName:
+          type: string
+          description: Full repository name (owner/repo for GitHub, path_with_namespace for GitLab)
+        url:
+          type: string
+          format: uri
+          description: Repository URL
+        description:
+          type: string
+          nullable: true
+          description: Repository description
+        private:
+          type: boolean
+          description: Whether repository is private
+        defaultBranch:
+          type: string
+          description: Default branch name
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+        isConnected:
+          type: boolean
+          description: Whether repository is already connected to an existing project
+      required:
+        - id
+        - name
+        - url
+        - private
+        - defaultBranch
+
+    PaginationInfo:
+      type: object
+      properties:
+        page:
+          type: integer
+          description: Current page number
+        perPage:
+          type: integer
+          description: Items per page
+        total:
+          type: integer
+          description: Total number of repositories
+        totalPages:
+          type: integer
+          description: Total number of pages
+        hasNext:
+          type: boolean
+          description: Whether there is a next page
+        hasPrev:
+          type: boolean
+          description: Whether there is a previous page
+
+    ImportProjectRequest:
+      type: object
+      properties:
+        repositoryUrl:
+          type: string
+          format: uri
+          description: Repository URL to import
+        repositoryType:
+          type: string
+          enum: [GitHub, GitLab, Bitbucket]
+          description: Git provider type
+        accessToken:
+          type: string
+          description: OAuth access token for the repository
+        projectKey:
+          type: string
+          pattern: '^[A-Z0-9]{2,10}$'
+          description: Optional project key (auto-generated if not provided)
+        projectName:
+          type: string
+          description: Optional project name (auto-populated from repository if not provided)
+      required:
+        - repositoryUrl
+        - repositoryType
+        - accessToken
+
+    ProjectImportResponse:
+      type: object
+      properties:
+        project:
+          $ref: '#/components/schemas/Project'
+        connection:
+          $ref: '#/components/schemas/RepositoryConnectionInfo'
+      required:
+        - project
+        - connection
+
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        key:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        repositoryUrl:
+          type: string
+          format: uri
+          nullable: true
+        repositoryType:
+          type: string
+          enum: [GitHub, GitLab, Bitbucket]
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - key
+        - name
+        - createdAt
+        - updatedAt
+
+    RepositoryConnectionInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        repositoryUrl:
+          type: string
+          format: uri
+        serviceType:
+          type: string
+          enum: [GitHub, GitLab, Bitbucket]
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - repositoryUrl
+        - serviceType
+        - isActive
+        - createdAt
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        details:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          description: Validation error details (optional)
+      required:
+        - error
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
