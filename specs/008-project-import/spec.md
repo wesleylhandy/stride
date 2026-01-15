@@ -13,7 +13,11 @@ A user wants to create a new project manually by entering project details, with 
 
 **Why this priority**: Manual project creation is the foundation workflow. Users need a reliable way to create projects even when they don't want to import from git providers or when git provider integration isn't configured. This ensures the system works independently of external integrations.
 
-**Independent Test**: Can be fully tested by having a user navigate to project creation, enter project key, name, and description, optionally provide a repository URL, and successfully create a project. Success when project appears in the projects list with correct information, and repository URL is stored if provided (connection can be established later via project settings or import flow).
+**Scope**: Users must be able to create projects both:
+- During initial onboarding (`/onboarding/project` - full page form)
+- After onboarding is complete (modal dialog accessible from projects listing page via "Create Project" button)
+
+**Independent Test**: Can be fully tested by having a user navigate to project creation (either from onboarding or from projects dashboard), enter project key, name, and description, optionally provide a repository URL, and successfully create a project. Success when project appears in the projects list with correct information, and repository URL is stored if provided (connection can be established later via project settings or import flow).
 
 **Acceptance Scenarios**:
 
@@ -21,6 +25,9 @@ A user wants to create a new project manually by entering project details, with 
 2. **Given** a user wants to create a project with a repository URL, **When** they provide a repository URL and type during creation, **Then** the project is created with the repository URL stored (repository connection is not automatically established; user can connect later via project settings)
 3. **Given** a user provides an invalid repository URL, **When** they attempt to create the project, **Then** validation errors are shown before project creation
 4. **Given** a user creates a project without a repository, **When** they view the project, **Then** they can connect a repository later through project settings or import flow
+5. **Given** a user has completed onboarding, **When** they navigate to the projects dashboard and click "Create Project", **Then** a modal dialog opens with the project creation form (stays on same page)
+6. **Given** a user is on the projects listing page with existing projects, **When** they want to create a new project, **Then** they can access project creation via a clearly visible "Create Project" button that opens a modal dialog
+7. **Given** a user successfully creates a project from the modal on the projects listing page, **When** the project is created, **Then** the modal closes and the projects list refreshes to show the new project
 
 ---
 
@@ -77,21 +84,25 @@ A user wants to create a project by importing from a git repository, automatical
 - **FR-001**: System MUST allow users to create projects manually by entering project key, name, and description
 - **FR-002**: System MUST allow users to optionally provide repository URL and type during manual project creation (URL is stored on project entity; repository connection is NOT automatically established and must be done separately via project settings or import flow)
 - **FR-003**: System MUST validate repository URLs before creating projects
-- **FR-004**: System MUST allow users to list repositories from GitHub using OAuth authentication
-- **FR-005**: System MUST allow users to list repositories from GitLab using OAuth authentication
-- **FR-006**: System MUST display repository name, description, and URL in the repository list
-- **FR-007**: System MUST support pagination or search for repository lists when users have many repositories
-- **FR-008**: System MUST allow users to import/create a project by selecting a repository from the list
-- **FR-009**: System MUST automatically populate project name and description from repository metadata during import
-- **FR-010**: System MUST automatically connect the repository to the imported project
-- **FR-011**: System MUST sync configuration from repository if `stride.config.yaml` file exists
-- **FR-012**: System MUST generate default configuration if repository does not contain `stride.config.yaml`
-- **FR-013**: System MUST register webhooks for branch and pull request events during repository import
-- **FR-014**: System MUST validate project key uniqueness before creating imported projects
-- **FR-015**: System MUST generate project keys from repository names when not explicitly provided
-- **FR-016**: System MUST handle errors gracefully when repository information cannot be fetched
-- **FR-017**: System MUST prevent importing repositories that are already connected to existing projects
-- **FR-018**: System MUST fail the entire import transaction if webhook registration fails (rollback project creation to ensure data consistency)
+- **FR-004**: System MUST provide project creation access during onboarding (`/onboarding/project` - full page form)
+- **FR-005**: System MUST provide project creation access after onboarding is complete via a modal dialog accessible from the projects listing page
+- **FR-006**: System MUST display a "Create Project" button on the projects listing page (`/projects`) for users who have completed onboarding that opens a modal dialog with the project creation form. The button MUST be placed in the top-right of the page header (next to project count/title area).
+- **FR-007**: System MUST close the modal and refresh the projects list after successful project creation from the modal (user remains on `/projects` page)
+- **FR-008**: System MUST allow users to list repositories from GitHub using OAuth authentication
+- **FR-009**: System MUST allow users to list repositories from GitLab using OAuth authentication
+- **FR-010**: System MUST display repository name, description, and URL in the repository list
+- **FR-011**: System MUST support pagination or search for repository lists when users have many repositories
+- **FR-012**: System MUST allow users to import/create a project by selecting a repository from the list
+- **FR-013**: System MUST automatically populate project name and description from repository metadata during import
+- **FR-014**: System MUST automatically connect the repository to the imported project
+- **FR-015**: System MUST sync configuration from repository if `stride.config.yaml` file exists
+- **FR-016**: System MUST generate default configuration if repository does not contain `stride.config.yaml`
+- **FR-017**: System MUST register webhooks for branch and pull request events during repository import
+- **FR-018**: System MUST validate project key uniqueness before creating imported projects
+- **FR-019**: System MUST generate project keys from repository names when not explicitly provided
+- **FR-020**: System MUST handle errors gracefully when repository information cannot be fetched
+- **FR-021**: System MUST prevent importing repositories that are already connected to existing projects
+- **FR-022**: System MUST fail the entire import transaction if webhook registration fails (rollback project creation to ensure data consistency)
 
 ### Key Entities
 
@@ -126,6 +137,8 @@ A user wants to create a project by importing from a git repository, automatical
 
 - Q: When webhook registration fails during project import, should the entire import operation fail or proceed without webhooks? → A: Fail entire import and rollback transaction (project creation fails)
 - Q: What happens when a user provides repository URL and type during manual project creation? → A: Repository URL is stored on the project entity only; repository connection is NOT automatically established. Connection requires OAuth authentication and must be done separately via project settings (existing flow) or import flow (User Story 3). Manual creation with repository URL stores metadata only. If OAuth is configured, users should use the import flow (User Story 3) to list repositories and create connections.
+- Q: How should the "Create Project" button on the projects listing page (`/projects`) work? → A: Button opens a modal dialog with the project creation form (stays on same page). This provides quick access without navigation, consistent with existing patterns (CreateIssueModal, CreateCycleModal). After successful creation, the modal closes and the projects list refreshes to show the new project.
+- Q: Where should the "Create Project" button be placed on the projects listing page? → A: Top-right of the page header (next to project count/title area). This follows common dashboard patterns and ensures the button is clearly visible and accessible.
 
 ## Assumptions
 

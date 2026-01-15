@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import "./globals.css";
 import "@stride/ui/styles";
 import { CommandPaletteProvider } from "@/components/CommandPaletteProvider";
+import { QueryClientProvider } from "@/components/providers/QueryClientProvider";
 import { ErrorSuppressor } from "./components/ErrorSuppressor";
 
 const inter = Inter({
@@ -61,7 +62,9 @@ export default function RootLayout({
           }}
         />
         <ErrorSuppressor />
-        <CommandPaletteProvider>{children}</CommandPaletteProvider>
+        <QueryClientProvider>
+          <CommandPaletteProvider>{children}</CommandPaletteProvider>
+        </QueryClientProvider>
         <Toaster
           position="bottom-right"
           toastOptions={{

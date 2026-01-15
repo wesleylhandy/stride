@@ -31,7 +31,8 @@ A user completes the onboarding flow and is redirected to the main application d
 2. **Given** a user has completed onboarding with no projects, **When** they are redirected to the projects page, **Then** they see an empty state with a call-to-action to create a project
 3. **Given** the projects listing page is displayed, **When** a user clicks on a project card or project name, **Then** they are navigated to the project's Kanban board (`/projects/{projectId}/board`)
 4. **Given** the projects listing page displays multiple projects, **When** viewing the list, **Then** each project shows key information: name, key, issue count, and last activity
-5. **Given** a user is viewing the projects listing page, **When** they have appropriate permissions, **Then** they can access quick actions like "Create Project" or "Project Settings"
+5. **Given** a user is viewing the projects listing page, **When** they have appropriate permissions, **Then** they can access quick actions like "Create Project" button that navigates to `/projects/new` or access project settings
+6. **Given** a user has completed onboarding, **When** they are on the projects listing page and click "Create Project", **Then** they are taken to `/projects/new` where they can create a new project
 
 ---
 

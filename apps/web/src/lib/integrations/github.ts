@@ -22,6 +22,8 @@ export interface GitHubRepository {
   clone_url: string;
   default_branch: string;
   private: boolean;
+  description: string | null;
+  updated_at: string;
 }
 
 /**
@@ -173,6 +175,106 @@ export function parseGitHubRepositoryUrl(
   }
 
   return null;
+}
+
+/**
+ * List GitHub repositories for the authenticated user
+ * @param accessToken - GitHub access token
+ * @param page - Page number (default: 1)
+ * @param perPage - Items per page (default: 100, max: 100)
+ * @returns List of repositories with pagination info
+ */
+export async function listGitHubRepositories(
+  accessToken: string,
+  page: number = 1,
+  perPage: number = 100,
+): Promise<{
+  repositories: GitHubRepository[];
+  pagination: {
+    page: number;
+    perPage: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+}> {
+  // GitHub API supports per_page and page parameters
+  const params = new URLSearchParams({
+    per_page: Math.min(perPage, 100).toString(),
+    page: page.toString(),
+    type: "all", // all, owner, member
+    sort: "updated", // created, updated, pushed, full_name
+    direction: "desc", // asc, desc
+  });
+
+  const response = await fetch(
+    `https://api.github.com/user/repos?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `token ${accessToken}`,
+        Accept: "application/vnd.github.v3+json",
+      },
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`GitHub API error: ${response.statusText}`);
+  }
+
+  const repositories = (await response.json()) as GitHubRepository[];
+
+  // GitHub API includes pagination info in Link headers
+  const linkHeader = response.headers.get("Link");
+  let total = repositories.length;
+  let hasNext = false;
+  let hasPrev = false;
+
+  if (linkHeader) {
+    // Parse Link header for pagination info
+    const links = linkHeader.split(",");
+    for (const link of links) {
+      const match = link.match(/<([^>]+)>;\s*rel="([^"]+)"/);
+      if (match && match[1]) {
+        const url = new URL(match[1]);
+        const rel = match[2];
+        if (rel === "next") {
+          hasNext = true;
+        } else if (rel === "prev") {
+          hasPrev = true;
+        }
+        if (rel === "last") {
+          // Extract page number from last link
+          const lastPage = parseInt(url.searchParams.get("page") || "1", 10);
+          total = lastPage * perPage;
+        }
+      }
+    }
+  }
+
+  // If we have all repos on one page, total is the count
+  if (!hasNext && repositories.length === perPage) {
+    // Might have more, but we don't know the total
+    // GitHub doesn't provide total count in response
+    // We'll estimate based on current page
+    total = page * perPage + (hasNext ? 1 : 0);
+  } else if (!hasNext) {
+    total = (page - 1) * perPage + repositories.length;
+  }
+
+  const totalPages = Math.ceil(total / perPage);
+
+  return {
+    repositories,
+    pagination: {
+      page,
+      perPage,
+      total,
+      totalPages,
+      hasNext,
+      hasPrev: page > 1,
+    },
+  };
 }
 
 /**

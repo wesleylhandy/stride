@@ -21,13 +21,50 @@ export const projectKeySchema = z
 /**
  * Create project input schema
  */
-export const createProjectSchema = z.object({
-  key: projectKeySchema,
-  name: z.string().min(1, "Project name is required").max(100, "Project name must be less than 100 characters"),
-  description: z.string().max(500, "Description must be less than 500 characters").optional(),
-  repositoryUrl: z.string().url("Invalid repository URL").optional().or(z.literal("")),
-  repositoryType: z.enum(["GitHub", "GitLab", "Bitbucket"]).optional(),
-});
+export const createProjectSchema = z
+  .object({
+    key: projectKeySchema,
+    name: z
+      .string()
+      .min(1, "Project name is required")
+      .max(100, "Project name must be less than 100 characters"),
+    description: z
+      .string()
+      .max(500, "Description must be less than 500 characters")
+      .optional(),
+    repositoryUrl: z
+      .string()
+      .url("Invalid repository URL")
+      .optional()
+      .or(z.literal("")),
+    repositoryType: z.enum(["GitHub", "GitLab", "Bitbucket"]).optional(),
+  })
+  .refine(
+    (data) => {
+      // If repositoryUrl is provided and not empty, repositoryType must be provided
+      if (data.repositoryUrl && data.repositoryUrl.trim() !== "") {
+        return !!data.repositoryType;
+      }
+      return true;
+    },
+    {
+      message: "Repository type is required when repository URL is provided",
+      path: ["repositoryType"],
+    },
+  )
+  .refine(
+    (data) => {
+      // If repositoryType is provided, repositoryUrl must be provided and not empty
+      if (data.repositoryType) {
+        return !!data.repositoryUrl && data.repositoryUrl.trim() !== "";
+      }
+      return true;
+    },
+    {
+      message: "Repository URL is required when repository type is provided",
+      path: ["repositoryUrl"],
+    },
+  );
 
 /**
  * Update project input schema

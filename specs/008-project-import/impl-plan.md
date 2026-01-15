@@ -107,8 +107,11 @@
 apps/web/app/projects/
   ├── import/
   │   └── page.tsx (Server Component - auth + renders client component)
+  └── page.tsx (Server Component - enhanced with Create Project button)
 
 apps/web/src/components/features/projects/
+  ├── CreateProjectModal.tsx (Client Component - modal for project creation)
+  ├── CreateProjectForm.tsx (Client Component - reusable project creation form)
   ├── RepositoryImportFlow.tsx (Client Component - main import UI)
   ├── RepositoryList.tsx (Client Component - repository selection)
   ├── RepositoryImportForm.tsx (Client Component - import confirmation)
@@ -116,6 +119,45 @@ apps/web/src/components/features/projects/
 ```
 
 **Component Details**:
+
+- **`/projects/page.tsx`** (Server Component - ENHANCED):
+  - Handles authentication via `requireAuth`
+  - Fetches projects list with pagination
+  - Renders projects grid with "Create Project" button in top-right header
+  - Button opens `CreateProjectModal` (client component wrapper)
+  - After successful creation, page refreshes to show new project
+
+- **`CreateProjectModal.tsx`** (Client Component - NEW):
+  - Modal wrapper for project creation form
+  - Manages modal open/close state
+  - Handles form submission via API
+  - Shows success toast and closes modal on success
+  - Refreshes page to show new project
+  - Props:
+    ```typescript
+    interface CreateProjectModalProps {
+      open: boolean;
+      onClose: () => void;
+    }
+    ```
+
+- **`CreateProjectForm.tsx`** (Client Component - NEW):
+  - Reusable project creation form component
+  - Extracted from `/onboarding/project/page.tsx`
+  - Handles form state, validation, and submission
+  - Supports optional repository URL/type fields
+  - Can be used in both onboarding (full page) and modal contexts
+  - Props:
+    ```typescript
+    interface CreateProjectFormProps {
+      onSubmit: (data: CreateProjectInput) => Promise<void>;
+      onCancel?: () => void;
+      initialValues?: Partial<CreateProjectInput>;
+      isSubmitting?: boolean;
+      error?: string | null;
+      mode?: 'onboarding' | 'modal'; // Controls styling/layout
+    }
+    ```
 
 - **`/projects/import/page.tsx`** (Server Component):
   - Handles authentication via `requireAuth`
@@ -173,23 +215,32 @@ apps/web/
 │   │   │   └── list/
 │   │   │       └── route.ts (NEW - repository listing endpoint)
 │   │   └── projects/
+│   │       ├── route.ts (ENHANCE - already supports repositoryUrl/repositoryType)
 │   │       └── import/
 │   │           └── route.ts (NEW - project import endpoint)
+│   ├── onboarding/
+│   │   └── project/
+│   │       └── page.tsx (REFACTOR - use CreateProjectForm component)
 │   └── projects/
+│       ├── page.tsx (ENHANCE - add Create Project button + modal)
 │       └── import/
 │           └── page.tsx (NEW - import page)
 └── src/
     ├── components/
     │   └── features/
     │       └── projects/
+    │           ├── CreateProjectModal.tsx (NEW - modal wrapper)
+    │           ├── CreateProjectForm.tsx (NEW - reusable form)
     │           ├── RepositoryImportFlow.tsx (NEW)
     │           ├── RepositoryList.tsx (NEW)
     │           ├── RepositoryImportForm.tsx (NEW)
     │           └── RepositoryListSkeleton.tsx (NEW)
     └── lib/
-        └── integrations/
-            ├── github.ts (ENHANCE - add listGitHubRepositories)
-            └── gitlab.ts (ENHANCE - add listGitLabRepositories)
+        ├── integrations/
+        │   ├── github.ts (ENHANCE - add listGitHubRepositories - already done)
+        │   └── gitlab.ts (ENHANCE - add listGitLabRepositories - already done)
+        └── utils/
+            └── project-key.ts (NEW - project key generation utility)
 ```
 
 ### State Management
@@ -199,44 +250,57 @@ apps/web/
 
 **State Requirements**:
 
-1. **Repository Listing State** (TanStack Query):
+1. **Project Creation Modal State** (React useState):
+   - Modal open/close state
+   - Form submission state
+   - Error state
+
+2. **Project Creation Form State** (React Hook Form):
+   - Project key, name, description
+   - Optional repository URL and type
+   - Validation state
+   - Submission state
+
+3. **Repository Listing State** (TanStack Query):
    - Fetched repositories list
    - Pagination metadata
    - Loading/error states
    - Cache management
 
-2. **OAuth Flow State** (URL + sessionStorage):
+4. **OAuth Flow State** (URL + sessionStorage):
    - OAuth state parameter for CSRF protection
    - Return URL after OAuth callback
    - Provider type (GitHub/GitLab)
 
-3. **Import Form State** (React Hook Form):
+5. **Import Form State** (React Hook Form):
    - Selected repository
    - Project key (editable)
    - Project name (editable)
    - Validation state
    - Submission state
 
-4. **Flow Navigation State** (React useState):
+6. **Flow Navigation State** (React useState):
    - Current step in import flow
    - Selected provider type
    - Access token (temporary, cleared after import)
 
 **State Management Strategy**:
 
+- **React useState**:
+  - Modal open/close state (CreateProjectModal)
+  - Flow step navigation (RepositoryImportFlow)
+  - Temporary OAuth state
+  - UI state (loading, errors)
+
+- **React Hook Form** (`react-hook-form`):
+  - Project creation form state and validation (CreateProjectForm)
+  - Import form state and validation (RepositoryImportForm)
+  - Zod schema for validation (reuse project validation schemas)
+
 - **TanStack Query** (`@tanstack/react-query`):
   - Repository listing: `useQuery` for fetching, `useMutation` for import
   - Query keys: `['repositories', providerType, page]`, `['import-project']`
-  - Cache invalidation after successful import
-
-- **React Hook Form** (`react-hook-form`):
-  - Import form state and validation
-  - Zod schema for validation (reuse project validation schemas)
-
-- **React useState**:
-  - Flow step navigation
-  - Temporary OAuth state
-  - UI state (loading, errors)
+  - Cache invalidation after successful import/project creation
 
 - **URL State** (Next.js searchParams):
   - OAuth callback parameters (code, state)
@@ -248,28 +312,41 @@ apps/web/
 
 **State Flow**:
 
-1. **User navigates to `/projects/import`**:
+1. **User navigates to `/projects` (projects listing page)**:
+   - Server component renders projects list
+   - "Create Project" button visible in top-right header
+   - User clicks button → opens `CreateProjectModal`
+
+2. **User creates project via modal**:
+   - Modal opens with `CreateProjectForm`
+   - User fills form (key, name, description, optional repository URL)
+   - Form validates using Zod schema
+   - On submit, calls `/api/projects` endpoint
+   - On success: modal closes, page refreshes, new project appears in list
+   - On error: error message displayed in form
+
+3. **User navigates to `/projects/import`** (repository import flow):
    - Server component renders `RepositoryImportFlow`
    - Client component initializes with provider selection step
 
-2. **User selects git provider (GitHub/GitLab)**:
+4. **User selects git provider (GitHub/GitLab)**:
    - Component initiates OAuth flow
    - Stores state in sessionStorage
    - Redirects to OAuth provider
 
-3. **OAuth callback returns**:
+5. **OAuth callback returns**:
    - Server component extracts code and state from URL
    - Validates state parameter
    - Exchanges code for access token
    - Stores token temporarily (or passes to client component)
    - Client component fetches repository list using TanStack Query
 
-4. **User views repository list**:
+6. **User views repository list**:
    - TanStack Query fetches repositories (with pagination)
    - Component displays list with loading/error states
    - User selects repository
 
-5. **User confirms import**:
+7. **User confirms import**:
    - Form validates project key and name
    - On submit, TanStack Query mutation calls import API
    - On success, invalidate queries, redirect to project page
@@ -293,13 +370,27 @@ apps/web/
    - Conflict resolution (append numbers)
    - Validation
 
-3. **Import Form Component** (`RepositoryImportForm.tsx`):
+3. **CreateProjectForm Component** (`CreateProjectForm.tsx`):
+   - Form validation (Zod schema)
+   - Project key, name, description fields
+   - Optional repository URL/type fields
+   - Error display
+   - Submit handler
+   - Both onboarding and modal modes
+
+4. **CreateProjectModal Component** (`CreateProjectModal.tsx`):
+   - Modal open/close behavior
+   - Form submission handling
+   - Success toast and page refresh
+   - Error handling
+
+5. **Import Form Component** (`RepositoryImportForm.tsx`):
    - Form validation
    - Project key editing
    - Error display
    - Submit handler
 
-4. **Repository List Component** (`RepositoryList.tsx`):
+6. **Repository List Component** (`RepositoryList.tsx`):
    - Repository rendering
    - Selection handling
    - Pagination controls
@@ -307,14 +398,19 @@ apps/web/
 
 **Integration Tests**:
 
-1. **Repository Listing API** (`/api/repositories/list`):
+1. **Project Creation API** (`/api/projects` - ENHANCED):
+   - Success case with optional repository URL/type
+   - Validation (project key uniqueness, repository URL format)
+   - Error handling (duplicate key, invalid URL)
+
+2. **Repository Listing API** (`/api/repositories/list`):
    - Success cases (GitHub, GitLab)
    - Pagination
    - Authentication validation
    - Error handling (invalid token, provider errors)
    - Response format validation
 
-2. **Project Import API** (`/api/projects/import`):
+3. **Project Import API** (`/api/projects/import`):
    - Success case (full import flow)
    - Duplicate repository detection
    - Project key conflict handling
@@ -325,7 +421,23 @@ apps/web/
 
 **E2E Tests** (Playwright):
 
-1. **Repository Import Flow**:
+1. **Project Creation via Modal**:
+   - Navigate to projects listing page
+   - Click "Create Project" button (top-right)
+   - Modal opens with project creation form
+   - Fill form and submit
+   - Verify modal closes
+   - Verify new project appears in list
+   - Verify page refresh shows new project
+
+2. **Project Creation with Repository URL**:
+   - Open create project modal
+   - Fill form with repository URL and type
+   - Submit
+   - Verify project created with repository URL stored
+   - Verify repository connection not automatically established
+
+3. **Repository Import Flow**:
    - Navigate to import page
    - Select GitHub provider
    - Complete OAuth flow (mocked)
@@ -336,19 +448,21 @@ apps/web/
    - Verify repository connected
    - Verify webhooks registered
 
-2. **Import with Custom Project Key**:
+4. **Import with Custom Project Key**:
    - Complete import flow
    - Edit project key in confirmation form
    - Submit import
    - Verify project created with custom key
 
-3. **Error Handling**:
+5. **Error Handling**:
+   - Attempt project creation with duplicate key
+   - Verify error message displayed
    - Attempt import with duplicate repository
    - Verify error message displayed
    - Attempt import with invalid project key
    - Verify validation errors
 
-4. **Repository Listing Pagination**:
+6. **Repository Listing Pagination**:
    - View repository list with many repositories
    - Navigate to next page
    - Verify pagination works correctly
@@ -366,10 +480,14 @@ apps/web/src/
 ├── components/
 │   └── features/
 │       └── projects/
+│           ├── CreateProjectForm.test.tsx (unit tests - new)
+│           ├── CreateProjectModal.test.tsx (unit tests - new)
 │           ├── RepositoryImportForm.test.tsx (unit tests)
 │           └── RepositoryList.test.tsx (unit tests)
 └── app/
     ├── api/
+    │   ├── projects/
+    │   │   └── route.test.ts (integration tests - enhanced)
     │   ├── repositories/
     │   │   └── list/
     │   │       └── route.test.ts (integration tests)
@@ -377,7 +495,7 @@ apps/web/src/
     │       └── import/
     │           └── route.test.ts (integration tests)
 └── e2e/
-    └── project-import.spec.ts (E2E tests)
+    └── project-import.spec.ts (E2E tests - enhanced)
 ```
 
 ## Phase 3: Implementation
@@ -389,8 +507,21 @@ apps/web/src/
 
 ## Notes
 
-- Building on existing repository connection functionality - reuse OAuth flows and API integration patterns
-- Repository listing endpoints are new but follow existing API patterns
-- Project import combines existing project creation and repository connection logic
-- All functionality builds on existing infrastructure (OAuth config, webhook registration, config sync)
-- Webhook registration failures cause transaction rollback (clarified in spec)
+- **User Story 1 (Manual Project Creation)**:
+  - Modal approach for post-onboarding project creation (clarified in spec)
+  - Button placement: top-right of projects listing page header
+  - Reusable `CreateProjectForm` component extracted from onboarding page
+  - Modal pattern follows existing `CreateIssueModal` and `CreateCycleModal` patterns
+  - Repository URL storage only (no automatic connection) - clarified in spec
+
+- **User Stories 2-3 (Repository Import)**:
+  - Building on existing repository connection functionality - reuse OAuth flows and API integration patterns
+  - Repository listing endpoints are new but follow existing API patterns
+  - Project import combines existing project creation and repository connection logic
+  - All functionality builds on existing infrastructure (OAuth config, webhook registration, config sync)
+  - Webhook registration failures cause transaction rollback (clarified in spec)
+
+- **Component Reuse**:
+  - `CreateProjectForm` used in both onboarding (full page) and modal contexts
+  - Form supports `mode` prop to adjust styling/layout for different contexts
+  - Existing validation schemas reused (`createProjectSchema` from `lib/validation/project.ts`)

@@ -1,39 +1,33 @@
-"use client";
+import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+import { requireAuthServer } from "@/middleware/auth";
+import { projectRepository } from "@stride/database";
+import { GoToDashboardButton } from "./GoToDashboardButton";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@stride/ui";
+/**
+ * Onboarding Complete Page (Server Component)
+ * 
+ * Displays completion message after onboarding flow.
+ * Fetches projects on the server to check if any exist,
+ * which determines whether to show "Connect a repository" tip.
+ */
+export default async function CompletePage() {
+  // Authenticate user
+  const headersList = await headers();
+  const session = await requireAuthServer(headersList);
 
-export default function CompletePage() {
-  const router = useRouter();
-  const [projects, setProjects] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  if (!session) {
+    redirect("/login");
+  }
 
-  useEffect(() => {
-    // Fetch projects to see if any exist
-    const fetchProjects = async () => {
-      try {
-        const response = await fetch("/api/projects");
-        if (response.ok) {
-          const data = await response.json();
-          setProjects(data.items || []);
-        }
-      } catch (error) {
-        console.error("Failed to fetch projects:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Fetch projects to check if any exist
+  // This determines whether to show the "Connect a repository" tip
+  const projectsResult = await projectRepository.findManyPaginated(undefined, {
+    page: 1,
+    pageSize: 1, // We only need to know if any exist
+  });
 
-    fetchProjects();
-  }, []);
-
-  const handleGoToDashboard = () => {
-    // Always redirect to projects listing page (T017, T036)
-    // The listing page will show projects or empty state as appropriate
-    // Documentation: The /projects route serves as the main dashboard after onboarding
-    router.push("/projects");
-  };
+  const hasProjects = projectsResult.items.length > 0;
 
   return (
     <div className="mx-auto max-w-2xl text-center">
@@ -115,7 +109,7 @@ export default function CompletePage() {
               Customize your workflow configuration in Project Settings
             </span>
           </li>
-          {projects.length === 0 && (
+          {!hasProjects && (
             <li className="flex items-start">
               <svg
                 className="mr-2 h-5 w-5 flex-shrink-0 text-accent"
@@ -137,9 +131,7 @@ export default function CompletePage() {
       </div>
 
       <div className="mt-8">
-        <Button onClick={handleGoToDashboard} size="lg">
-          Go to Dashboard
-        </Button>
+        <GoToDashboardButton />
       </div>
     </div>
   );

@@ -24,6 +24,8 @@ export interface GitLabRepository {
   http_url_to_repo: string;
   default_branch: string;
   visibility: string;
+  description: string | null;
+  updated_at: string;
 }
 
 /**
@@ -173,6 +175,80 @@ export function parseGitLabRepositoryUrl(
   }
 
   return null;
+}
+
+/**
+ * List GitLab repositories (projects) for the authenticated user
+ * @param accessToken - GitLab access token
+ * @param baseUrl - Optional base URL for self-hosted instances
+ * @param page - Page number (default: 1)
+ * @param perPage - Items per page (default: 100, max: 100)
+ * @returns List of repositories with pagination info
+ */
+export async function listGitLabRepositories(
+  accessToken: string,
+  baseUrl?: string,
+  page: number = 1,
+  perPage: number = 100,
+): Promise<{
+  repositories: GitLabRepository[];
+  pagination: {
+    page: number;
+    perPage: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+}> {
+  const apiBaseUrl = baseUrl || "https://gitlab.com";
+  const params = new URLSearchParams({
+    per_page: Math.min(perPage, 100).toString(),
+    page: page.toString(),
+    order_by: "updated_at",
+    sort: "desc",
+    membership: "true", // Only show projects user is a member of
+  });
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/v4/projects?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`GitLab API error: ${response.statusText}`);
+  }
+
+  const repositories = (await response.json()) as GitLabRepository[];
+
+  // GitLab API includes pagination info in headers
+  const totalHeader = response.headers.get("X-Total");
+  const totalPagesHeader = response.headers.get("X-Total-Pages");
+  const nextPageHeader = response.headers.get("X-Next-Page");
+  const prevPageHeader = response.headers.get("X-Prev-Page");
+
+  const total = totalHeader ? parseInt(totalHeader, 10) : repositories.length;
+  const totalPages = totalPagesHeader
+    ? parseInt(totalPagesHeader, 10)
+    : Math.ceil(total / perPage);
+  const hasNext = nextPageHeader !== null && nextPageHeader !== "";
+  const hasPrev = prevPageHeader !== null && prevPageHeader !== "";
+
+  return {
+    repositories,
+    pagination: {
+      page,
+      perPage,
+      total,
+      totalPages,
+      hasNext,
+      hasPrev,
+    },
+  };
 }
 
 /**
