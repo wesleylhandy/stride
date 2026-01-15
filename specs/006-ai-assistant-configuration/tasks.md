@@ -184,8 +184,8 @@
 - [ ] T072 [P] Add logging and observability (log assistant usage, response times, errors) in chat routes
 - [ ] T072A [P] Implement response time monitoring and validation against SC-008 target (30 seconds for 95% of queries) in apps/web/src/lib/assistant/performance-monitor.ts
 - [ ] T073 [P] Update documentation with AI assistant feature in docs/user/ai-assistant.md
-- [ ] T074 [P] Add unit tests for prompt builder, config comparison, doc retrieval in apps/web/src/lib/assistant/__tests__/
-- [ ] T075 [P] Add integration tests for chat flow in apps/web/__tests__/integration/assistant/
+- [ ] T074 [P] Add unit tests for prompt builder, config comparison, doc retrieval in apps/web/src/lib/assistant/**tests**/
+- [ ] T075 [P] Add integration tests for chat flow in apps/web/**tests**/integration/assistant/
 - [ ] T076 Run quickstart.md validation to ensure all examples work
 
 ---
