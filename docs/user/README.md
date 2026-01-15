@@ -79,6 +79,32 @@ The dashboard shows:
 
 The project key is used to prefix issue keys (e.g., "PROJ-1", "PROJ-2").
 
+### Importing a Project from Git Provider
+
+You can import a project directly from GitHub or GitLab, which automatically sets up the project with repository information, configuration sync, and webhook registration.
+
+**Prerequisites**: Git provider OAuth must be configured in infrastructure settings (see [Infrastructure Configuration Guide](/docs/deployment/infrastructure-configuration)).
+
+#### Importing a Project
+
+1. Navigate to the Projects page (`/projects`)
+2. Click "Import Project" button (or navigate to `/projects/import`)
+3. Select your git provider (GitHub or GitLab)
+4. Authenticate with your git provider (OAuth flow)
+5. Select a repository from the list
+6. Review and optionally edit:
+   - **Project Key**: Auto-generated from repository name (you can customize)
+   - **Project Name**: Auto-populated from repository name (you can edit)
+7. Click "Import Project"
+
+After import:
+- The project is created with repository information
+- The repository connection is automatically established
+- Configuration is synced from `stride.config.yaml` if present in the repository
+- Webhooks are registered for branch and pull request events
+
+**Note**: If you try to import a repository that's already connected to another project, you'll see an error message.
+
 ### Viewing Projects
 
 - **All Projects**: Click "Projects" in the navigation to see all projects

@@ -24,6 +24,7 @@
     "@stride/types": "workspace:*",
     "@stride/ui": "workspace:*",
     "@stride/yaml-config": "workspace:*",
+    "@tanstack/react-query": "^5.90.17",
     "bcryptjs": "^2.4.3",
     "cheerio": "^1.0.0",
     "gray-matter": "^4.0.3",

@@ -5,6 +5,7 @@ import { headers } from 'next/headers';
 import { ProjectCard } from '@/components/ProjectCard';
 import { ProjectsEmptyState } from '@/components/ProjectsEmptyState';
 import { PaginationControls } from '@/components/PaginationControls';
+import { ProjectsPageClient } from '@/components/features/projects/ProjectsPageClient';
 import { PageContainer } from '@stride/ui';
 import type { Metadata } from 'next';
 
@@ -79,14 +80,12 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
     // Uses full-width container for better grid layout on large screens
     return (
       <PageContainer variant="full" className="py-6">
-        <div className="mb-6">
-          <p className="text-sm text-foreground-secondary dark:text-foreground-dark-secondary">
-            {projects.total} {projects.total === 1 ? 'project' : 'projects'}
-          </p>
-        </div>
+        <ProjectsPageClient projectCount={projects.total} />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {projects.items.map((project) => (
-            <ProjectCard key={project.id} project={project} />
+            <div key={project.id} className="flex flex-col">
+              <ProjectCard project={project} />
+            </div>
           ))}
         </div>
         

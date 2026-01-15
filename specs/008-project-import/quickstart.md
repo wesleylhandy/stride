@@ -11,12 +11,22 @@ This feature enables users to import projects from git repositories (GitHub, Git
 
 ### Flow 1: Manual Project Creation (Enhanced)
 
-1. Navigate to project creation page (`/onboarding/project` or `/projects/new`)
+**During Onboarding**:
+1. Navigate to project creation page (`/onboarding/project`)
 2. Enter project key, name, and description
 3. Optionally provide repository URL and type
 4. Submit form
-5. If repository URL provided, repository connection is established automatically
-6. Project is created with repository connected
+5. Project is created (repository URL stored if provided; connection happens separately)
+
+**After Onboarding**:
+1. Navigate to projects listing page (`/projects`)
+2. Click "Create Project" button (top-right header)
+3. Modal opens with project creation form
+4. Enter project key, name, and description
+5. Optionally provide repository URL and type
+6. Submit form
+7. Modal closes and projects list refreshes
+8. Project is created (repository URL stored if provided; connection happens separately)
 
 ### Flow 2: Repository Import (Automated)
 

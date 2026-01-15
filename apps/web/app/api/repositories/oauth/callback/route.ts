@@ -115,15 +115,44 @@ export async function GET(request: NextRequest) {
       return redirect(errorUrl.toString());
     }
 
-    // Decode state to get project context
-    const state = decodeOAuthState(stateParam);
-    if (!state) {
-      const errorUrl = new URL('/onboarding/complete', request.url);
-      errorUrl.searchParams.set('error', 'invalid_state');
-      errorUrl.searchParams.set('error_description', 'Invalid OAuth state parameter');
-      return redirect(errorUrl.toString());
+    // Decode state to get project context (if it's an encoded OAuthState with projectId)
+    let state: OAuthState | null = null;
+    try {
+      state = decodeOAuthState(stateParam);
+    } catch (decodeError) {
+      // If decoding fails, treat as import flow (simple UUID state)
+      console.log('OAuth state decode failed (likely import flow with UUID state):', decodeError);
+    }
+    
+    // Check if this is an import flow (no projectId) vs project connection flow (has projectId)
+    if (!state || !state.projectId) {
+      // This is an import flow - redirect to import page with code and state
+      // The client component will handle the token exchange
+      const returnToRaw = request.nextUrl.searchParams.get('returnTo') || '/projects/import';
+      const validatedReturnTo = validateReturnToUrl(returnToRaw, request.url);
+      
+      if (!validatedReturnTo) {
+        // Fallback to /projects/import if validation fails
+        console.warn('Invalid returnTo URL, using default /projects/import:', returnToRaw);
+      }
+      
+      const finalReturnTo = validatedReturnTo || '/projects/import';
+      const importUrl = new URL(finalReturnTo, request.url);
+      importUrl.searchParams.set('code', code);
+      importUrl.searchParams.set('state', stateParam);
+      
+      // Preserve any existing error params
+      if (error) {
+        importUrl.searchParams.set('error', error);
+      }
+      if (errorDescription) {
+        importUrl.searchParams.set('error_description', errorDescription);
+      }
+      
+      return redirect(importUrl.toString());
     }
 
+    // This is a project connection flow - proceed with existing logic
     const { projectId, returnTo: stateReturnTo, repositoryType: stateRepositoryType, repositoryUrl: stateRepositoryUrl } = state;
     const returnTo = stateReturnTo || '/onboarding/complete';
 
@@ -276,14 +305,39 @@ export async function GET(request: NextRequest) {
     successUrl.searchParams.set('success', 'true');
     return redirect(successUrl.toString());
   } catch (error) {
+    // Check if this is a Next.js redirect error - if so, re-throw it
+    if (error && typeof error === 'object' && 'digest' in error && typeof error.digest === 'string' && error.digest.includes('NEXT_REDIRECT')) {
+      throw error;
+    }
+
     console.error('OAuth callback error:', error);
     // Try to decode state for error redirect
     let returnTo = '/onboarding/complete';
     const stateParam = request.nextUrl.searchParams.get('state');
     if (stateParam) {
-      const state = decodeOAuthState(stateParam);
-      if (state?.returnTo) {
-        const validated = validateReturnToUrl(state.returnTo, request.url);
+      try {
+        const state = decodeOAuthState(stateParam);
+        if (state?.returnTo) {
+          const validated = validateReturnToUrl(state.returnTo, request.url);
+          if (validated) {
+            returnTo = validated;
+          }
+        }
+      } catch {
+        // If state can't be decoded, check if there's a returnTo query param (for import flow)
+        const returnToRaw = request.nextUrl.searchParams.get('returnTo');
+        if (returnToRaw) {
+          const validated = validateReturnToUrl(returnToRaw, request.url);
+          if (validated) {
+            returnTo = validated;
+          }
+        }
+      }
+    } else {
+      // No state param - check for returnTo query param (for import flow)
+      const returnToRaw = request.nextUrl.searchParams.get('returnTo');
+      if (returnToRaw) {
+        const validated = validateReturnToUrl(returnToRaw, request.url);
         if (validated) {
           returnTo = validated;
         }

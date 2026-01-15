@@ -25,9 +25,9 @@
 
 **Purpose**: Project initialization and utility functions needed across user stories
 
-- [ ] T001 Create project key generation utility function in apps/web/src/lib/utils/project-key.ts
-- [ ] T002 [P] Add RepositoryInfo and PaginationInfo types for repository listing API in apps/web/app/api/repositories/list/route.ts (co-locate with API route following existing pattern)
-- [ ] T003 [P] Add ImportProjectData type in apps/web/src/components/features/projects/RepositoryImportForm.tsx (co-locate with component following existing pattern)
+- [x] T001 Create project key generation utility function in apps/web/src/lib/utils/project-key.ts
+- [x] T002 [P] Add RepositoryInfo and PaginationInfo types for repository listing API in apps/web/app/api/repositories/list/route.ts (co-locate with API route following existing pattern)
+- [x] T003 [P] Add ImportProjectData type in apps/web/src/components/features/projects/RepositoryImportForm.tsx (co-locate with component following existing pattern)
 
 ---
 
@@ -37,10 +37,10 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 Enhance GitHub integration with repository listing function in apps/web/src/lib/integrations/github.ts
-- [ ] T005 [P] Enhance GitLab integration with repository listing function in apps/web/src/lib/integrations/gitlab.ts
-- [ ] T006 Create repository listing API endpoint in apps/web/app/api/repositories/list/route.ts
-- [ ] T007 Create project import API endpoint in apps/web/app/api/projects/import/route.ts
+- [x] T004 Enhance GitHub integration with repository listing function in apps/web/src/lib/integrations/github.ts
+- [x] T005 [P] Enhance GitLab integration with repository listing function in apps/web/src/lib/integrations/gitlab.ts
+- [x] T006 Create repository listing API endpoint in apps/web/app/api/repositories/list/route.ts
+- [x] T007 Create project import API endpoint in apps/web/app/api/projects/import/route.ts
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -52,13 +52,23 @@
 
 **Independent Test**: User can navigate to project creation, enter project key/name/description, optionally provide repository URL, and successfully create a project. Project appears in projects list with correct information, and repository URL is stored if provided (connection can be established later via project settings or import flow).
 
+### Tests for User Story 1
+
+- [x] T011 [P] [US1] Unit test for CreateProjectForm component in apps/web/src/components/features/projects/CreateProjectForm.test.tsx
+- [x] T012 [P] [US1] Unit test for CreateProjectModal component in apps/web/src/components/features/projects/CreateProjectModal.test.tsx
+
 ### Implementation for User Story 1
 
-- [ ] T008 [US1] Enhance POST /api/projects endpoint to accept optional repositoryUrl and repositoryType in apps/web/app/api/projects/route.ts (URL is stored on project entity only; no connection logic)
-- [ ] T009 [US1] Update project creation validation schema to include optional repository fields in apps/web/src/lib/validation/project.ts
-- [ ] T010 [US1] Update manual project creation UI to include optional repository URL input in apps/web/app/onboarding/project/page.tsx
+- [x] T008 [US1] Enhance POST /api/projects endpoint to accept optional repositoryUrl and repositoryType in apps/web/app/api/projects/route.ts (URL is stored on project entity only; no connection logic)
+- [x] T009 [US1] Update project creation validation schema to include optional repository fields in apps/web/src/lib/validation/project.ts
+- [x] T010 [US1] Update manual project creation UI to include optional repository URL input in apps/web/app/onboarding/project/page.tsx
+- [x] T013 [US1] Extract project creation form into reusable component (CreateProjectForm) in apps/web/src/components/features/projects/CreateProjectForm.tsx
+- [x] T014 [US1] Create CreateProjectModal component in apps/web/src/components/features/projects/CreateProjectModal.tsx
+- [x] T015 [US1] Update `/onboarding/project` page to use shared CreateProjectForm component in apps/web/app/onboarding/project/page.tsx
+- [x] T016 [US1] Add "Create Project" button to projects listing page header (top-right) in apps/web/app/projects/page.tsx
+- [x] T017 [US1] Integrate CreateProjectModal with projects listing page in apps/web/app/projects/page.tsx
 
-**Checkpoint**: At this point, User Story 1 should be fully functional and testable independently. Users can create projects manually with or without repository URL (URL is stored; connection happens separately).
+**Checkpoint**: At this point, User Story 1 should be fully functional and testable independently. Users can create projects manually with or without repository URL (URL is stored; connection happens separately), both during onboarding (full page form) and after onboarding is complete (modal dialog from projects listing page).
 
 ---
 
@@ -70,20 +80,20 @@
 
 ### Tests for User Story 2
 
-- [ ] T012 [P] [US2] Unit test for listGitHubRepositories function in apps/web/src/lib/integrations/github.test.ts
-- [ ] T013 [P] [US2] Unit test for listGitLabRepositories function in apps/web/src/lib/integrations/gitlab.test.ts
-- [ ] T014 [P] [US2] Integration test for GET /api/repositories/list endpoint in apps/web/app/api/repositories/list/route.test.ts
+- [x] T018 [P] [US2] Unit test for listGitHubRepositories function in apps/web/src/lib/integrations/github.test.ts
+- [x] T019 [P] [US2] Unit test for listGitLabRepositories function in apps/web/src/lib/integrations/gitlab.test.ts
+- [x] T020 [P] [US2] Integration test for GET /api/repositories/list endpoint in apps/web/app/api/repositories/list/route.test.ts
 
 ### Implementation for User Story 2
 
-- [ ] T015 [US2] Create import page server component in apps/web/app/projects/import/page.tsx
-- [ ] T016 [US2] Create RepositoryImportFlow client component in apps/web/src/components/features/projects/RepositoryImportFlow.tsx
-- [ ] T017 [US2] Create RepositoryList client component in apps/web/src/components/features/projects/RepositoryList.tsx
-- [ ] T018 [P] [US2] Create RepositoryListSkeleton loading component in apps/web/src/components/features/projects/RepositoryListSkeleton.tsx
-- [ ] T019 [US2] Implement OAuth flow integration in RepositoryImportFlow component
-- [ ] T020 [US2] Implement repository listing with TanStack Query in RepositoryList component
-- [ ] T021 [US2] Add pagination controls to RepositoryList component
-- [ ] T022 [US2] Add error handling and loading states to repository listing flow
+- [x] T021 [US2] Create import page server component in apps/web/app/projects/import/page.tsx
+- [x] T022 [US2] Create RepositoryImportFlow client component in apps/web/src/components/features/projects/RepositoryImportFlow.tsx
+- [x] T023 [US2] Create RepositoryList client component in apps/web/src/components/features/projects/RepositoryList.tsx
+- [x] T024 [P] [US2] Create RepositoryListSkeleton loading component in apps/web/src/components/features/projects/RepositoryListSkeleton.tsx
+- [x] T025 [US2] Implement OAuth flow integration in RepositoryImportFlow component
+- [x] T026 [US2] Implement repository listing with TanStack Query in RepositoryList component
+- [x] T027 [US2] Add pagination controls to RepositoryList component
+- [x] T028 [US2] Add error handling and loading states to repository listing flow
 
 **Checkpoint**: At this point, User Story 2 should be fully functional and testable independently. Users can authenticate with git providers and view their repository lists.
 
@@ -97,25 +107,25 @@
 
 ### Tests for User Story 3
 
-- [ ] T023 [P] [US3] Unit test for project key generation utility in apps/web/src/lib/utils/project-key.test.ts
-- [ ] T024 [P] [US3] Unit test for RepositoryImportForm component in apps/web/src/components/features/projects/RepositoryImportForm.test.tsx
-- [ ] T025 [P] [US3] Integration test for POST /api/projects/import endpoint in apps/web/app/api/projects/import/route.test.ts
-- [ ] T026 [P] [US3] Integration test for transaction rollback on webhook failure in apps/web/app/api/projects/import/route.test.ts
+- [x] T029 [P] [US3] Unit test for project key generation utility in apps/web/src/lib/utils/project-key.test.ts
+- [x] T030 [P] [US3] Unit test for RepositoryImportForm component in apps/web/src/components/features/projects/RepositoryImportForm.test.tsx
+- [x] T031 [P] [US3] Integration test for POST /api/projects/import endpoint in apps/web/app/api/projects/import/route.test.ts
+- [x] T032 [P] [US3] Integration test for transaction rollback on webhook failure in apps/web/app/api/projects/import/route.test.ts
 
 ### Implementation for User Story 3
 
-- [ ] T027 [US3] Create RepositoryImportForm client component in apps/web/src/components/features/projects/RepositoryImportForm.tsx
-- [ ] T028 [US3] Implement project import mutation with TanStack Query in RepositoryImportFlow component
-- [ ] T029 [US3] Add project key editing and validation to RepositoryImportForm component
-- [ ] T030 [US3] Implement duplicate repository detection in POST /api/projects/import endpoint
-- [ ] T031 [US3] Implement project key generation from repository name in POST /api/projects/import endpoint
-- [ ] T032 [US3] Implement repository metadata fetching in POST /api/projects/import endpoint
-- [ ] T033 [US3] Implement configuration sync from repository in POST /api/projects/import endpoint
-- [ ] T034 [US3] Implement repository connection creation in POST /api/projects/import endpoint
-- [ ] T035 [US3] Implement webhook registration in POST /api/projects/import endpoint
-- [ ] T036 [US3] Implement transaction rollback on webhook registration failure in POST /api/projects/import endpoint (use Prisma $transaction pattern - see apps/web/src/lib/services/invitation-service.ts:252 for example)
-- [ ] T037 [US3] Add error handling for import failures in RepositoryImportForm component
-- [ ] T038 [US3] Add success redirect to project page after import completion
+- [x] T033 [US3] Create RepositoryImportForm client component in apps/web/src/components/features/projects/RepositoryImportForm.tsx
+- [x] T034 [US3] Implement project import mutation with TanStack Query in RepositoryImportFlow component
+- [x] T035 [US3] Add project key editing and validation to RepositoryImportForm component
+- [x] T036 [US3] Implement duplicate repository detection in POST /api/projects/import endpoint
+- [x] T037 [US3] Implement project key generation from repository name in POST /api/projects/import endpoint
+- [x] T038 [US3] Implement repository metadata fetching in POST /api/projects/import endpoint
+- [x] T039 [US3] Implement configuration sync from repository in POST /api/projects/import endpoint
+- [x] T040 [US3] Implement repository connection creation in POST /api/projects/import endpoint
+- [x] T041 [US3] Implement webhook registration in POST /api/projects/import endpoint
+- [x] T042 [US3] Implement transaction rollback on webhook registration failure in POST /api/projects/import endpoint (use Prisma $transaction pattern - see apps/web/src/lib/services/invitation-service.ts:252 for example)
+- [x] T043 [US3] Add error handling for import failures in RepositoryImportForm component
+- [x] T044 [US3] Add success redirect to project page after import completion
 
 **Checkpoint**: At this point, User Story 3 should be fully functional and testable independently. Users can import projects from repositories with automatic setup.
 
@@ -127,19 +137,21 @@
 
 ### E2E Tests
 
-- [ ] T039 [P] E2E test for repository import flow in apps/web/e2e/project-import.spec.ts
-- [ ] T040 [P] E2E test for import with custom project key in apps/web/e2e/project-import.spec.ts
-- [ ] T041 [P] E2E test for error handling in import flow in apps/web/e2e/project-import.spec.ts
-- [ ] T042 [P] E2E test for repository listing pagination in apps/web/e2e/project-import.spec.ts
+- [x] T045 [P] E2E test for project creation via modal in apps/web/e2e/project-import.spec.ts
+- [x] T046 [P] E2E test for project creation with repository URL in apps/web/e2e/project-import.spec.ts
+- [x] T047 [P] E2E test for repository import flow in apps/web/e2e/project-import.spec.ts
+- [x] T048 [P] E2E test for import with custom project key in apps/web/e2e/project-import.spec.ts
+- [x] T049 [P] E2E test for error handling in import flow in apps/web/e2e/project-import.spec.ts
+- [x] T050 [P] E2E test for repository listing pagination in apps/web/e2e/project-import.spec.ts
 
 ### Polish & Cross-Cutting Concerns
 
-- [ ] T043 [P] Add accessibility attributes to all new components (ARIA labels, keyboard navigation)
-- [ ] T044 [P] Add loading states and error boundaries to import page
-- [ ] T045 [P] Update documentation with import feature usage in docs/user/README.md
-- [ ] T046 [P] Add repository connection status indicator to repository list (optional enhancement)
-- [ ] T047 Code cleanup and refactoring across all new components
-- [ ] T048 Run quickstart.md validation to ensure all steps work correctly
+- [x] T051 [P] Add accessibility attributes to all new components (ARIA labels, keyboard navigation)
+- [x] T052 [P] Add loading states and error boundaries to import page
+- [x] T053 [P] Update documentation with import feature usage in docs/user/README.md
+- [x] T054 [P] Add repository connection status indicator to repository list (optional enhancement)
+- [x] T055 Code cleanup and refactoring across all new components
+- [x] T056 Run quickstart.md validation to ensure all steps work correctly
 
 ---
 
@@ -177,17 +189,27 @@
 
 ---
 
+## Parallel Example: User Story 1
+
+```bash
+# Launch all tests for User Story 1 together:
+Task: "Unit test for CreateProjectForm component in apps/web/src/components/features/projects/CreateProjectForm.test.tsx (T011)"
+Task: "Unit test for CreateProjectModal component in apps/web/src/components/features/projects/CreateProjectModal.test.tsx (T012)"
+```
+
+---
+
 ## Parallel Example: User Story 2
 
 ```bash
 # Launch all tests for User Story 2 together:
-Task: "Unit test for listGitHubRepositories function in apps/web/src/lib/integrations/github.test.ts"
-Task: "Unit test for listGitLabRepositories function in apps/web/src/lib/integrations/gitlab.test.ts"
-Task: "Integration test for GET /api/repositories/list endpoint in apps/web/app/api/repositories/list/route.test.ts"
+Task: "Unit test for listGitHubRepositories function in apps/web/src/lib/integrations/github.test.ts (T018)"
+Task: "Unit test for listGitLabRepositories function in apps/web/src/lib/integrations/gitlab.test.ts (T019)"
+Task: "Integration test for GET /api/repositories/list endpoint in apps/web/app/api/repositories/list/route.test.ts (T020)"
 
 # Launch all components for User Story 2 together (after tests):
-Task: "Create RepositoryListSkeleton loading component in apps/web/src/components/features/projects/RepositoryListSkeleton.tsx"
-Task: "Create RepositoryList client component in apps/web/src/components/features/projects/RepositoryList.tsx"
+Task: "Create RepositoryListSkeleton loading component in apps/web/src/components/features/projects/RepositoryListSkeleton.tsx (T024)"
+Task: "Create RepositoryList client component in apps/web/src/components/features/projects/RepositoryList.tsx (T023)"
 ```
 
 ---
@@ -196,10 +218,10 @@ Task: "Create RepositoryList client component in apps/web/src/components/feature
 
 ```bash
 # Launch all tests for User Story 3 together:
-Task: "Unit test for project key generation utility in apps/web/src/lib/utils/project-key.test.ts"
-Task: "Unit test for RepositoryImportForm component in apps/web/src/components/features/projects/RepositoryImportForm.test.tsx"
-Task: "Integration test for POST /api/projects/import endpoint in apps/web/app/api/projects/import/route.test.ts"
-Task: "Integration test for transaction rollback on webhook failure in apps/web/app/api/projects/import/route.test.ts"
+Task: "Unit test for project key generation utility in apps/web/src/lib/utils/project-key.test.ts (T029)"
+Task: "Unit test for RepositoryImportForm component in apps/web/src/components/features/projects/RepositoryImportForm.test.tsx (T030)"
+Task: "Integration test for POST /api/projects/import endpoint in apps/web/app/api/projects/import/route.test.ts (T031)"
+Task: "Integration test for transaction rollback on webhook failure in apps/web/app/api/projects/import/route.test.ts (T032)"
 ```
 
 ---
@@ -245,5 +267,7 @@ With multiple developers:
 - Stop at any checkpoint to validate story independently
 - Avoid: vague tasks, same file conflicts, cross-story dependencies that break independence
 - All three user stories are P1 priority, but can be delivered incrementally
-- User Story 1 enhances existing functionality (manual project creation)
+- User Story 1 enhances existing functionality (manual project creation with modal approach for post-onboarding)
 - User Stories 2 and 3 add new functionality (repository import workflow)
+- User Story 1 uses modal dialog pattern (CreateProjectModal) consistent with existing CreateIssueModal and CreateCycleModal patterns
+- Create Project button is placed in top-right of projects listing page header (clarified in spec)
