@@ -17,7 +17,7 @@ export const StatusConfigSchema = z.strictObject({
 });
 
 // Custom field type enum
-const CustomFieldTypeSchema = z.enum(['text', 'number', 'dropdown', 'date', 'boolean']);
+const CustomFieldTypeSchema = z.enum(['text', 'number', 'dropdown', 'date', 'boolean', 'textarea']);
 
 // Custom field configuration schema
 export const CustomFieldConfigSchema = z.strictObject({

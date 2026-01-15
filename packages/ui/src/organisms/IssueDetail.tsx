@@ -162,6 +162,8 @@ function renderCustomFieldValue(
         return formatDate(typeof value === 'string' ? new Date(value) : value);
       }
       return String(value);
+    case 'textarea':
+      return <MarkdownRenderer content={String(value)} />;
     default:
       return String(value);
   }
