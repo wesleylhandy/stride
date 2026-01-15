@@ -69,6 +69,7 @@ model User {
   sessions         Session[]
   sentInvitations  Invitation[]                @relation("SentInvitations")
   updatedConfigs   GlobalInfrastructureConfig[] @relation("ConfigUpdater")
+  assistantSessions ConfigurationAssistantSession[]
 
   @@index([role])
   @@map("users")
@@ -93,6 +94,7 @@ model Project {
   repositoryConnections RepositoryConnection[]
   webhooks              Webhook[]
   aiProviderConfigs     AiProviderConfig[]
+  assistantSessions     ConfigurationAssistantSession[]
 
   @@index([repositoryUrl])
   @@map("projects")
@@ -335,4 +337,38 @@ model AiProviderConfig {
   @@unique([projectId, providerType])
   @@index([projectId])
   @@map("ai_provider_configs")
+}
+
+model ConfigurationAssistantSession {
+  id          String   @id @default(uuid())
+  userId      String
+  projectId   String?
+  contextType String   // "project" or "infrastructure"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project  Project?          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  messages AssistantMessage[]
+
+  @@index([userId, projectId])
+  @@index([updatedAt])
+  @@index([userId, contextType])
+  @@map("configuration_assistant_sessions")
+}
+
+model AssistantMessage {
+  id        String   @id @default(uuid())
+  sessionId String
+  role      String   // "user" or "assistant"
+  content   String   @db.Text
+  metadata  Json?    // Config references, doc links, suggestions
+  createdAt DateTime @default(now())
+
+  // Relations
+  session ConfigurationAssistantSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
+  @@map("assistant_messages")
 }

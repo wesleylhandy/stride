@@ -10,10 +10,11 @@
 ### Session 2026-01-23
 
 - Q: What are the access control requirements for the AI assistant? Who can use it? → A: Role-based permissions configurable per project. Default: only project admins can use project assistant; only system admins can use infrastructure assistant. Projects can opt-in to allow members/viewers access (configurable per project). Infrastructure assistant always requires system admin role.
-- Q: What rate limiting strategy should be implemented to prevent abuse? → A: Per-user rate limits (e.g., 20 messages per minute) with separate limits for AI Gateway calls to protect the service.
-- Q: How should the system handle concurrent configuration changes (e.g., user edits config while assistant suggests changes)? → A: Detect conflicts and prompt user to resolve. Show both versions (current database state vs assistant suggestion), let user choose which to keep or merge manually.
-- Q: How should session lifecycle and conversation history be managed? → A: Sessions persist indefinitely, but UI shows only recent sessions (last 30 days) with option to archive/delete older ones. System MUST implement creative context management strategy to prevent context window overload when sending conversation history to AI (e.g., summarization, sliding window, or selective message inclusion based on relevance).
+- Q: What rate limiting strategy should be implemented to prevent abuse? → A: Per-user rate limits (e.g., 20 messages per minute) with separate limits for AI Gateway calls to protect the service. Rate limits are configurable via constants in the rate limiting utility (following existing codebase pattern), with defaults of 20 messages per minute per user and 60 requests per minute for AI Gateway calls.
+- Q: How should the system handle concurrent configuration changes (e.g., user edits config while assistant suggests changes)? → A: Detect conflicts and prompt user to resolve. Show both versions (current database state vs assistant suggestion) side-by-side, let user choose to: (1) keep current version, (2) use suggested version, or (3) manually edit/merge both versions. UI displays diff view with clear labels for current vs suggested.
+- Q: How should session lifecycle and conversation history be managed? → A: Sessions persist indefinitely, but UI shows only recent sessions (last 30 days) with option to archive/delete older ones. System MUST implement sliding window context management strategy: include most recent N messages (e.g., last 20 messages) plus system prompt, with older messages excluded to prevent context window overflow. If conversation exceeds window, include summary of older messages when available.
 - Q: What are the performance targets for assistant response time? → A: Up to 30 seconds acceptable for assistant responses. Allows time for complex analysis, documentation retrieval, and thorough configuration validation while maintaining good user experience.
+- Q: How should the system handle non-English language queries? → A: System supports English-only for MVP. If user asks in another language, assistant should gracefully respond indicating English is required, or attempt to understand and respond in English. Future enhancement may add multi-language support.
 
 ## User Scenarios & Testing
 
@@ -106,10 +107,10 @@ When providing guidance, the AI assistant references relevant documentation sect
 - How does assistant handle conflicting recommendations? (Should explain trade-offs, not just pick one)
 - What if user asks about features not yet implemented? (Assistant should acknowledge limitations)
 - How does assistant handle malformed YAML or invalid configurations? (Should identify errors and suggest fixes)
-- What if user asks in a language other than English? (Should handle gracefully, may need clarification)
+- What if user asks in a language other than English? (System supports English-only for MVP. Assistant should gracefully indicate English is required or attempt to understand and respond in English)
 - What happens when user exceeds rate limits? (Should return 429 Too Many Requests with retry-after header, show user-friendly message)
 - What if configuration changes between when assistant reads it and when user applies suggestion? (System detects conflict, shows both versions, prompts user to resolve)
-- How does system prevent context window overflow for long conversations? (Context management: summarization, sliding window, or selective message inclusion - implementation strategy to be determined in planning phase)
+- How does system prevent context window overflow for long conversations? (Sliding window strategy: include most recent N messages (default: last 20) plus system prompt, exclude older messages. If conversation exceeds window, include summary of older messages when available)
 
 ## Requirements
 
@@ -132,11 +133,11 @@ When providing guidance, the AI assistant references relevant documentation sect
 - **FR-015**: System MUST store conversation history per user/session (for context continuity)
 - **FR-016**: System MUST enforce role-based access control: default to admin-only access, with opt-in configuration per project to allow members/viewers
 - **FR-017**: Infrastructure assistant MUST require system admin role (non-configurable)
-- **FR-018**: System MUST implement per-user rate limiting (e.g., 20 messages per minute) to prevent abuse
-- **FR-019**: System MUST enforce separate rate limits for AI Gateway API calls to protect the service
+- **FR-018**: System MUST implement per-user rate limiting (default: 20 messages per minute, configurable via constants) to prevent abuse
+- **FR-019**: System MUST enforce separate rate limits for AI Gateway API calls (default: 60 requests per minute, configurable via constants) to protect the service
 - **FR-020**: System MUST detect configuration conflicts when applying assistant suggestions (compare current database state to suggestion)
-- **FR-021**: System MUST prompt user to resolve conflicts by showing both versions (current vs suggested) and allowing user to choose or merge
-- **FR-022**: System MUST implement context management strategy to prevent AI context window overload (e.g., conversation summarization, sliding window of recent messages, or selective message inclusion based on relevance)
+- **FR-021**: System MUST prompt user to resolve conflicts by showing both versions side-by-side (current vs suggested) with options to: (1) keep current version, (2) use suggested version, or (3) manually edit/merge both versions
+- **FR-022**: System MUST implement sliding window context management strategy: include most recent N messages (default: last 20 messages) plus system prompt, excluding older messages to prevent context window overflow
 - **FR-023**: UI MUST show only recent sessions (last 30 days) by default, with option to access/archive/delete older sessions
 
 ### Key Entities

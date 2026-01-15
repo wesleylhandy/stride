@@ -134,35 +134,236 @@ All clarifications resolved. See `research.md` for detailed decisions and ration
 ## Phase 2: Implementation Planning
 
 ### Component Structure
-- [ ] Components identified:
-  - `ConfigurationAssistant` - Main chat interface component
-  - `AssistantMessage` - Individual message display
+- [x] Components identified:
+  - `ConfigurationAssistant` - Main chat interface component (Server Component)
+  - `ConfigurationAssistantClient` - Client wrapper for interactivity (Client Component)
+  - `AssistantMessage` - Individual message display component
   - `ConfigurationSuggestion` - Suggestion display with apply button
   - `AssistantInput` - Message input component
-- [ ] Component hierarchy defined
-- [ ] Props/interfaces designed
+  - `SessionList` - Session list UI (recent sessions, archive/delete)
+  - `ComparisonResults` - Display configuration comparison differences
+  - `DocumentationLinks` - Display documentation references
+- [x] Component hierarchy defined
+- [x] Props/interfaces designed
+
+**Component Hierarchy**:
+```
+ProjectSettingsPage (Server)
+  └── ConfigurationAssistant (Server Component)
+        ├── Fetches initial session and messages
+        └── Renders ConfigurationAssistantClient (Client Component)
+              ├── AssistantMessage[] (renders messages)
+              │     ├── ConfigurationSuggestion (if suggestion in metadata)
+              │     ├── ComparisonResults (if comparison in metadata)
+              │     └── DocumentationLinks (if docs in metadata)
+              ├── AssistantInput (message input)
+              └── SessionList (session management UI)
+```
+
+**Component Interfaces**:
+
+```typescript
+// Server Component
+interface ConfigurationAssistantProps {
+  projectId: string;
+  contextType: 'project' | 'infrastructure';
+  initialSession?: ConfigurationAssistantSession;
+  initialMessages?: AssistantMessage[];
+}
+
+// Client Component
+interface ConfigurationAssistantClientProps {
+  projectId: string;
+  contextType: 'project' | 'infrastructure';
+  initialSessionId?: string;
+  initialMessages: AssistantMessage[];
+}
+
+// Message Component
+interface AssistantMessageProps {
+  message: AssistantMessage;
+  onApplySuggestion?: (suggestion: ConfigurationSuggestion) => void;
+}
+
+// Suggestion Component
+interface ConfigurationSuggestionProps {
+  suggestion: ConfigurationSuggestion;
+  onApply: () => Promise<void>;
+  onCancel?: () => void;
+  conflictResolution?: {
+    current: unknown;
+    suggested: unknown;
+    onResolve: (choice: 'keep' | 'use' | 'merge') => Promise<void>;
+  };
+}
+
+// Input Component
+interface AssistantInputProps {
+  onSend: (message: string) => Promise<void>;
+  disabled?: boolean;
+  placeholder?: string;
+}
+```
 
 ### State Management
-- [ ] State requirements identified:
+- [x] State requirements identified:
   - Conversation messages (server state via TanStack Query)
   - Input state (local useState)
   - Loading states (local useState)
   - Suggestion application state (optimistic updates)
-- [ ] State management strategy chosen
-- [ ] State flow documented
+  - Session selection state (local useState)
+- [x] State management strategy chosen
+- [x] State flow documented
+
+**State Management Strategy**:
+
+1. **Server State (TanStack Query)**:
+   - `useQuery` for fetching conversation history
+   - `useMutation` for sending messages
+   - `useMutation` for applying suggestions
+   - Automatic refetch on window focus
+   - Optimistic updates for message sending
+
+2. **Local State (useState)**:
+   - Input field value
+   - Loading indicators (sending, applying suggestion)
+   - Selected session ID
+   - Error messages
+   - UI state (modal open/closed, etc.)
+
+3. **State Flow**:
+   ```
+   User types message
+     ↓
+   Update input state (useState)
+     ↓
+   User clicks send
+     ↓
+   Optimistic update: Add user message to UI immediately
+     ↓
+   Call API mutation (TanStack Query)
+     ↓
+   On success: Add assistant response to query cache
+     ↓
+   On error: Revert optimistic update, show error
+   ```
+
+4. **Optimistic Updates**:
+   - Message sending: Add user message immediately, show loading indicator
+   - Suggestion application: Show "Applying..." state, update UI optimistically
+   - On error: Revert optimistic state, show error message
 
 ### Testing Strategy
-- [ ] Unit test plan:
+- [x] Unit test plan:
   - Prompt building functions
   - Config comparison logic
   - Documentation retrieval
-- [ ] Integration test plan:
+  - Context management (sliding window)
+  - Rate limiting utilities
+  - Access control utilities
+- [x] Integration test plan:
   - Chat flow end-to-end
   - Config suggestion application
-- [ ] E2E test scenarios:
+  - Conflict detection and resolution
+  - Rate limiting enforcement
+  - Access control enforcement
+- [x] E2E test scenarios:
   - Admin configures project with assistant
   - Assistant validates configuration
   - Assistant compares YAML to database
+  - Infrastructure assistant (admin-only)
+  - Session management (list, archive, delete)
+
+**Unit Test Coverage**:
+
+1. **Prompt Builder** (`apps/web/src/lib/assistant/__tests__/prompt-builder.test.ts`):
+   - Builds prompt with system prompt
+   - Includes conversation history (sliding window)
+   - Includes current project config
+   - Includes documentation sections
+   - Handles empty conversation
+   - Handles long conversation (window truncation)
+
+2. **Config Comparison** (`apps/web/src/lib/assistant/__tests__/config-comparison.test.ts`):
+   - Compares YAML to database config
+   - Identifies missing fields
+   - Identifies value mismatches
+   - Handles nested structures
+   - Formats comparison results
+
+3. **Documentation Retrieval** (`apps/web/src/lib/assistant/__tests__/doc-retrieval.test.ts`):
+   - Retrieves relevant docs by keyword
+   - Returns correct file paths
+   - Handles missing docs gracefully
+   - Indexes documentation correctly
+
+4. **Context Manager** (`apps/web/src/lib/assistant/__tests__/context-manager.test.ts`):
+   - Applies sliding window (last N messages)
+   - Includes system prompt
+   - Excludes older messages
+   - Handles empty conversation
+
+5. **Rate Limiting** (`apps/web/src/lib/assistant/__tests__/rate-limit.test.ts`):
+   - Enforces per-user limits
+   - Enforces AI Gateway limits
+   - Returns correct retry-after headers
+   - Handles concurrent requests
+
+**Integration Test Coverage**:
+
+1. **Chat Flow** (`apps/web/__tests__/integration/assistant/chat-flow.test.ts`):
+   - POST /api/projects/[projectId]/assistant/chat
+   - Creates session on first message
+   - Returns assistant response
+   - Stores messages in database
+   - Applies rate limiting
+   - Enforces access control
+
+2. **Suggestion Application** (`apps/web/__tests__/integration/assistant/apply-suggestion.test.ts`):
+   - POST /api/projects/[projectId]/assistant/apply-suggestion
+   - Validates suggestion schema
+   - Detects conflicts
+   - Applies configuration
+   - Returns conflict resolution UI data
+
+3. **History Retrieval** (`apps/web/__tests__/integration/assistant/history.test.ts`):
+   - GET /api/projects/[projectId]/assistant/history
+   - Returns paginated messages
+   - Filters by session
+   - Enforces access control
+
+**E2E Test Scenarios** (Playwright/Cypress):
+
+1. **Project Configuration Flow**:
+   - Admin navigates to project settings
+   - Opens AI assistant
+   - Asks configuration question
+   - Receives guidance
+   - Applies suggested configuration
+   - Verifies configuration applied
+
+2. **Configuration Validation**:
+   - Admin asks assistant to review configuration
+   - Assistant identifies issues
+   - Assistant provides recommendations
+   - Admin applies fixes
+
+3. **YAML vs Database Comparison**:
+   - Admin asks to compare YAML to database
+   - Assistant shows differences
+   - Admin reconciles differences
+
+4. **Infrastructure Assistant**:
+   - System admin navigates to infrastructure settings
+   - Opens AI assistant
+   - Asks OAuth setup question
+   - Receives step-by-step guidance
+
+5. **Session Management**:
+   - Admin views recent sessions
+   - Archives old session
+   - Deletes session
+   - Creates new session
 
 ## Phase 3: Implementation
 

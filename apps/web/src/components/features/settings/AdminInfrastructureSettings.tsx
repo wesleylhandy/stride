@@ -1,10 +1,11 @@
 'use client';
 
 import * as React from 'react';
-import { useToast } from '@stride/ui';
+import { useToast, Button } from '@stride/ui';
 import { GitHubOAuthConfigForm } from './GitHubOAuthConfigForm';
 import { GitLabOAuthConfigForm } from './GitLabOAuthConfigForm';
 import { AIInfrastructureConfigForm } from './AIInfrastructureConfigForm';
+import { InfrastructureAssistant } from './InfrastructureAssistant';
 import type { GitHubOAuthConfig } from '@/lib/config/schemas/git-oauth-schema';
 import type { GitLabOAuthConfig } from '@/lib/config/schemas/git-oauth-schema';
 import type { AIGatewayConfig } from '@/lib/config/schemas/ai-gateway-schema';
@@ -78,6 +79,7 @@ export function AdminInfrastructureSettings() {
     'ai-gateway'?: boolean;
     ollama?: boolean;
   }>({});
+  const [showAssistant, setShowAssistant] = React.useState(false);
 
   // Fetch configuration on mount
   React.useEffect(() => {
@@ -411,14 +413,30 @@ export function AdminInfrastructureSettings() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-foreground dark:text-foreground-dark mb-4">
-          Infrastructure Settings
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold text-foreground dark:text-foreground-dark">
+            Infrastructure Settings
+          </h2>
+          <Button
+            variant={showAssistant ? "secondary" : "primary"}
+            onClick={() => setShowAssistant(!showAssistant)}
+            className="ml-4"
+          >
+            {showAssistant ? "Hide AI Assistant" : "Ask AI Assistant"}
+          </Button>
+        </div>
         <p className="text-sm text-foreground-secondary dark:text-foreground-dark-secondary mb-6">
           Configure global Git OAuth and AI Gateway infrastructure settings.
           Environment variables override UI settings.
         </p>
       </div>
+
+      {/* AI Assistant Toggle */}
+      {showAssistant && (
+        <div className="rounded-lg border border-border dark:border-border-dark bg-surface-secondary dark:bg-surface-dark-secondary p-6">
+          <InfrastructureAssistant />
+        </div>
+      )}
 
       {/* Git OAuth Configuration Section */}
       <div className="rounded-lg border border-border dark:border-border-dark bg-surface dark:bg-surface-dark p-6 space-y-6">

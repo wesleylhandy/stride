@@ -5,6 +5,9 @@ import dynamic from 'next/dynamic';
 import type { ProjectConfig } from '@stride/yaml-config';
 import { RepositoryConnectionSettings } from './RepositoryConnectionSettings';
 import { AiProviderSettings } from './AiProviderSettings';
+import { ConfigurationAssistant } from './ConfigurationAssistant';
+import { Button } from '@stride/ui';
+import { getCsrfHeaders } from '@/lib/utils/csrf';
 
 // Dynamically import ConfigEditor to code-split the heavy CodeMirror editor
 const ConfigEditor = dynamic(
@@ -44,6 +47,8 @@ export function ProjectSettingsContent({
   const [configYaml, setConfigYaml] = useState<string>('');
   const [isLoading, setIsLoading] = useState(activeTab === 'config');
   const [error, setError] = useState<string | null>(null);
+  const [showAssistant, setShowAssistant] = useState(false);
+  const [hasAssistantPermission, setHasAssistantPermission] = useState<boolean | null>(null);
 
   // Fetch configuration when config tab is active
   useEffect(() => {
@@ -55,12 +60,31 @@ export function ProjectSettingsContent({
     async function fetchConfig() {
       try {
         setIsLoading(true);
-        const response = await fetch(`/api/projects/${projectId}/config`);
+        const csrfHeaders = getCsrfHeaders();
+        
+        const [configResponse, permissionResponse] = await Promise.all([
+          fetch(`/api/projects/${projectId}/config`, {
+            headers: csrfHeaders,
+          }),
+          fetch(`/api/projects/${projectId}/assistant/permissions`, {
+            headers: csrfHeaders,
+          }),
+        ]);
 
-        if (!response.ok) {
-          if (response.status === 403) {
+        // Handle permission check
+        if (permissionResponse.ok) {
+          const permissionData = await permissionResponse.json();
+          setHasAssistantPermission(permissionData.hasPermission ?? false);
+        } else {
+          // If permission check fails, assume no permission
+          setHasAssistantPermission(false);
+        }
+
+        // Handle config fetch
+        if (!configResponse.ok) {
+          if (configResponse.status === 403) {
             setError('You do not have permission to view this configuration');
-          } else if (response.status === 404) {
+          } else if (configResponse.status === 404) {
             setError('Project or configuration not found');
           } else {
             setError('Failed to load configuration');
@@ -68,12 +92,13 @@ export function ProjectSettingsContent({
           return;
         }
 
-        const data = await response.json();
+        const data = await configResponse.json();
         setConfigYaml(data.configYaml || '');
       } catch (err) {
         setError(
           err instanceof Error ? err.message : 'Failed to load configuration'
         );
+        setHasAssistantPermission(false);
       } finally {
         setIsLoading(false);
       }
@@ -88,6 +113,7 @@ export function ProjectSettingsContent({
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          ...getCsrfHeaders(),
         },
         body: JSON.stringify({
           configYaml: yaml,
@@ -136,12 +162,45 @@ export function ProjectSettingsContent({
     }
 
     return (
-      <div className="h-[calc(100vh-16rem)]">
-        <ConfigEditor
-          initialValue={configYaml}
-          onSave={handleSave}
-          showPreview={true}
-        />
+      <div className="space-y-6">
+        {/* Assistant Toggle */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-semibold text-foreground dark:text-foreground-dark">
+              Configuration Editor
+            </h2>
+            <p className="text-sm text-foreground-secondary dark:text-foreground-dark-secondary mt-1">
+              Edit your project configuration YAML
+            </p>
+          </div>
+          <div className="relative">
+            <Button
+              variant={showAssistant ? "secondary" : "primary"}
+              onClick={() => setShowAssistant(!showAssistant)}
+              disabled={hasAssistantPermission === false}
+              className={showAssistant 
+                ? "" 
+                : "bg-accent hover:bg-accent-hover active:bg-accent-active text-white dark:bg-accent dark:hover:bg-accent-hover dark:active:bg-accent-active dark:text-white dark:shadow-[0_0_0_1px_rgba(0,212,170,0.3),0_4px_12px_rgba(0,212,170,0.2)] dark:hover:shadow-[0_0_0_1px_rgba(0,212,170,0.4),0_6px_16px_rgba(0,212,170,0.3)] shadow-md hover:shadow-lg transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              }
+              title={hasAssistantPermission === false ? "You do not have permission to use the AI assistant. Admin role required." : undefined}
+            >
+              {showAssistant ? "Hide AI Assistant" : "Ask AI Assistant"}
+            </Button>
+          </div>
+        </div>
+
+        {/* Assistant or Editor */}
+        {showAssistant ? (
+          <ConfigurationAssistant projectId={projectId} />
+        ) : (
+          <div className="h-[calc(100vh-16rem)]">
+            <ConfigEditor
+              initialValue={configYaml}
+              onSave={handleSave}
+              showPreview={true}
+            />
+          </div>
+        )}
       </div>
     );
   }

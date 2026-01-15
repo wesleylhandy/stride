@@ -37,11 +37,33 @@ export interface MarkdownRendererProps {
 
 /**
  * Extract URLs from markdown text
+ * Filters out internal documentation links (relative paths starting with /docs/)
+ * and cleans trailing punctuation from URLs
  */
 function extractUrls(text: string): string[] {
   const urlRegex = /https?:\/\/[^\s<>"{}|\\^`\[\]]+/gi;
   const matches = text.match(urlRegex);
-  return matches || [];
+  if (!matches) return [];
+  
+  // Clean and filter URLs
+  return matches
+    .map((url) => {
+      // Remove trailing punctuation (periods, parentheses, commas, etc.) that might be part of sentence
+      return url.replace(/[.,;:!?)\]}]+$/, '');
+    })
+    .filter((url) => {
+      // Filter out internal documentation links (should not fetch previews for these)
+      // These are relative paths handled by the app, not external links needing previews
+      try {
+        const urlObj = new URL(url);
+        // Skip if it's an absolute URL pointing to our own domain (internal link)
+        // Also skip relative paths (shouldn't appear here but just in case)
+        return !urlObj.pathname.startsWith('/docs/');
+      } catch {
+        // Invalid URL, skip it
+        return false;
+      }
+    });
 }
 
 /**

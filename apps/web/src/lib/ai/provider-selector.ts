@@ -22,6 +22,7 @@ export interface SelectedProvider {
  * 2. If multiple providers exist, prefer providers with a default model set
  * 3. Select the first provider with enabled models
  * 4. Use defaultModel if set, otherwise use the first enabled model
+ * 5. If no project-specific provider found, fall back to infrastructure/global config
  * 
  * @param projectId - Project ID
  * @returns Selected provider and model, or null if no providers configured
@@ -43,7 +44,8 @@ export async function selectProviderForProject(
   });
 
   if (providers.length === 0) {
-    return null;
+    // Fall back to infrastructure/global configuration
+    return await selectProviderFromInfrastructure();
   }
 
   // Find the first provider with enabled models
@@ -100,6 +102,61 @@ export async function selectProviderForProject(
   }
 
   // No providers with enabled models found
+  // Fall back to infrastructure/global configuration
+  return await selectProviderFromInfrastructure();
+}
+
+/**
+ * Select provider from infrastructure/global configuration
+ * Checks environment variables and database for global AI provider settings
+ * 
+ * @returns Selected provider from infrastructure config, or null if not configured
+ */
+async function selectProviderFromInfrastructure(): Promise<SelectedProvider | null> {
+  const { resolveAIGatewayConfig } = await import('@/lib/config/infrastructure-precedence');
+  const config = await resolveAIGatewayConfig();
+
+  // Prefer OpenAI if available
+  if (config.openaiApiKey) {
+    return {
+      providerId: 'infrastructure-openai',
+      providerType: 'openai',
+      model: 'gpt-3.5-turbo', // Default model for OpenAI
+      apiKey: config.openaiApiKey,
+    };
+  }
+
+  // Prefer Anthropic if available
+  if (config.anthropicApiKey) {
+    return {
+      providerId: 'infrastructure-anthropic',
+      providerType: 'anthropic',
+      model: 'claude-3-haiku-20240307', // Default model for Anthropic
+      apiKey: config.anthropicApiKey,
+    };
+  }
+
+  // Prefer Google Gemini if available
+  if (config.googleAiApiKey) {
+    return {
+      providerId: 'infrastructure-google-gemini',
+      providerType: 'google-gemini',
+      model: 'gemini-pro', // Default model for Google Gemini
+      apiKey: config.googleAiApiKey,
+    };
+  }
+
+  // Prefer Ollama if endpoint is available
+  if (config.llmEndpoint) {
+    return {
+      providerId: 'infrastructure-ollama',
+      providerType: 'ollama',
+      model: 'llama2', // Default model for Ollama
+      endpointUrl: config.llmEndpoint,
+    };
+  }
+
+  // No infrastructure provider configured
   return null;
 }
 
