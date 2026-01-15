@@ -1,0 +1,433 @@
+openapi: 3.0.3
+info:
+  title: Manual Issue Sync API
+  version: 1.0.0
+  description: API endpoints for manually synchronizing repository issues from Git providers
+servers:
+  - url: http://localhost:3000/api
+    description: Local development
+  - url: https://stride.example.com/api
+    description: Production
+
+tags:
+  - name: sync
+    description: Manual issue synchronization from Git providers
+
+paths:
+  /projects/{projectId}/repositories/{repositoryId}/sync:
+    post:
+      tags: [sync]
+      summary: Trigger manual issue sync
+      description: |
+        Manually synchronize issues and security advisories from a Git repository.
+        Requires project administrator or member permissions (viewers cannot trigger sync).
+        
+        When webhook is active, an informational message is shown but sync proceeds after confirmation.
+        Supports both synchronous (small repos) and asynchronous (large repos) operation modes.
+      operationId: triggerIssueSync
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Project ID
+        - name: repositoryId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Repository connection ID
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                syncType:
+                  type: string
+                  enum: [full, issuesOnly, securityOnly]
+                  default: full
+                  description: |
+                    - full: Sync both regular issues and security advisories (default)
+                    - issuesOnly: Sync only regular issues
+                    - securityOnly: Sync only security advisories
+                includeClosed:
+                  type: boolean
+                  default: false
+                  description: Include closed/archived issues in sync (requires verification)
+              example:
+                syncType: full
+                includeClosed: false
+      responses:
+        '200':
+          description: Sync completed synchronously (small repository)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncResult'
+        '202':
+          description: Sync started asynchronously (large repository)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncOperationResponse'
+          headers:
+            Location:
+              description: URL to check sync status
+              schema:
+                type: string
+                example: /api/projects/550e8400-e29b-41d4-a716-446655440000/repositories/660e8400-e29b-41d4-a716-446655440000/sync/770e8400-e29b-41d4-a716-446655440000
+        '400':
+          description: Bad request (invalid parameters, webhook active requires confirmation)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                activeWebhook:
+                  summary: Active webhook confirmation required
+                  value:
+                    error: "Repository webhook is active. Manual sync will proceed after confirmation."
+                    requiresConfirmation: true
+        '403':
+          description: Permission denied (viewer role) or repository connection not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Sync already in progress for this repository
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "A sync operation is already in progress for this repository"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /projects/{projectId}/repositories/{repositoryId}/sync/{operationId}:
+    get:
+      tags: [sync]
+      summary: Get sync operation status
+      description: |
+        Get the status and progress of an async sync operation.
+        Used for polling sync progress for large repositories.
+      operationId: getSyncStatus
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: repositoryId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: operationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Sync operation status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncOperationStatus'
+        '404':
+          description: Sync operation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /projects/{projectId}/repositories/{repositoryId}/sync/{operationId}:
+    delete:
+      tags: [sync]
+      summary: Cancel sync operation
+      description: |
+        Cancel an in-progress sync operation.
+        Only pending or in-progress operations can be cancelled.
+      operationId: cancelSync
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: repositoryId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: operationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Sync operation cancelled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Sync operation cancelled"
+        '400':
+          description: Cannot cancel (operation already completed or failed)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Sync operation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /projects/{projectId}/issues/{issueId}/link-external:
+    post:
+      tags: [sync]
+      summary: Manually link issue to external repository issue
+      description: |
+        Manually link a local issue to an external repository issue when automatic matching failed.
+        Updates the issue's customFields.externalId to establish the link.
+      operationId: linkIssueToExternal
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: issueId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [externalId, providerType, repositoryUrl]
+              properties:
+                externalId:
+                  type: string
+                  description: External identifier in format "{provider}:{repoUrl}:{issueId}"
+                  example: "github:https://github.com/owner/repo:123"
+                providerType:
+                  type: string
+                  enum: [GitHub, GitLab, Bitbucket]
+                repositoryUrl:
+                  type: string
+                  format: uri
+                issueNumber:
+                  type: integer
+                  description: Provider-specific issue number (optional)
+      responses:
+        '200':
+          description: Issue linked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+        '400':
+          description: Invalid external ID or external ID already in use
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Issue not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session_token
+
+  schemas:
+    SyncResult:
+      type: object
+      required: [status, results]
+      properties:
+        status:
+          type: string
+          enum: [completed]
+        results:
+          $ref: '#/components/schemas/SyncResults'
+        duration:
+          type: number
+          description: Sync duration in seconds
+        repositoryUrl:
+          type: string
+          format: uri
+        syncedAt:
+          type: string
+          format: date-time
+
+    SyncOperationResponse:
+      type: object
+      required: [operationId, status]
+      properties:
+        operationId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending]
+        location:
+          type: string
+          description: URL to check sync status
+
+    SyncOperationStatus:
+      type: object
+      required: [operationId, status]
+      properties:
+        operationId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending, inProgress, completed, failed]
+        progress:
+          $ref: '#/components/schemas/SyncProgress'
+        results:
+          $ref: '#/components/schemas/SyncResults'
+        error:
+          type: string
+          description: Error message if status is failed
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    SyncProgress:
+      type: object
+      properties:
+        current:
+          type: integer
+          description: Current issue number being processed
+        total:
+          type: integer
+          description: Total issues to sync
+        processed:
+          type: integer
+          description: Issues processed so far
+        stage:
+          type: string
+          enum: [fetching, matching, creating, updating]
+          description: Current sync stage
+
+    SyncResults:
+      type: object
+      required: [created, updated, skipped, failed]
+      properties:
+        created:
+          type: integer
+          description: Number of issues created
+        updated:
+          type: integer
+          description: Number of issues updated
+        skipped:
+          type: integer
+          description: Number of issues skipped (duplicates)
+        failed:
+          type: integer
+          description: Number of issues that failed to sync
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              issueId:
+                type: string
+                format: uuid
+              error:
+                type: string
+
+    Issue:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        key:
+          type: string
+        title:
+          type: string
+        customFields:
+          type: object
+          description: JSONB field containing external sync metadata
+
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+        details:
+          type: array
+          items:
+            type: object
+        requiresConfirmation:
+          type: boolean
+          description: Whether action requires user confirmation

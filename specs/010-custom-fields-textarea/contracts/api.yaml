@@ -1,0 +1,249 @@
+openapi: 3.0.0
+info:
+  title: Custom Fields Textarea API
+  description: API contracts for textarea custom field support (no new endpoints, existing endpoints extended)
+  version: 1.0.0
+
+paths:
+  /api/projects/{projectId}/issues:
+    post:
+      summary: Create issue with textarea custom field
+      description: Creates a new issue. Custom fields can include textarea type fields with markdown content.
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                customFields:
+                  type: object
+                  description: Custom field values. Textarea fields store raw markdown strings.
+                  additionalProperties:
+                    type: string
+                    description: Field value. For textarea fields, this is raw markdown text.
+                  example:
+                    priority: "High"
+                    meeting_notes: "## Meeting Summary\n\n**Date**: 2026-01-27\n\n### Discussion\n\n- Point 1\n- Point 2"
+      responses:
+        '201':
+          description: Issue created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+        '400':
+          description: Validation error (e.g., required textarea field empty)
+        '401':
+          description: Unauthorized
+        '404':
+          description: Project not found
+
+  /api/projects/{projectId}/issues/{issueId}:
+    get:
+      summary: Get issue with textarea custom field
+      description: Retrieves an issue. Custom fields include textarea field values as raw markdown strings.
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: issueId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Issue retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+              example:
+                id: "123"
+                title: "Example Issue"
+                description: "Issue description"
+                customFields:
+                  priority: "High"
+                  meeting_notes: "## Meeting Summary\n\n**Date**: 2026-01-27"
+        '401':
+          description: Unauthorized
+        '404':
+          description: Issue not found
+
+    patch:
+      summary: Update issue with textarea custom field
+      description: Updates an issue. Can update custom fields including textarea fields with markdown content.
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: issueId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                customFields:
+                  type: object
+                  description: Custom field values. Textarea fields store raw markdown strings.
+                  additionalProperties:
+                    type: string
+                  example:
+                    meeting_notes: "## Updated Notes\n\nNew content here."
+      responses:
+        '200':
+          description: Issue updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+        '400':
+          description: Validation error (e.g., required textarea field empty)
+        '401':
+          description: Unauthorized
+        '404':
+          description: Issue not found
+
+  /api/projects/{projectId}/config:
+    get:
+      summary: Get project configuration
+      description: Returns project configuration including custom field definitions. Textarea fields are included in custom_fields array.
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Configuration retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectConfig'
+              example:
+                project_key: "MYPROJ"
+                project_name: "My Project"
+                custom_fields:
+                  - key: meeting_notes
+                    name: Meeting Notes
+                    type: textarea
+                    required: false
+                  - key: acceptance_criteria
+                    name: Acceptance Criteria
+                    type: textarea
+                    required: true
+        '401':
+          description: Unauthorized
+        '404':
+          description: Project not found
+
+components:
+  schemas:
+    Issue:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        customFields:
+          type: object
+          description: Custom field values. Textarea fields contain raw markdown strings.
+          additionalProperties:
+            type: string
+            description: Field value. For textarea type, this is raw markdown text.
+      example:
+        id: "123"
+        title: "Example Issue"
+        description: "Issue description"
+        customFields:
+          priority: "High"
+          meeting_notes: "## Meeting Summary\n\n**Date**: 2026-01-27"
+
+    ProjectConfig:
+      type: object
+      properties:
+        project_key:
+          type: string
+        project_name:
+          type: string
+        custom_fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomFieldConfig'
+      example:
+        project_key: "MYPROJ"
+        project_name: "My Project"
+        custom_fields:
+          - key: meeting_notes
+            name: Meeting Notes
+            type: textarea
+            required: false
+
+    CustomFieldConfig:
+      type: object
+      required:
+        - key
+        - name
+        - type
+      properties:
+        key:
+          type: string
+          description: Unique identifier for the field
+        name:
+          type: string
+          description: Human-readable field name
+        type:
+          type: string
+          enum:
+            - text
+            - number
+            - dropdown
+            - date
+            - boolean
+            - textarea
+          description: Field type. 'textarea' supports markdown editing and rendering.
+        options:
+          type: array
+          items:
+            type: string
+          description: Options for dropdown type (not used for textarea)
+        required:
+          type: boolean
+          default: false
+          description: Whether the field must be filled
+      example:
+        key: meeting_notes
+        name: Meeting Notes
+        type: textarea
+        required: false
