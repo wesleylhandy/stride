@@ -54,7 +54,7 @@ export interface StatusConfig {
 export interface CustomFieldConfig {
   key: string;
   name: string;
-  type: 'text' | 'number' | 'dropdown' | 'date' | 'boolean';
+  type: 'text' | 'number' | 'dropdown' | 'date' | 'boolean' | 'textarea';
   options?: string[];
   required: boolean;
 }

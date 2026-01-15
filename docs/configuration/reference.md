@@ -158,7 +158,7 @@ Each custom field must have:
 
 #### `type` (required)
 
-- **Type**: Enum (`text`, `number`, `dropdown`, `date`, `boolean`)
+- **Type**: Enum (`text`, `number`, `dropdown`, `date`, `boolean`, `textarea`)
 - **Description**: Field data type
 
 **Type Details**:
@@ -168,6 +168,48 @@ Each custom field must have:
 - `dropdown`: Selection from predefined options (requires `options` array)
 - `date`: Date value
 - `boolean`: True/false checkbox
+- `textarea`: Multi-line text input with Markdown support
+
+**Textarea Field Details**:
+
+The `textarea` field type provides a multi-line text input with full Markdown editing and rendering support:
+
+- **Editing**: Users can enter Markdown content using a markdown editor with syntax highlighting hints
+- **Rendering**: Content is rendered as formatted HTML using GitHub Flavored Markdown (GFM) support
+- **Features**: Supports headings, lists, bold/italic text, code blocks, links, tables, and more
+- **Storage**: Content is stored as plain text (raw Markdown) in the database
+- **Validation**: Follows the same validation rules as `text` fields (string type, optional/required)
+- **Use cases**: Meeting notes, detailed descriptions, documentation, formatted content
+
+**Example - Textarea Field with Markdown**:
+
+```yaml
+custom_fields:
+  - key: meeting_notes
+    name: Meeting Notes
+    type: textarea
+    required: false
+```
+
+When users enter content in a textarea field, they can use Markdown syntax:
+
+```markdown
+# Meeting Summary
+
+## Discussion Points
+
+- Discussed feature requirements
+- Agreed on timeline
+- Next steps identified
+
+**Action Items**:
+1. Review design mockups
+2. Schedule follow-up meeting
+
+See [documentation](/docs/feature) for details.
+```
+
+The content will be rendered as formatted HTML in the issue view, with proper styling for headings, lists, bold text, and links.
 
 #### `options` (optional)
 
@@ -197,6 +239,10 @@ custom_fields:
   - key: blocked
     name: Blocked
     type: boolean
+    required: false
+  - key: meeting_notes
+    name: Meeting Notes
+    type: textarea
     required: false
 ```
 
@@ -506,6 +552,10 @@ custom_fields:
     type: dropdown
     options: [Low, Medium, High, Critical]
     required: false
+  - key: meeting_notes
+    name: Meeting Notes
+    type: textarea
+    required: false
 ```
 
 ### Full Example with All Features
@@ -547,6 +597,10 @@ custom_fields:
     name: Component
     type: text
     required: false
+  - key: meeting_notes
+    name: Meeting Notes
+    type: textarea
+    required: false
 
 automation_rules:
   - trigger: branch_created
@@ -581,7 +635,7 @@ user_assignment:
 
 - Field keys must be unique
 - Dropdown fields must have `options` array
-- Field types must be one of: `text`, `number`, `dropdown`, `date`, `boolean`
+- Field types must be one of: `text`, `number`, `dropdown`, `date`, `boolean`, `textarea`
 
 ### Transition Rules
 
