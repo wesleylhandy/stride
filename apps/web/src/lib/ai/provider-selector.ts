@@ -121,7 +121,7 @@ async function selectProviderFromInfrastructure(): Promise<SelectedProvider | nu
     return {
       providerId: 'infrastructure-openai',
       providerType: 'openai',
-      model: 'gpt-3.5-turbo', // Default model for OpenAI
+      model: config.openaiDefaultModel || 'gpt-3.5-turbo', // Use configured default or fallback
       apiKey: config.openaiApiKey,
     };
   }
@@ -131,7 +131,7 @@ async function selectProviderFromInfrastructure(): Promise<SelectedProvider | nu
     return {
       providerId: 'infrastructure-anthropic',
       providerType: 'anthropic',
-      model: 'claude-3-haiku-20240307', // Default model for Anthropic
+      model: config.anthropicDefaultModel || 'claude-3-haiku-20240307', // Use configured default or fallback
       apiKey: config.anthropicApiKey,
     };
   }
@@ -141,7 +141,7 @@ async function selectProviderFromInfrastructure(): Promise<SelectedProvider | nu
     return {
       providerId: 'infrastructure-google-gemini',
       providerType: 'google-gemini',
-      model: 'gemini-pro', // Default model for Google Gemini
+      model: config.googleAiDefaultModel || 'gemini-pro', // Use configured default or fallback
       apiKey: config.googleAiApiKey,
     };
   }
@@ -151,7 +151,7 @@ async function selectProviderFromInfrastructure(): Promise<SelectedProvider | nu
     return {
       providerId: 'infrastructure-ollama',
       providerType: 'ollama',
-      model: 'llama2', // Default model for Ollama
+      model: config.ollamaDefaultModel || 'llama2', // Use configured default or fallback
       endpointUrl: config.llmEndpoint,
     };
   }

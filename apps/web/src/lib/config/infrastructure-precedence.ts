@@ -29,6 +29,10 @@ export interface ResolvedAIConfig {
   openaiApiKey?: string;
   anthropicApiKey?: string;
   googleAiApiKey?: string;
+  openaiDefaultModel?: string;
+  anthropicDefaultModel?: string;
+  googleAiDefaultModel?: string;
+  ollamaDefaultModel?: string;
   source: ConfigSource;
 }
 
@@ -151,6 +155,10 @@ export async function resolveAIGatewayConfig(): Promise<ResolvedAIConfig> {
         openaiApiKey?: string;
         anthropicApiKey?: string;
         googleAiApiKey?: string;
+        openaiDefaultModel?: string;
+        anthropicDefaultModel?: string;
+        googleAiDefaultModel?: string;
+        ollamaDefaultModel?: string;
       }
     | undefined;
 
@@ -182,6 +190,20 @@ export async function resolveAIGatewayConfig(): Promise<ResolvedAIConfig> {
       } catch (error) {
         console.error("Failed to decrypt Google AI API key:", error);
       }
+    }
+
+    // Include default models (plain text, not encrypted)
+    if (aiConfig.openaiDefaultModel) {
+      resolved.openaiDefaultModel = aiConfig.openaiDefaultModel;
+    }
+    if (aiConfig.anthropicDefaultModel) {
+      resolved.anthropicDefaultModel = aiConfig.anthropicDefaultModel;
+    }
+    if (aiConfig.googleAiDefaultModel) {
+      resolved.googleAiDefaultModel = aiConfig.googleAiDefaultModel;
+    }
+    if (aiConfig.ollamaDefaultModel) {
+      resolved.ollamaDefaultModel = aiConfig.ollamaDefaultModel;
     }
 
     return resolved;

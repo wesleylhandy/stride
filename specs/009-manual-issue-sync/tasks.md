@@ -22,10 +22,10 @@
 
 **Purpose**: Project structure and type definitions
 
-- [ ] T001 [P] Create sync library directory structure at apps/web/src/lib/sync/
-- [ ] T002 [P] Create TypeScript types file for sync operations at apps/web/src/lib/sync/types.ts
-- [ ] T003 [P] Create rate limiter utility at apps/web/src/lib/sync/rate-limiter.ts
-- [ ] T009 Implement DuplicateMatcher class in apps/web/src/lib/sync/duplicate-matcher.ts (requires T001: directory structure)
+- [x] T001 [P] Create sync library directory structure at apps/web/src/lib/sync/
+- [x] T002 [P] Create TypeScript types file for sync operations at apps/web/src/lib/sync/types.ts
+- [x] T003 [P] Create rate limiter utility at apps/web/src/lib/sync/rate-limiter.ts
+- [x] T009 Implement DuplicateMatcher class in apps/web/src/lib/sync/duplicate-matcher.ts (requires T001: directory structure)
 
 ---
 
@@ -35,12 +35,12 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 [P] Extend GitHub client with fetchGitHubIssues function in apps/web/src/lib/integrations/github.ts
-- [ ] T005 [P] Extend GitHub client with fetchGitHubDependabotAlerts function in apps/web/src/lib/integrations/github.ts
-- [ ] T006 [P] Extend GitLab client with fetchGitLabIssues function in apps/web/src/lib/integrations/gitlab.ts
-- [ ] T007 [P] Extend GitLab client with fetchGitLabVulnerabilityFindings function in apps/web/src/lib/integrations/gitlab.ts
-- [ ] T008 [P] Extend Bitbucket client with fetchBitbucketIssues function in apps/web/src/lib/integrations/bitbucket.ts (create if not exists)
-- [ ] T010 Create Zod validation schemas for sync request/response types in apps/web/src/lib/sync/types.ts (requires T002: types.ts file)
+- [x] T004 [P] Extend GitHub client with fetchGitHubIssues function in apps/web/src/lib/integrations/github.ts
+- [x] T005 [P] Extend GitHub client with fetchGitHubDependabotAlerts function in apps/web/src/lib/integrations/github.ts
+- [x] T006 [P] Extend GitLab client with fetchGitLabIssues function in apps/web/src/lib/integrations/gitlab.ts
+- [x] T007 [P] Extend GitLab client with fetchGitLabVulnerabilityFindings function in apps/web/src/lib/integrations/gitlab.ts
+- [x] T008 [P] Extend Bitbucket client with fetchBitbucketIssues function in apps/web/src/lib/integrations/bitbucket.ts (create if not exists)
+- [x] T010 Create Zod validation schemas for sync request/response types in apps/web/src/lib/sync/types.ts (requires T002: types.ts file)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -56,26 +56,26 @@
 
 ### Implementation for User Story 1
 
-- [ ] T011 [US1] Implement IssueSyncService class in apps/web/src/lib/sync/issue-sync-service.ts with syncRepositoryIssues method
-- [ ] T012 [US1] Set default issue state filter to 'open' only in Git provider client calls (unless includeClosed is true)
-- [ ] T013 [US1] Add pagination handling logic to IssueSyncService for sequential page fetching
-- [ ] T014 [US1] Integrate DuplicateMatcher into IssueSyncService for duplicate detection
-- [ ] T015 [US1] Implement external identifier storage in Issue.customFields within IssueSyncService
-- [ ] T016 [US1] Preserve Git provider issue metadata (labels, assignees, descriptions, creation dates) when creating/updating issues in IssueSyncService
-- [ ] T017 [US1] Validate repository connection access token and permissions before sync in IssueSyncService
-- [ ] T018 [US1] Add error handling for Git provider API failures in IssueSyncService
-- [ ] T019 [US1] Add rate limiting error handling with exponential backoff in IssueSyncService
-- [ ] T020 [US1] Create POST API route handler at apps/web/app/api/projects/[projectId]/repositories/[repositoryId]/sync/route.ts
-- [ ] T021 [US1] Add permission validation (admin/member only, not viewers) in sync route handler
-- [ ] T022 [US1] Add concurrent sync prevention logic in sync route handler
-- [ ] T023 [US1] Add webhook status check and confirmation requirement logic in sync route handler
-- [ ] T024 [US1] Integrate IssueSyncService into sync route handler
-- [ ] T025 [US1] Implement RepositoryConnection.lastSyncAt update after successful sync
-- [ ] T026 [US1] Create ManualSyncButton component at apps/web/src/components/features/projects/ManualSyncButton.tsx
-- [ ] T027 [US1] Add sync button to repository connection settings UI
-- [ ] T028 [US1] Implement sync trigger logic in ManualSyncButton component
-- [ ] T029 [US1] Add loading state handling in ManualSyncButton component
-- [ ] T030 [US1] Add basic success/error feedback display in ManualSyncButton component
+- [x] T011 [US1] Implement IssueSyncService class in apps/web/src/lib/sync/issue-sync-service.ts with syncRepositoryIssues method
+- [x] T012 [US1] Set default issue state filter to 'open' only in Git provider client calls (unless includeClosed is true)
+- [x] T013 [US1] Add pagination handling logic to IssueSyncService for sequential page fetching
+- [x] T014 [US1] Integrate DuplicateMatcher into IssueSyncService for duplicate detection
+- [x] T015 [US1] Implement external identifier storage in Issue.customFields within IssueSyncService
+- [x] T016 [US1] Preserve Git provider issue metadata (labels, assignees, descriptions, creation dates) when creating/updating issues in IssueSyncService
+- [x] T017 [US1] Validate repository connection access token and permissions before sync in IssueSyncService
+- [x] T018 [US1] Add error handling for Git provider API failures in IssueSyncService
+- [x] T019 [US1] Add rate limiting error handling with exponential backoff in IssueSyncService
+- [x] T020 [US1] Create POST API route handler at apps/web/app/api/projects/[projectId]/repositories/[repositoryId]/sync/route.ts
+- [x] T021 [US1] Add permission validation (admin/member only, not viewers) in sync route handler
+- [x] T022 [US1] Add concurrent sync prevention logic in sync route handler
+- [x] T023 [US1] Add webhook status check and confirmation requirement logic in sync route handler
+- [x] T024 [US1] Integrate IssueSyncService into sync route handler
+- [x] T025 [US1] Implement RepositoryConnection.lastSyncAt update after successful sync
+- [x] T026 [US1] Create ManualSyncButton component at apps/web/src/components/features/projects/ManualSyncButton.tsx
+- [x] T027 [US1] Add sync button to repository connection settings UI
+- [x] T028 [US1] Implement sync trigger logic in ManualSyncButton component
+- [x] T029 [US1] Add loading state handling in ManualSyncButton component
+- [x] T030 [US1] Add basic success/error feedback display in ManualSyncButton component
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently. Users can trigger manual sync, issues are fetched and created/updated, duplicates are prevented.
 
@@ -89,15 +89,15 @@
 
 ### Implementation for User Story 2
 
-- [ ] T031 [US2] Extend IssueSyncService to support security advisory fetching from GitHub Dependabot API
-- [ ] T032 [US2] Extend IssueSyncService to support security advisory fetching from GitLab Vulnerability API
-- [ ] T033 [US2] Add security advisory mapping logic (map to Bug type with High/Critical priority) in IssueSyncService
-- [ ] T034 [US2] Add securityAdvisory flag to external sync metadata in Issue.customFields
-- [ ] T035 [US2] Implement syncType parameter handling (full/issuesOnly/securityOnly) in sync route handler
-- [ ] T036 [US2] Add security-only sync option to ManualSyncButton component UI
-- [ ] T037 [US2] Implement graceful degradation for providers without security advisory support (Bitbucket)
-- [ ] T038 [US2] Add security advisory sync error handling in IssueSyncService
-- [ ] T039 [US2] Update sync results to include security advisory counts separately
+- [x] T031 [US2] Extend IssueSyncService to support security advisory fetching from GitHub Dependabot API
+- [x] T032 [US2] Extend IssueSyncService to support security advisory fetching from GitLab Vulnerability API
+- [x] T033 [US2] Add security advisory mapping logic (map to Bug type with High/Critical priority) in IssueSyncService
+- [x] T034 [US2] Add securityAdvisory flag to external sync metadata in Issue.customFields
+- [x] T035 [US2] Implement syncType parameter handling (full/issuesOnly/securityOnly) in sync route handler
+- [x] T036 [US2] Add security-only sync option to ManualSyncButton component UI
+- [x] T037 [US2] Implement graceful degradation for providers without security advisory support (Bitbucket)
+- [x] T038 [US2] Add security advisory sync error handling in IssueSyncService
+- [x] T039 [US2] Update sync results to include security advisory counts separately
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently. Users can sync regular issues, security advisories separately, or both together.
 
@@ -111,20 +111,20 @@
 
 ### Implementation for User Story 3
 
-- [ ] T040 [US3] Add progress tracking state management to IssueSyncService
-- [ ] T041 [US3] Implement sync operation status storage (in-memory or database) for async operations
-- [ ] T042 [US3] Add GET API route handler for sync status at apps/web/app/api/projects/[projectId]/repositories/[repositoryId]/sync/[operationId]/route.ts
-- [ ] T043 [US3] Implement async operation mode detection (repository size > 100 issues) in sync route handler
-- [ ] T044 [US3] Return 202 Accepted with operation ID for async operations in sync route handler
-- [ ] T045 [US3] Create SyncProgressDialog component at apps/web/src/components/features/projects/SyncProgressDialog.tsx
-- [ ] T046 [US3] Implement progress polling logic in SyncProgressDialog component
-- [ ] T047 [US3] Add progress bar and stage display in SyncProgressDialog component
-- [ ] T048 [US3] Add sync results summary display (created/updated/skipped counts) in SyncProgressDialog component
-- [ ] T049 [US3] Implement error message display with actionable suggestions in SyncProgressDialog component
-- [ ] T050 [US3] Add SyncProgressDialog integration to ManualSyncButton component
-- [ ] T051 [US3] Add periodic progress updates during sync (update every N issues processed)
-- [ ] T052 [US3] Implement sync cancellation support (DELETE endpoint) at apps/web/app/api/projects/[projectId]/repositories/[repositoryId]/sync/[operationId]/route.ts
-- [ ] T053 [US3] Add cancellation button to SyncProgressDialog component
+- [x] T040 [US3] Add progress tracking state management to IssueSyncService
+- [x] T041 [US3] Implement sync operation status storage (in-memory or database) for async operations
+- [x] T042 [US3] Add GET API route handler for sync status at apps/web/app/api/projects/[projectId]/repositories/[repositoryId]/sync/[operationId]/route.ts
+- [x] T043 [US3] Implement async operation mode detection (repository size > 100 issues) in sync route handler
+- [x] T044 [US3] Return 202 Accepted with operation ID for async operations in sync route handler
+- [x] T045 [US3] Create SyncProgressDialog component at apps/web/src/components/features/projects/SyncProgressDialog.tsx
+- [x] T046 [US3] Implement progress polling logic in SyncProgressDialog component
+- [x] T047 [US3] Add progress bar and stage display in SyncProgressDialog component
+- [x] T048 [US3] Add sync results summary display (created/updated/skipped counts) in SyncProgressDialog component
+- [x] T049 [US3] Implement error message display with actionable suggestions in SyncProgressDialog component
+- [x] T050 [US3] Add SyncProgressDialog integration to ManualSyncButton component
+- [x] T051 [US3] Add periodic progress updates during sync (update every N issues processed)
+- [x] T052 [US3] Implement sync cancellation support (DELETE endpoint) at apps/web/app/api/projects/[projectId]/repositories/[repositoryId]/sync/[operationId]/route.ts
+- [x] T053 [US3] Add cancellation button to SyncProgressDialog component
 
 **Checkpoint**: At this point, all user stories should work independently with full progress feedback. Users can monitor sync progress, see detailed results, and cancel long-running operations.
 
@@ -140,12 +140,12 @@
 
 ### Implementation for Manual Issue Linking
 
-- [ ] T054 [P] [US1] Create POST API route handler for manual linking at apps/web/app/api/projects/[projectId]/issues/[issueId]/link-external/route.ts
-- [ ] T055 [P] [US1] Add external identifier validation logic in link-external route handler
-- [ ] T056 [P] [US1] Implement duplicate external ID prevention in link-external route handler
-- [ ] T057 [P] [US1] Add manual link button/action to issue detail UI
-- [ ] T058 [P] [US1] Create manual link modal/dialog component for selecting external issue
-- [ ] T059 [P] [US1] Integrate manual link functionality into issue detail page
+- [x] T054 [P] [US1] Create POST API route handler for manual linking at apps/web/app/api/projects/[projectId]/issues/[issueKey]/link-external/route.ts
+- [x] T055 [P] [US1] Add external identifier validation logic in link-external route handler
+- [x] T056 [P] [US1] Implement duplicate external ID prevention in link-external route handler
+- [x] T057 [P] [US1] Add manual link button/action to issue detail UI
+- [x] T058 [P] [US1] Create manual link modal/dialog component for selecting external issue
+- [x] T059 [P] [US1] Integrate manual link functionality into issue detail page
 
 **Checkpoint**: Users can now manually link issues when automatic matching fails or produces incorrect matches.
 
@@ -161,12 +161,12 @@
 
 ### Implementation for Closed/Archived Issues
 
-- [ ] T060 [US1] Add includeClosed parameter handling to sync route handler
-- [ ] T061 [US1] Add includeClosed parameter to IssueSyncService.syncRepositoryIssues method
-- [ ] T062 [US1] Add state parameter (closed/all) to Git provider client functions when includeClosed is true
-- [ ] T063 [US1] Add includeClosed checkbox to ManualSyncButton component UI
-- [ ] T064 [US1] Add verification confirmation dialog for includeClosed option in ManualSyncButton component
-- [ ] T065 [US1] Add confirmation flag to sync API request when includeClosed is selected
+- [x] T060 [US1] Add includeClosed parameter handling to sync route handler
+- [x] T061 [US1] Add includeClosed parameter to IssueSyncService.syncRepositoryIssues method
+- [x] T062 [US1] Add state parameter (closed/all) to Git provider client functions when includeClosed is true
+- [x] T063 [US1] Add includeClosed checkbox to ManualSyncButton component UI
+- [x] T064 [US1] Add verification confirmation dialog for includeClosed option in ManualSyncButton component
+- [x] T065 [US1] Add confirmation flag to sync API request when includeClosed is selected
 
 **Checkpoint**: Users can opt-in to sync closed/archived issues with proper confirmation safeguards.
 
@@ -176,16 +176,16 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T066 [P] Add comprehensive error logging for sync operations in IssueSyncService
-- [ ] T067 [P] Add sync operation metrics tracking (duration, issue counts, error rates)
-- [ ] T068 [P] Update API documentation with sync endpoint examples
+- [x] T066 [P] Add comprehensive error logging for sync operations in IssueSyncService
+- [x] T067 [P] Add sync operation metrics tracking (duration, issue counts, error rates)
+- [x] T068 [P] Update API documentation with sync endpoint examples
 - [ ] T069 [P] Add integration tests for sync API endpoints in apps/web/e2e/features/manual-sync.spec.ts
-- [ ] T070 [P] Add unit tests for DuplicateMatcher in apps/web/src/lib/sync/__tests__/duplicate-matcher.test.ts
-- [ ] T071 [P] Add unit tests for IssueSyncService in apps/web/src/lib/sync/__tests__/issue-sync-service.test.ts
-- [ ] T072 [P] Add accessibility attributes to ManualSyncButton and SyncProgressDialog components
-- [ ] T073 [P] Add keyboard navigation support to sync UI components
-- [ ] T074 [P] Validate quickstart.md implementation steps against actual code
-- [ ] T075 [P] Add loading skeletons for sync operation states
+- [ ] T070 [P] Add unit tests for DuplicateMatcher in apps/web/src/lib/sync/**tests**/duplicate-matcher.test.ts
+- [ ] T071 [P] Add unit tests for IssueSyncService in apps/web/src/lib/sync/**tests**/issue-sync-service.test.ts
+- [x] T072 [P] Add accessibility attributes to ManualSyncButton and SyncProgressDialog components
+- [x] T073 [P] Add keyboard navigation support to sync UI components
+- [x] T074 [P] Validate quickstart.md implementation steps against actual code
+- [x] T075 [P] Add loading skeletons for sync operation states
 - [ ] T076 [P] Add retry mechanism for failed sync operations
 - [ ] T077 [P] Add sync history/audit log (optional enhancement)
 
@@ -221,7 +221,7 @@
 
 - **Setup phase**: T001-T003 can run in parallel (different files). T009 requires T001 to complete first (not parallel)
 - **Foundational phase**: T004-T008 can run in parallel. T010 requires T002 to be complete first (not parallel)
-- **User Story 1**: 
+- **User Story 1**:
   - T011-T017 (sync service core + metadata + validation + error handling) must be sequential
   - T018-T019 (error handling completion) must complete before T024 (integration)
   - T020-T025 (API route) can be done in parallel with T026-T030 (UI components) after service is ready

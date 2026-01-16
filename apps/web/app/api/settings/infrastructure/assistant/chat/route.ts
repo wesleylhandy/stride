@@ -27,6 +27,8 @@ import { z } from "zod";
 const chatRequestSchema = z.object({
   message: z.string().min(1).max(5000),
   sessionId: z.string().uuid().optional(),
+  providerId: z.string().optional(),
+  model: z.string().optional(),
 });
 
 /**
@@ -181,7 +183,11 @@ export async function POST(request: NextRequest) {
           systemPrompt,
           userMessage: promptUserMessage,
         },
-        "infrastructure" // Use special identifier for infrastructure context
+        "infrastructure", // Use special identifier for infrastructure context
+        {
+          providerId: validated.providerId,
+          model: validated.model,
+        }
       );
       assistantResponse = chatResponse.content;
     } catch (error) {

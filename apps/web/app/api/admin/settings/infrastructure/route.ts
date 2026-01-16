@@ -56,6 +56,10 @@ export async function GET(request: NextRequest) {
           openaiApiKey?: string;
           anthropicApiKey?: string;
           googleAiApiKey?: string;
+          openaiDefaultModel?: string;
+          anthropicDefaultModel?: string;
+          googleAiDefaultModel?: string;
+          ollamaDefaultModel?: string;
         }
       | undefined;
 
@@ -105,6 +109,13 @@ export async function GET(request: NextRequest) {
           openaiApiKey: !!(dbAiConfig?.openaiApiKey || aiConfig.openaiApiKey),
           anthropicApiKey: !!(dbAiConfig?.anthropicApiKey || aiConfig.anthropicApiKey),
           googleAiApiKey: !!(dbAiConfig?.googleAiApiKey || aiConfig.googleAiApiKey),
+        },
+        // Return default models from database (plain text, not sensitive)
+        defaultModels: {
+          openai: dbAiConfig?.openaiDefaultModel,
+          anthropic: dbAiConfig?.anthropicDefaultModel,
+          googleAi: dbAiConfig?.googleAiDefaultModel,
+          ollama: dbAiConfig?.ollamaDefaultModel,
         },
       },
       updatedBy: dbConfig?.updatedBy || null,
@@ -337,26 +348,83 @@ export async function PUT(request: NextRequest) {
         encryptedGitConfig = existingConfig.gitConfig as Prisma.InputJsonValue;
       }
 
-      // Check if aiConfig has actual values
-      const hasAiConfig =
-        validatedConfig.aiConfig &&
-        (validatedConfig.aiConfig.aiGatewayUrl ||
-          validatedConfig.aiConfig.llmEndpoint ||
-          validatedConfig.aiConfig.openaiApiKey ||
-          validatedConfig.aiConfig.anthropicApiKey ||
-          validatedConfig.aiConfig.googleAiApiKey);
+      // Simple merge: start with existing, apply updates
+      // Empty string = delete, has value = update, not provided = preserve
+      const existingAiConfig = existingConfig?.aiConfig as {
+        openaiApiKey?: string;
+        anthropicApiKey?: string;
+        googleAiApiKey?: string;
+        aiGatewayUrl?: string;
+        llmEndpoint?: string;
+      } | undefined;
 
-      if (hasAiConfig) {
-        // Has values - encrypt and store
+      // Build merged config: start with existing, apply updates
+      const mergedAiConfig: typeof validatedConfig.aiConfig = {};
+      
+      // Copy existing values first (they're already encrypted)
+      if (existingAiConfig) {
+        if (existingAiConfig.aiGatewayUrl) mergedAiConfig.aiGatewayUrl = existingAiConfig.aiGatewayUrl;
+        if (existingAiConfig.llmEndpoint) mergedAiConfig.llmEndpoint = existingAiConfig.llmEndpoint;
+        if (existingAiConfig.openaiApiKey) mergedAiConfig.openaiApiKey = existingAiConfig.openaiApiKey;
+        if (existingAiConfig.anthropicApiKey) mergedAiConfig.anthropicApiKey = existingAiConfig.anthropicApiKey;
+        if (existingAiConfig.googleAiApiKey) mergedAiConfig.googleAiApiKey = existingAiConfig.googleAiApiKey;
+      }
+
+      // Apply updates from request (empty string = delete by not including it)
+      if (validatedConfig.aiConfig) {
+        if ('aiGatewayUrl' in validatedConfig.aiConfig) {
+          const value = validatedConfig.aiConfig.aiGatewayUrl?.trim();
+          if (value) {
+            mergedAiConfig.aiGatewayUrl = value;
+          } else {
+            delete mergedAiConfig.aiGatewayUrl;
+          }
+        }
+        if ('llmEndpoint' in validatedConfig.aiConfig) {
+          const value = validatedConfig.aiConfig.llmEndpoint?.trim();
+          if (value) {
+            mergedAiConfig.llmEndpoint = value;
+          } else {
+            delete mergedAiConfig.llmEndpoint;
+          }
+        }
+        if ('openaiApiKey' in validatedConfig.aiConfig) {
+          const value = validatedConfig.aiConfig.openaiApiKey?.trim();
+          if (value) {
+            // Will be encrypted by encryptAiConfig
+            mergedAiConfig.openaiApiKey = value;
+          } else {
+            delete mergedAiConfig.openaiApiKey;
+          }
+        }
+        if ('anthropicApiKey' in validatedConfig.aiConfig) {
+          const value = validatedConfig.aiConfig.anthropicApiKey?.trim();
+          if (value) {
+            // Will be encrypted by encryptAiConfig
+            mergedAiConfig.anthropicApiKey = value;
+          } else {
+            delete mergedAiConfig.anthropicApiKey;
+          }
+        }
+        if ('googleAiApiKey' in validatedConfig.aiConfig) {
+          const value = validatedConfig.aiConfig.googleAiApiKey?.trim();
+          if (value) {
+            // Will be encrypted by encryptAiConfig
+            mergedAiConfig.googleAiApiKey = value;
+          } else {
+            delete mergedAiConfig.googleAiApiKey;
+          }
+        }
+      }
+
+      if (aiConfigProvided) {
+        // Encrypt and store merged config
         encryptedAiConfig = encryptAiConfig(
-          validatedConfig.aiConfig,
+          mergedAiConfig,
         ) as Prisma.InputJsonValue;
-      } else if (aiConfigProvided) {
-        // aiConfig was explicitly provided but is empty - delete all AI config
-        encryptedAiConfig = {} as Prisma.InputJsonValue;
-      } else if (existingConfig) {
+      } else {
         // aiConfig not provided - preserve existing
-        encryptedAiConfig = existingConfig.aiConfig as Prisma.InputJsonValue;
+        encryptedAiConfig = existingConfig?.aiConfig as Prisma.InputJsonValue;
       }
     } catch (encryptionError) {
       console.error("Encryption error:", encryptionError);
@@ -381,6 +449,10 @@ export async function PUT(request: NextRequest) {
             openaiApiKey?: string;
             anthropicApiKey?: string;
             googleAiApiKey?: string;
+            openaiDefaultModel?: string;
+            anthropicDefaultModel?: string;
+            googleAiDefaultModel?: string;
+            ollamaDefaultModel?: string;
           }
         | undefined;
       const finalDbGitConfig = finalConfig?.gitConfig as
@@ -424,6 +496,13 @@ export async function PUT(request: NextRequest) {
             openaiApiKey: !!finalDbAiConfig?.openaiApiKey,
             anthropicApiKey: !!finalDbAiConfig?.anthropicApiKey,
             googleAiApiKey: !!finalDbAiConfig?.googleAiApiKey,
+          },
+          // Return default models from database (plain text, not sensitive)
+          defaultModels: {
+            openai: finalDbAiConfig?.openaiDefaultModel,
+            anthropic: finalDbAiConfig?.anthropicDefaultModel,
+            googleAi: finalDbAiConfig?.googleAiDefaultModel,
+            ollama: finalDbAiConfig?.ollamaDefaultModel,
           },
         },
         updatedBy: session.userId,

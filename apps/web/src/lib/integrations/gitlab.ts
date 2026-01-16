@@ -295,3 +295,213 @@ export async function createGitLabWebhook(
   return data.id;
 }
 
+/**
+ * GitLab issue response from API
+ */
+export interface GitLabIssue {
+  id: number;
+  iid: number;
+  title: string;
+  description: string | null;
+  state: "opened" | "closed";
+  labels: string[];
+  assignees: Array<{
+    username: string;
+    name: string;
+    email?: string;
+  }>;
+  created_at: string;
+  updated_at: string;
+  web_url: string;
+}
+
+/**
+ * GitLab vulnerability finding response from API
+ */
+export interface GitLabVulnerabilityFinding {
+  id: number;
+  name: string;
+  description: string | null;
+  severity: "info" | "unknown" | "low" | "medium" | "high" | "critical";
+  confidence: "ignore" | "unknown" | "experimental" | "low" | "medium" | "high" | "confirmed";
+  state: "dismissed" | "resolved" | "detected";
+  location: {
+    file?: string;
+    start_line?: number;
+    end_line?: number;
+  };
+  identifiers: Array<{
+    name: string;
+    value: string;
+  }>;
+  project: {
+    id: number;
+    name: string;
+    path_with_namespace: string;
+  };
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Fetch GitLab repository issues
+ * @param projectId - GitLab project ID
+ * @param accessToken - GitLab access token
+ * @param options - Optional fetch options
+ * @param baseUrl - Optional base URL for self-hosted instances
+ * @returns Array of issues with pagination info
+ */
+export async function fetchGitLabIssues(
+  projectId: string | number,
+  accessToken: string,
+  options?: {
+    state?: "opened" | "closed" | "all";
+    page?: number;
+    perPage?: number;
+    includeClosed?: boolean;
+  },
+  baseUrl?: string,
+): Promise<{
+  issues: GitLabIssue[];
+  hasNext: boolean;
+  nextPage?: number;
+}> {
+  const apiBaseUrl = baseUrl || "https://gitlab.com";
+  const state = options?.includeClosed
+    ? options.state || "all"
+    : options?.state || "opened";
+  const page = options?.page || 1;
+  const perPage = Math.min(options?.perPage || 100, 100);
+
+  const params = new URLSearchParams({
+    state,
+    page: page.toString(),
+    per_page: perPage.toString(),
+    order_by: "created_at",
+    sort: "desc",
+  });
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/v4/projects/${projectId}/issues?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`GitLab API error: ${response.statusText}`);
+  }
+
+  const issues = (await response.json()) as GitLabIssue[];
+
+  // Parse Link header for pagination
+  const linkHeader = response.headers.get("Link");
+  let hasNext = false;
+  let nextPage: number | undefined;
+
+  if (linkHeader) {
+    const links = linkHeader.split(",");
+    for (const link of links) {
+      const match = link.match(/<([^>]+)>;\s*rel="([^"]+)"/);
+      if (match && match[2] === "next" && match[1]) {
+        hasNext = true;
+        const url = new URL(match[1]);
+        const nextPageParam = url.searchParams.get("page");
+        if (nextPageParam) {
+          nextPage = parseInt(nextPageParam, 10);
+        }
+      }
+    }
+  }
+
+  return {
+    issues,
+    hasNext,
+    nextPage,
+  };
+}
+
+/**
+ * Fetch GitLab vulnerability findings
+ * @param projectId - GitLab project ID
+ * @param accessToken - GitLab access token
+ * @param options - Optional fetch options
+ * @param baseUrl - Optional base URL for self-hosted instances
+ * @returns Array of vulnerability findings with pagination info
+ */
+export async function fetchGitLabVulnerabilityFindings(
+  projectId: string | number,
+  accessToken: string,
+  options?: {
+    state?: "dismissed" | "resolved" | "detected";
+    page?: number;
+    perPage?: number;
+  },
+  baseUrl?: string,
+): Promise<{
+  findings: GitLabVulnerabilityFinding[];
+  hasNext: boolean;
+  nextPage?: number;
+}> {
+  const apiBaseUrl = baseUrl || "https://gitlab.com";
+  const state = options?.state || "detected";
+  const page = options?.page || 1;
+  const perPage = Math.min(options?.perPage || 100, 100);
+
+  const params = new URLSearchParams({
+    state,
+    page: page.toString(),
+    per_page: perPage.toString(),
+  });
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/v4/projects/${projectId}/vulnerability_findings?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    // If 403 or 404, vulnerability findings may not be available (requires Premium/Ultimate)
+    if (response.status === 403 || response.status === 404) {
+      return {
+        findings: [],
+        hasNext: false,
+      };
+    }
+    throw new Error(`GitLab API error: ${response.statusText}`);
+  }
+
+  const findings = (await response.json()) as GitLabVulnerabilityFinding[];
+
+  // Parse Link header for pagination
+  const linkHeader = response.headers.get("Link");
+  let hasNext = false;
+  let nextPage: number | undefined;
+
+  if (linkHeader) {
+    const links = linkHeader.split(",");
+    for (const link of links) {
+      const match = link.match(/<([^>]+)>;\s*rel="([^"]+)"/);
+      if (match && match[2] === "next" && match[1]) {
+        hasNext = true;
+        const url = new URL(match[1]);
+        const nextPageParam = url.searchParams.get("page");
+        if (nextPageParam) {
+          nextPage = parseInt(nextPageParam, 10);
+        }
+      }
+    }
+  }
+
+  return {
+    findings,
+    hasNext,
+    nextPage,
+  };
+}
+

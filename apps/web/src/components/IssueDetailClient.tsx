@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { IssueDetail, useToast, type IssueBranch } from '@stride/ui';
 import type { Issue, ProjectConfig, UpdateIssueInput } from '@stride/types';
 import { CreateIssueModal } from './CreateIssueModal';
+import { ManualLinkModal } from './features/projects/ManualLinkModal';
 import type { CreateIssueInput } from '@stride/types';
 
 export interface IssueDetailClientProps {
@@ -35,6 +36,7 @@ export function IssueDetailClient({
   const toast = useToast();
   const [issue, setIssue] = React.useState<Issue>(initialIssue);
   const [isCloneModalOpen, setIsCloneModalOpen] = React.useState(false);
+  const [isLinkModalOpen, setIsLinkModalOpen] = React.useState(false);
   const [cloneInitialValues, setCloneInitialValues] = React.useState<Partial<CreateIssueInput> | undefined>();
 
   // Update issue when initialIssue changes (e.g., after refresh)
@@ -168,6 +170,20 @@ export function IssueDetailClient({
     setCloneInitialValues(undefined);
   }, []);
 
+  // T057: Create manual link handler
+  const handleLink = React.useCallback(() => {
+    setIsLinkModalOpen(true);
+  }, []);
+
+  const handleLinkModalClose = React.useCallback(() => {
+    setIsLinkModalOpen(false);
+  }, []);
+
+  const handleLinkSuccess = React.useCallback(() => {
+    // Refresh to show updated issue with external link
+    router.refresh();
+  }, [router]);
+
   return (
     <>
       <IssueDetail
@@ -179,6 +195,7 @@ export function IssueDetailClient({
         onUpdate={handleUpdate}
         onStatusChange={handleStatusChange}
         onClone={handleClone}
+        onLink={handleLink}
       />
       {/* T418: Open CreateIssueModal with prefilled initialValues */}
       <CreateIssueModal
@@ -187,6 +204,14 @@ export function IssueDetailClient({
         projectId={projectId}
         projectConfig={projectConfig}
         initialValues={cloneInitialValues}
+      />
+      {/* T059: Manual link modal */}
+      <ManualLinkModal
+        open={isLinkModalOpen}
+        onClose={handleLinkModalClose}
+        projectId={projectId}
+        issueKey={issue.key}
+        onSuccess={handleLinkSuccess}
       />
     </>
   );

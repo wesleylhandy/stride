@@ -47,8 +47,11 @@ export function ConfigurationAssistantClient({
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState<{ providerId: string; model: string } | null>(null);
+  const [availableProviders, setAvailableProviders] = useState<Array<{ id: string; providerType: string; models: string[]; defaultModel: string | null }>>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesStartRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
   const toast = useToast();
 
@@ -58,16 +61,181 @@ export function ConfigurationAssistantClient({
   }, [initialSessionId]);
 
   // Scroll to bottom when new messages are added (not when loading older messages)
+  // Use manual scrolling on the container to prevent page scroll
   useEffect(() => {
-    if (!isLoadingMore) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (!isLoadingMore && messagesContainerRef.current) {
+      const container = messagesContainerRef.current;
+      // Scroll to bottom of the container
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: "smooth",
+      });
     }
   }, [messages, isLoadingMore]);
 
-  // Check if AI provider is configured on mount
+  // Check if AI provider is configured on mount and load available providers
   useEffect(() => {
     checkAiProviderConfigured();
+    loadAvailableProviders();
   }, [projectId, contextType]);
+
+  // Load available providers and models
+  async function loadAvailableProviders() {
+    try {
+      if (contextType === "infrastructure") {
+        // For infrastructure, fetch from global config and discover models
+        const configResponse = await fetch("/api/admin/settings/infrastructure", {
+          headers: {
+            ...getCsrfHeaders(),
+          },
+        });
+
+        if (!configResponse.ok) {
+          return;
+        }
+
+        const configData = await configResponse.json();
+        const aiConfig = configData.aiConfig || {};
+        const allProviders: Array<{ id: string; providerType: string; models: string[]; defaultModel: string | null }> = [];
+        
+        // Helper to discover models with fallback
+        const discoverModelsForProvider = async (providerType: "openai" | "anthropic" | "google-gemini" | "ollama"): Promise<string[]> => {
+          try {
+            const response = await fetch("/api/admin/settings/infrastructure/discover-models", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                ...getCsrfHeaders(),
+              },
+              body: JSON.stringify({ providerType }),
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              return data.models || [];
+            }
+          } catch (error) {
+            console.error(`Failed to discover models for ${providerType}:`, error);
+          }
+
+          // Fallback to common models
+          const fallbackModels: Record<string, string[]> = {
+            openai: ["gpt-3.5-turbo", "gpt-4"],
+            anthropic: ["claude-3-5-sonnet-20241022", "claude-3-5-haiku-20241022", "claude-3-opus-20240229"],
+            "google-gemini": ["gemini-pro", "gemini-pro-vision"],
+            ollama: ["llama2", "mistral"],
+          };
+          return fallbackModels[providerType] || [];
+        };
+        
+        // Discover models for each configured provider
+        if (aiConfig.configuredApiKeys?.openaiApiKey) {
+          const models = await discoverModelsForProvider("openai");
+          allProviders.push({
+            id: "infrastructure-openai",
+            providerType: "openai",
+            models,
+            defaultModel: aiConfig.defaultModels?.openai || models[0] || null,
+          });
+        }
+        
+        if (aiConfig.configuredApiKeys?.anthropicApiKey) {
+          const models = await discoverModelsForProvider("anthropic");
+          allProviders.push({
+            id: "infrastructure-anthropic",
+            providerType: "anthropic",
+            models,
+            defaultModel: aiConfig.defaultModels?.anthropic || models[0] || null,
+          });
+        }
+        
+        if (aiConfig.configuredApiKeys?.googleAiApiKey) {
+          const models = await discoverModelsForProvider("google-gemini");
+          allProviders.push({
+            id: "infrastructure-google-gemini",
+            providerType: "google-gemini",
+            models,
+            defaultModel: aiConfig.defaultModels?.googleAi || models[0] || null,
+          });
+        }
+        
+        if (aiConfig.llmEndpoint) {
+          const models = await discoverModelsForProvider("ollama");
+          allProviders.push({
+            id: "infrastructure-ollama",
+            providerType: "ollama",
+            models,
+            defaultModel: aiConfig.defaultModels?.ollama || models[0] || null,
+          });
+        }
+        
+        setAvailableProviders(allProviders);
+        
+        // Auto-select first provider with available models if none selected
+        if (!selectedProvider && allProviders.length > 0) {
+          const firstProvider = allProviders[0];
+          if (firstProvider && firstProvider.models.length > 0) {
+            setSelectedProvider({
+              providerId: firstProvider.id,
+              model: firstProvider.defaultModel || firstProvider.models[0]!,
+            });
+          }
+        }
+        return;
+      }
+
+      // For project context, fetch from project API
+      const response = await fetch(`/api/projects/${projectId}/ai-providers`, {
+        headers: {
+          ...getCsrfHeaders(),
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const allProviders: Array<{ id: string; providerType: string; models: string[]; defaultModel: string | null }> = [];
+        
+        // Add project providers
+        if (data.projectProviders && Array.isArray(data.projectProviders)) {
+          data.projectProviders.forEach((p: any) => {
+            allProviders.push({
+              id: p.id,
+              providerType: p.providerType,
+              models: p.enabledModels || [],
+              defaultModel: p.defaultModel,
+            });
+          });
+        }
+        
+        // Add global providers
+        if (data.globalProviders && Array.isArray(data.globalProviders)) {
+          data.globalProviders.forEach((p: any) => {
+            allProviders.push({
+              id: p.id,
+              providerType: p.providerType,
+              models: p.enabledModels || [],
+              defaultModel: p.defaultModel,
+            });
+          });
+        }
+        
+        setAvailableProviders(allProviders);
+        
+        // Auto-select first provider with available models if none selected
+        if (!selectedProvider && allProviders.length > 0) {
+          const firstProvider = allProviders[0];
+          if (firstProvider && firstProvider.models.length > 0) {
+            setSelectedProvider({
+              providerId: firstProvider.id,
+              model: firstProvider.defaultModel || firstProvider.models[0]!,
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load available providers:", error);
+    }
+  }
 
   async function checkAiProviderConfigured() {
     try {
@@ -87,8 +255,11 @@ export function ConfigurationAssistantClient({
       
       if (projectResponse.ok) {
         const projectData = await projectResponse.json();
-        if (Array.isArray(projectData) && projectData.length > 0) {
-          hasProjectProvider = true;
+        // Handle both old format (array) and new format (object with projectProviders and globalProviders)
+        if (Array.isArray(projectData)) {
+          hasProjectProvider = projectData.length > 0;
+        } else if (projectData.projectProviders) {
+          hasProjectProvider = projectData.projectProviders.length > 0;
         }
       }
 
@@ -418,8 +589,8 @@ export function ConfigurationAssistantClient({
       aria-atomic="false"
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border dark:border-border-dark">
-        <div>
+      <div className="flex items-center justify-between p-4 border-b border-border dark:border-border-dark gap-4">
+        <div className="flex-1 min-w-0">
           <h3 className="text-lg font-semibold text-foreground dark:text-foreground-dark">
             AI Configuration Assistant
           </h3>
@@ -429,35 +600,66 @@ export function ConfigurationAssistantClient({
               : "Ask questions about configuring your project"}
           </p>
         </div>
-        {messages.length > 0 && sessionId && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowClearConfirm(true)}
-            className="text-foreground-secondary dark:text-foreground-dark-secondary hover:text-foreground dark:hover:text-foreground-dark"
-            aria-label="Clear conversation"
-          >
-            <svg
-              className="w-4 h-4 mr-1.5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              aria-hidden="true"
+        <div className="flex items-center gap-3">
+          {/* Model/Provider Selector */}
+          {availableProviders.length > 0 && (
+            <div className="flex items-center gap-2">
+              <label className="text-xs text-foreground-secondary dark:text-foreground-dark-secondary whitespace-nowrap">
+                Model:
+              </label>
+              <select
+                value={selectedProvider ? `${selectedProvider.providerId}:${selectedProvider.model}` : ""}
+                onChange={(e) => {
+                  const [providerId, model] = e.target.value.split(":");
+                  if (providerId && model) {
+                    setSelectedProvider({ providerId, model });
+                  }
+                }}
+                className="text-xs rounded-md border border-border dark:border-border-dark bg-surface dark:bg-surface-dark px-2 py-1 text-foreground dark:text-foreground-dark focus:border-accent focus:outline-none focus:ring-accent"
+                disabled={isLoading}
+              >
+                <option value="">Auto-select</option>
+                {availableProviders.map((provider) =>
+                  provider.models.map((model) => (
+                    <option key={`${provider.id}:${model}`} value={`${provider.id}:${model}`}>
+                      {provider.providerType} - {model}
+                    </option>
+                  ))
+                )}
+              </select>
+            </div>
+          )}
+          {messages.length > 0 && sessionId && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowClearConfirm(true)}
+              className="text-foreground-secondary dark:text-foreground-dark-secondary hover:text-foreground dark:hover:text-foreground-dark"
+              aria-label="Clear conversation"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-              />
-            </svg>
-            Clear
-          </Button>
-        )}
+              <svg
+                className="w-4 h-4 mr-1.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+              Clear
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Messages Area */}
       <div 
+        ref={messagesContainerRef}
         className="flex-1 overflow-y-auto p-4 space-y-4"
         role="log"
         aria-label="Conversation messages"

@@ -52,6 +52,10 @@ export interface IssueDetailProps {
    */
   onClone?: () => void;
   /**
+   * Callback when manual link is triggered
+   */
+  onLink?: () => void;
+  /**
    * Whether user can use AI triage (permission check)
    */
   canUseAITriage?: boolean;
@@ -182,6 +186,7 @@ export function IssueDetail({
   onUpdate,
   onStatusChange,
   onClone,
+  onLink,
   canUseAITriage = false,
   className,
 }: IssueDetailProps) {
@@ -323,6 +328,16 @@ export function IssueDetail({
                 disabled={isUpdating}
               >
                 Clone
+              </Button>
+            )}
+            {/* T057: Add manual link button */}
+            {onLink && (
+              <Button
+                variant="ghost"
+                onClick={onLink}
+                disabled={isUpdating}
+              >
+                Link External Issue
               </Button>
             )}
             <Button

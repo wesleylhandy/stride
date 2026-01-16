@@ -475,12 +475,27 @@ export function MarkdownRenderer({
             const preview = linkPreviews.get(href);
             const isLoading = loadingPreviews.has(href);
 
-            // If we have a preview, render it
-            if (preview) {
+            // Check if link is inside a paragraph (to avoid invalid HTML: <p><div>...</div></p>)
+            const isInParagraph = node && typeof node === 'object' && 'parent' in node && 
+              node.parent && typeof node.parent === 'object' && 'type' in node.parent &&
+              node.parent.type === 'paragraph';
+
+            // If we have a preview and we're NOT in a paragraph, render preview as block
+            if (preview && !isInParagraph) {
               return (
                 <div className="my-4">
                   <LinkPreview preview={preview} />
                 </div>
+              );
+            }
+
+            // If we have a preview but we're in a paragraph, render link normally
+            // (Can't render block elements inside paragraphs)
+            if (preview && isInParagraph) {
+              return (
+                <a href={href} {...props} className="underline">
+                  {children}
+                </a>
               );
             }
 

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { RepositoryConnectionForm } from './RepositoryConnectionForm';
+import { SyncStatusCard } from './SyncStatusCard';
 import { Badge } from '@stride/ui';
 import { FaGithub, FaGitlab } from 'react-icons/fa';
 
@@ -202,54 +203,48 @@ export function RepositoryConnectionSettings({
         </div>
       )}
 
-      {/* Connection Status */}
+      {/* Sync Status Card - Prominent, at top when connection exists */}
+      {connection && (
+        <SyncStatusCard
+          projectId={projectId}
+          repositoryConnection={connection}
+          onSyncComplete={fetchConnection}
+        />
+      )}
+
+      {/* Connection Information Card - Separate from sync */}
       {connection ? (
         <div className="rounded-lg border border-border dark:border-border-dark bg-surface dark:bg-surface-dark p-6">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <h3 className="text-lg font-semibold text-foreground dark:text-foreground-dark">
-                  Connected Repository
-                </h3>
-                <Badge
-                  variant={connection.isActive ? 'success' : 'warning'}
-                  className="flex items-center gap-1"
-                >
-                  {connection.isActive ? 'Connected' : 'Inactive'}
-                </Badge>
-              </div>
-              <div className="space-y-2 mt-4">
-                <div className="flex items-center gap-2 text-sm">
-                  {getServiceIcon(connection.serviceType)}
-                  <span className="text-foreground-secondary dark:text-foreground-dark-secondary">
-                    Service: <strong className="text-foreground dark:text-foreground-dark">{connection.serviceType}</strong>
-                  </span>
-                </div>
-                <div className="text-sm">
-                  <span className="text-foreground-secondary dark:text-foreground-dark-secondary">
-                    Repository:{' '}
-                  </span>
-                  <a
-                    href={connection.repositoryUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-accent hover:underline font-mono"
-                  >
-                    {connection.repositoryUrl}
-                  </a>
-                </div>
-                <div className="text-sm text-foreground-secondary dark:text-foreground-dark-secondary">
-                  Last synced: <strong className="text-foreground dark:text-foreground-dark">{formatDate(connection.lastSyncAt)}</strong>
-                </div>
-                <div className="text-xs text-foreground-secondary dark:text-foreground-dark-secondary">
-                  Connected: {formatDate(connection.createdAt)}
-                </div>
-              </div>
+          <h2 className="text-lg font-semibold text-foreground dark:text-foreground-dark mb-4">
+            Connection Information
+          </h2>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm">
+              {getServiceIcon(connection.serviceType)}
+              <span className="text-foreground-secondary dark:text-foreground-dark-secondary">
+                Service: <strong className="text-foreground dark:text-foreground-dark">{connection.serviceType}</strong>
+              </span>
+            </div>
+            <div className="text-sm">
+              <span className="text-foreground-secondary dark:text-foreground-dark-secondary">
+                Repository:{' '}
+              </span>
+              <a
+                href={connection.repositoryUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent hover:underline font-mono break-all"
+              >
+                {connection.repositoryUrl}
+              </a>
+            </div>
+            <div className="text-xs text-foreground-secondary dark:text-foreground-dark-secondary">
+              Connected: {formatDate(connection.createdAt)}
             </div>
           </div>
           <div className="mt-4 pt-4 border-t border-border dark:border-border-dark">
             <p className="text-sm text-foreground-secondary dark:text-foreground-dark-secondary">
-              To update your connection, connect a new repository below. This will replace the existing connection.
+              To update your connection, use the form below. This will replace the existing connection.
             </p>
           </div>
         </div>

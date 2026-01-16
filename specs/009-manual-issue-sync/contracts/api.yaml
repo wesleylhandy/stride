@@ -61,9 +61,27 @@ paths:
                   type: boolean
                   default: false
                   description: Include closed/archived issues in sync (requires verification)
-              example:
-                syncType: full
-                includeClosed: false
+              examples:
+                fullSync:
+                  summary: Full sync (default)
+                  value:
+                    syncType: full
+                    includeClosed: false
+                issuesOnly:
+                  summary: Sync issues only
+                  value:
+                    syncType: issuesOnly
+                    includeClosed: false
+                securityOnly:
+                  summary: Sync security advisories only
+                  value:
+                    syncType: securityOnly
+                includeClosed:
+                  summary: Include closed issues (requires confirmation)
+                  value:
+                    syncType: full
+                    includeClosed: true
+                    confirmation: true
       responses:
         '200':
           description: Sync completed synchronously (small repository)
@@ -71,6 +89,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SyncResult'
+              examples:
+                success:
+                  summary: Successful sync with results
+                  value:
+                    status: completed
+                    results:
+                      created: 15
+                      updated: 3
+                      skipped: 2
+                      failed: 0
+                      securityAdvisories:
+                        created: 2
+                        updated: 0
+                        skipped: 0
+                        failed: 0
+                    duration: 45
+                    repositoryUrl: "https://github.com/owner/repo"
+                    syncedAt: "2026-01-27T10:30:00Z"
+                noIssues:
+                  summary: Sync with no issues to sync
+                  value:
+                    status: completed
+                    results:
+                      created: 0
+                      updated: 0
+                      skipped: 0
+                      failed: 0
+                    duration: 12
+                    repositoryUrl: "https://github.com/owner/repo"
+                    syncedAt: "2026-01-27T10:30:00Z"
         '202':
           description: Sync started asynchronously (large repository)
           content:
@@ -83,6 +131,17 @@ paths:
               schema:
                 type: string
                 example: /api/projects/550e8400-e29b-41d4-a716-446655440000/repositories/660e8400-e29b-41d4-a716-446655440000/sync/770e8400-e29b-41d4-a716-446655440000
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncOperationResponse'
+              examples:
+                asyncOperation:
+                  summary: Async operation started
+                  value:
+                    operationId: "770e8400-e29b-41d4-a716-446655440000"
+                    status: pending
+                    location: "/api/projects/550e8400-e29b-41d4-a716-446655440000/repositories/660e8400-e29b-41d4-a716-446655440000/sync/770e8400-e29b-41d4-a716-446655440000"
         '400':
           description: Bad request (invalid parameters, webhook active requires confirmation)
           content:
@@ -152,6 +211,48 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SyncOperationStatus'
+              examples:
+                inProgress:
+                  summary: Sync operation in progress
+                  value:
+                    operationId: "770e8400-e29b-41d4-a716-446655440000"
+                    status: inProgress
+                    progress:
+                      current: 50
+                      total: 100
+                      processed: 45
+                      stage: creating
+                    startedAt: "2026-01-27T10:30:00Z"
+                completed:
+                  summary: Sync operation completed
+                  value:
+                    operationId: "770e8400-e29b-41d4-a716-446655440000"
+                    status: completed
+                    results:
+                      created: 15
+                      updated: 3
+                      skipped: 2
+                      failed: 0
+                      securityAdvisories:
+                        created: 2
+                        updated: 0
+                        skipped: 0
+                        failed: 0
+                    startedAt: "2026-01-27T10:30:00Z"
+                    completedAt: "2026-01-27T10:31:15Z"
+                failed:
+                  summary: Sync operation failed
+                  value:
+                    operationId: "770e8400-e29b-41d4-a716-446655440000"
+                    status: failed
+                    error: "Rate limit exceeded. Please try again later."
+                    results:
+                      created: 10
+                      updated: 2
+                      skipped: 1
+                      failed: 5
+                    startedAt: "2026-01-27T10:30:00Z"
+                    completedAt: "2026-01-27T10:30:45Z"
         '404':
           description: Sync operation not found
           content:
@@ -224,7 +325,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /projects/{projectId}/issues/{issueId}/link-external:
+  /projects/{projectId}/issues/{issueKey}/link-external:
     post:
       tags: [sync]
       summary: Manually link issue to external repository issue
@@ -241,12 +342,13 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: issueId
+        - name: issueKey
           in: path
           required: true
           schema:
             type: string
-            format: uuid
+          description: Issue key (e.g., "PROJ-123")
+          example: "PROJ-123"
       requestBody:
         required: true
         content:
@@ -259,6 +361,25 @@ paths:
                   type: string
                   description: External identifier in format "{provider}:{repoUrl}:{issueId}"
                   example: "github:https://github.com/owner/repo:123"
+              examples:
+                githubLink:
+                  summary: Link to GitHub issue
+                  value:
+                    providerType: GitHub
+                    repositoryUrl: "https://github.com/owner/repo"
+                    issueNumber: 123
+                gitlabLink:
+                  summary: Link to GitLab issue
+                  value:
+                    providerType: GitLab
+                    repositoryUrl: "https://gitlab.com/owner/repo"
+                    issueNumber: 456
+                bitbucketLink:
+                  summary: Link to Bitbucket issue
+                  value:
+                    providerType: Bitbucket
+                    repositoryUrl: "https://bitbucket.org/workspace/repo"
+                    issueNumber: 789
                 providerType:
                   type: string
                   enum: [GitHub, GitLab, Bitbucket]
@@ -275,6 +396,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Issue'
+              examples:
+                linkedIssue:
+                  summary: Successfully linked issue
+                  value:
+                    id: "550e8400-e29b-41d4-a716-446655440000"
+                    key: "PROJ-123"
+                    title: "Fix authentication bug"
+                    customFields:
+                      externalId: "github:https://github.com/owner/repo:123"
+                      externalSync:
+                        providerType: "GitHub"
+                        repositoryUrl: "https://github.com/owner/repo"
+                        issueNumber: 123
+                        syncedAt: "2026-01-27T10:30:00Z"
         '400':
           description: Invalid external ID or external ID already in use
           content:

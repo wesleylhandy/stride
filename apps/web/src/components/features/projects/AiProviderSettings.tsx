@@ -14,6 +14,7 @@ export interface AiProvider {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  source?: 'project' | 'global';
 }
 
 export interface AiProviderSettingsProps {
@@ -30,6 +31,7 @@ export function AiProviderSettings({
   projectId,
 }: AiProviderSettingsProps) {
   const [providers, setProviders] = useState<AiProvider[]>([]);
+  const [globalProviders, setGlobalProviders] = useState<AiProvider[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingProvider, setEditingProvider] = useState<AiProvider | null>(null);
@@ -55,7 +57,14 @@ export function AiProviderSettings({
       }
 
       const data = await response.json();
-      setProviders(data);
+      // Handle both old format (array) and new format (object with projectProviders and globalProviders)
+      if (Array.isArray(data)) {
+        setProviders(data);
+        setGlobalProviders([]);
+      } else {
+        setProviders(data.projectProviders || []);
+        setGlobalProviders(data.globalProviders || []);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load providers');
     } finally {
@@ -220,9 +229,12 @@ export function AiProviderSettings({
         </div>
       )}
 
-      {/* Providers List */}
+      {/* Project-Specific Providers List */}
       {providers.length > 0 && (
         <div className="space-y-4">
+          <h3 className="text-sm font-medium text-foreground-secondary dark:text-foreground-dark-secondary">
+            Project-Specific Providers
+          </h3>
           {providers.map((provider) => (
             <div
               key={provider.id}
@@ -237,6 +249,7 @@ export function AiProviderSettings({
                     <Badge variant={provider.isActive ? 'success' : 'warning'}>
                       {provider.isActive ? 'Active' : 'Inactive'}
                     </Badge>
+                    <Badge variant="info">Project</Badge>
                   </div>
                   <div className="space-y-2 mt-4">
                     {provider.endpointUrl && (
@@ -252,11 +265,16 @@ export function AiProviderSettings({
                     {provider.enabledModels.length > 0 && (
                       <div className="text-sm">
                         <span className="text-foreground-secondary dark:text-foreground-dark-secondary">
-                          Enabled Models:{' '}
+                          Available Models:{' '}
                         </span>
                         <span className="text-foreground dark:text-foreground-dark">
                           {provider.enabledModels.join(', ')}
                         </span>
+                        {(provider as any).modelsSource === 'fallback' && (
+                          <span className="ml-2 text-xs text-warning">
+                            (estimated - could not fetch from provider)
+                          </span>
+                        )}
                       </div>
                     )}
                     {provider.defaultModel && (
@@ -298,13 +316,92 @@ export function AiProviderSettings({
         </div>
       )}
 
+      {/* Global Providers List */}
+      {globalProviders.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium text-foreground-secondary dark:text-foreground-dark-secondary">
+              Global Infrastructure Providers
+            </h3>
+            <p className="text-xs text-foreground-secondary dark:text-foreground-dark-secondary">
+              Available from infrastructure configuration
+            </p>
+          </div>
+          {globalProviders.map((provider) => (
+            <div
+              key={provider.id}
+              className="rounded-lg border border-border dark:border-border-dark bg-surface dark:bg-surface-dark p-6 opacity-90"
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="text-lg font-semibold text-foreground dark:text-foreground-dark">
+                      {getProviderDisplayName(provider.providerType)}
+                    </h3>
+                    <Badge variant="info">Global</Badge>
+                    <Badge variant="success">Active</Badge>
+                  </div>
+                  <div className="space-y-2 mt-4">
+                    {provider.endpointUrl && (
+                      <div className="text-sm">
+                        <span className="text-foreground-secondary dark:text-foreground-dark-secondary">
+                          Endpoint:{' '}
+                        </span>
+                        <span className="text-foreground dark:text-foreground-dark font-mono">
+                          {provider.endpointUrl}
+                        </span>
+                      </div>
+                    )}
+                    {provider.enabledModels.length > 0 && (
+                      <div className="text-sm">
+                        <span className="text-foreground-secondary dark:text-foreground-dark-secondary">
+                          Available Models:{' '}
+                        </span>
+                        <span className="text-foreground dark:text-foreground-dark">
+                          {provider.enabledModels.join(', ')}
+                        </span>
+                        {(provider as any).modelsSource === 'fallback' && (
+                          <span className="ml-2 text-xs text-warning">
+                            (estimated - could not fetch from provider)
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    {provider.defaultModel && (
+                      <div className="text-sm">
+                        <span className="text-foreground-secondary dark:text-foreground-dark-secondary">
+                          Default Model:{' '}
+                        </span>
+                        <span className="text-foreground dark:text-foreground-dark font-mono">
+                          {provider.defaultModel}
+                        </span>
+                      </div>
+                    )}
+                    <div className="p-3 bg-info/10 border border-info/20 rounded-md mt-3">
+                      <p className="text-sm text-foreground dark:text-foreground-dark">
+                        ℹ️ This provider is configured globally. Configure a project-specific provider to override.
+                        {(provider as any).modelsSource === 'fetched' && (
+                          <span className="ml-2 text-xs text-success">
+                            (models fetched from provider API)
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Empty State */}
-      {providers.length === 0 && !showForm && (
+      {providers.length === 0 && globalProviders.length === 0 && !showForm && (
         <div className="rounded-lg border border-border dark:border-border-dark bg-surface dark:bg-surface-dark p-6">
           <div className="flex items-center gap-3">
             <Badge variant="default">No Providers</Badge>
             <p className="text-sm text-foreground-secondary dark:text-foreground-dark-secondary">
-              No AI providers configured for this project.
+              No AI providers configured for this project or globally.
             </p>
           </div>
         </div>
