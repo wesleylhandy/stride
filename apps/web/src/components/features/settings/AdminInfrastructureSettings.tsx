@@ -44,6 +44,12 @@ interface InfrastructureConfig {
       anthropicApiKey?: boolean;
       googleAiApiKey?: boolean;
     };
+    defaultModels?: {
+      openai?: string;
+      anthropic?: string;
+      googleAi?: string;
+      ollama?: string;
+    };
   };
   updatedBy: string | null;
   updatedByUser: {
@@ -497,6 +503,7 @@ export function AdminInfrastructureSettings() {
             llmEndpoint: safeConfig.aiConfig?.llmEndpoint,
             source: safeConfig.aiConfig?.source || 'default',
             configuredApiKeys: safeConfig.aiConfig?.configuredApiKeys,
+            defaultModels: safeConfig.aiConfig?.defaultModels,
           }}
           onSubmit={handleAIConfigSubmit}
           isSubmitting={isSubmitting}

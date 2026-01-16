@@ -48,6 +48,10 @@ export function encryptAiConfig(aiConfig: {
   openaiApiKey?: string;
   anthropicApiKey?: string;
   googleAiApiKey?: string;
+  openaiDefaultModel?: string;
+  anthropicDefaultModel?: string;
+  googleAiDefaultModel?: string;
+  ollamaDefaultModel?: string;
 }): typeof aiConfig {
   const encrypted: typeof aiConfig = {
     aiGatewayUrl: aiConfig.aiGatewayUrl, // URL is not sensitive
@@ -64,6 +68,20 @@ export function encryptAiConfig(aiConfig: {
 
   if (aiConfig.googleAiApiKey) {
     encrypted.googleAiApiKey = encrypt(aiConfig.googleAiApiKey);
+  }
+
+  // Default models are not sensitive, store as plain text
+  if (aiConfig.openaiDefaultModel) {
+    encrypted.openaiDefaultModel = aiConfig.openaiDefaultModel;
+  }
+  if (aiConfig.anthropicDefaultModel) {
+    encrypted.anthropicDefaultModel = aiConfig.anthropicDefaultModel;
+  }
+  if (aiConfig.googleAiDefaultModel) {
+    encrypted.googleAiDefaultModel = aiConfig.googleAiDefaultModel;
+  }
+  if (aiConfig.ollamaDefaultModel) {
+    encrypted.ollamaDefaultModel = aiConfig.ollamaDefaultModel;
   }
 
   return encrypted;

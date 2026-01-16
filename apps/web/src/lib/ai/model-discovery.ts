@@ -84,31 +84,42 @@ async function discoverOpenAIModels(apiKey: string): Promise<string[]> {
 
 /**
  * Discover Anthropic models
+ * API: GET https://api.anthropic.com/v1/models
  * 
- * Note: Anthropic doesn't provide a public models list endpoint.
- * We use a curated list of documented models from their API documentation.
- * These are the current supported models as of 2024.
+ * Requires headers:
+ * - anthropic-version: 2023-06-01
+ * - x-api-key: {apiKey}
  */
 async function discoverAnthropicModels(apiKey: string): Promise<string[]> {
-  // Anthropic doesn't have a public models list endpoint
-  // Return curated list of documented models
-  // We could try to validate the API key by making a test request, but
-  // for now we'll return the known models
-  
-  // These are the current Anthropic Claude models (as of 2024)
-  const knownModels = [
-    "claude-3-5-sonnet-20241022",
-    "claude-3-5-haiku-20241022",
-    "claude-3-opus-20240229",
-    "claude-3-sonnet-20240229",
-    "claude-3-haiku-20240307",
-  ];
+  const response = await fetch("https://api.anthropic.com/v1/models", {
+    method: "GET",
+    headers: {
+      "anthropic-version": "2023-06-01",
+      "x-api-key": apiKey,
+    },
+    signal: AbortSignal.timeout(10000), // 10 second timeout
+  });
 
-  // Optional: Validate API key by making a test request
-  // For now, we'll just return the known models
-  // In the future, we could implement a validation check here
+  if (!response.ok) {
+    throw new Error(
+      `Anthropic API error: ${response.status} ${response.statusText}`
+    );
+  }
+
+  const data = await response.json();
   
-  return knownModels;
+  // Anthropic returns: { data: [{ id: "claude-sonnet-4-20250514", display_name: "...", ... }, ...] }
+  if (!data.data || !Array.isArray(data.data)) {
+    return [];
+  }
+
+  // Extract model IDs and sort them
+  const models = data.data
+    .map((model: { id: string }) => model.id)
+    .filter((id: string) => id && id.length > 0)
+    .sort();
+
+  return models;
 }
 
 /**

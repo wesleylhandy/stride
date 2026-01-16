@@ -21,6 +21,13 @@ const googleAiApiKeySchema = z
   .regex(/^AIza[0-9A-Za-z-_]{35}$/, "Google AI API key must start with 'AIza' and be 39 characters");
 
 /**
+ * Provider default model configuration schema
+ */
+const providerModelConfigSchema = z.object({
+  defaultModel: z.string().optional(),
+}).optional();
+
+/**
  * AI Gateway configuration schema
  */
 export const aiGatewayConfigSchema = z.object({
@@ -33,6 +40,11 @@ export const aiGatewayConfigSchema = z.object({
   openaiApiKey: z.union([openAiApiKeySchema, z.literal("")]).optional(),
   anthropicApiKey: z.union([anthropicApiKeySchema, z.literal("")]).optional(),
   googleAiApiKey: z.union([googleAiApiKeySchema, z.literal("")]).optional(),
+  // Provider default model preferences
+  openaiDefaultModel: z.string().optional(),
+  anthropicDefaultModel: z.string().optional(),
+  googleAiDefaultModel: z.string().optional(),
+  ollamaDefaultModel: z.string().optional(),
 });
 
 /**

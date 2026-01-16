@@ -7,7 +7,7 @@
  */
 
 import { selectProviderForProject } from "@/lib/ai/provider-selector";
-import type { SelectedProvider } from "@/lib/ai/provider-selector";
+import type { SelectedProvider, ProviderType } from "@/lib/ai/provider-selector";
 import { resolveAIGatewayConfig } from "@/lib/config/infrastructure-precedence";
 
 export interface ChatRequest {
@@ -73,19 +73,35 @@ async function selectProviderFromInfrastructure(): Promise<SelectedProvider | nu
 /**
  * Call AI provider for chat completion
  * Uses project-specific provider selection, or infrastructure provider for infrastructure context
+ * If providerId and model are provided, uses those instead of auto-selection
  */
 export async function callAIChat(
   request: ChatRequest,
-  projectId: string | "infrastructure"
+  projectId: string | "infrastructure",
+  options?: {
+    providerId?: string;
+    model?: string;
+  }
 ): Promise<ChatResponse> {
   let selectedProvider: SelectedProvider | null;
 
-  // For infrastructure context, use infrastructure provider directly
-  if (projectId === "infrastructure") {
-    selectedProvider = await selectProviderFromInfrastructure();
+  // If provider and model are explicitly provided, use them
+  if (options?.providerId && options?.model) {
+    // Need to resolve the provider details (API keys, etc.) from the provider ID
+    selectedProvider = await resolveProviderById(
+      options.providerId,
+      options.model,
+      projectId
+    );
   } else {
-    // Get provider from project config (with fallback to infrastructure/global)
-    selectedProvider = await selectProviderForProject(projectId);
+    // Auto-select provider using existing logic
+    // For infrastructure context, use infrastructure provider directly
+    if (projectId === "infrastructure") {
+      selectedProvider = await selectProviderFromInfrastructure();
+    } else {
+      // Get provider from project config (with fallback to infrastructure/global)
+      selectedProvider = await selectProviderForProject(projectId);
+    }
   }
 
   if (!selectedProvider) {
@@ -94,10 +110,123 @@ export async function callAIChat(
     );
   }
 
+  // Override model if provided
+  if (options?.model && selectedProvider) {
+    selectedProvider.model = options.model;
+  }
+
   // Call provider directly
   const content = await callProviderForChat(selectedProvider, request);
 
   return { content };
+}
+
+/**
+ * Resolve provider details by provider ID
+ */
+async function resolveProviderById(
+  providerId: string,
+  model: string,
+  projectId: string | "infrastructure"
+): Promise<SelectedProvider | null> {
+  // Check if it's an infrastructure provider
+  if (providerId.startsWith("infrastructure-")) {
+    const config = await resolveAIGatewayConfig();
+    const providerType = providerId.replace("infrastructure-", "");
+    
+    switch (providerType) {
+      case "openai":
+        if (!config.openaiApiKey) return null;
+        return {
+          providerId,
+          providerType: "openai",
+          model,
+          apiKey: config.openaiApiKey,
+        };
+      case "anthropic":
+        if (!config.anthropicApiKey) return null;
+        return {
+          providerId,
+          providerType: "anthropic",
+          model,
+          apiKey: config.anthropicApiKey,
+        };
+      case "google-gemini":
+        if (!config.googleAiApiKey) return null;
+        return {
+          providerId,
+          providerType: "google-gemini",
+          model,
+          apiKey: config.googleAiApiKey,
+        };
+      case "ollama":
+        if (!config.llmEndpoint) return null;
+        return {
+          providerId,
+          providerType: "ollama",
+          model,
+          endpointUrl: config.llmEndpoint,
+        };
+      default:
+        return null;
+    }
+  }
+
+  // It's a project-specific provider
+  if (projectId === "infrastructure") {
+    return null; // Project providers not available for infrastructure context
+  }
+
+  const { prisma } = await import("@stride/database");
+  const { decrypt } = await import("@/lib/integrations/storage");
+  
+  const provider = await prisma.aiProviderConfig.findFirst({
+    where: {
+      id: providerId,
+      projectId,
+      isActive: true,
+    },
+  });
+
+  if (!provider) {
+    return null;
+  }
+
+  // Verify model is in enabled models
+  const enabledModels = provider.enabledModels as string[] | null;
+  if (!enabledModels || !enabledModels.includes(model)) {
+    return null;
+  }
+
+  const result: SelectedProvider = {
+    providerId: provider.id,
+    providerType: provider.providerType as ProviderType,
+    model,
+  };
+
+  // Decrypt and include credentials
+  if (provider.apiKey) {
+    try {
+      result.apiKey = decrypt(provider.apiKey);
+    } catch (error) {
+      console.error(`Failed to decrypt API key for provider ${provider.id}:`, error);
+      return null;
+    }
+  }
+
+  if (provider.endpointUrl) {
+    result.endpointUrl = provider.endpointUrl;
+  }
+
+  if (provider.authToken) {
+    try {
+      result.authToken = decrypt(provider.authToken);
+    } catch (error) {
+      console.error(`Failed to decrypt auth token for provider ${provider.id}:`, error);
+    }
+  }
+
+  return result;
 }
 
 /**

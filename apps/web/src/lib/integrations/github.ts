@@ -325,3 +325,225 @@ export async function createGitHubWebhook(
   return data.id;
 }
 
+/**
+ * GitHub issue response from API
+ */
+export interface GitHubIssue {
+  id: number;
+  number: number;
+  title: string;
+  body: string | null;
+  state: "open" | "closed";
+  labels: Array<{
+    name: string;
+    color?: string;
+  }>;
+  assignees: Array<{
+    login: string;
+    name?: string | null;
+    email?: string | null;
+  }>;
+  created_at: string;
+  updated_at: string;
+  html_url: string;
+}
+
+/**
+ * GitHub Dependabot alert response from API
+ */
+export interface GitHubDependabotAlert {
+  number: number;
+  state: "open" | "dismissed" | "fixed";
+  dependency: {
+    package: {
+      name: string;
+      ecosystem: string;
+    };
+  };
+  security_advisory: {
+    summary: string;
+    description: string;
+    severity: "low" | "medium" | "high" | "critical";
+    cvss: {
+      score: number;
+      vector_string: string;
+    } | null;
+  };
+  security_vulnerability: {
+    package: {
+      name: string;
+      ecosystem: string;
+    };
+    severity: "low" | "medium" | "high" | "critical";
+    vulnerable_version_range: string;
+    first_patched_version: {
+      identifier: string;
+    } | null;
+  };
+  html_url: string;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Fetch GitHub repository issues
+ * @param owner - Repository owner
+ * @param repo - Repository name
+ * @param accessToken - GitHub access token
+ * @param options - Optional fetch options
+ * @returns Array of issues with pagination info
+ */
+export async function fetchGitHubIssues(
+  owner: string,
+  repo: string,
+  accessToken: string,
+  options?: {
+    state?: "open" | "closed" | "all";
+    page?: number;
+    perPage?: number;
+    includeClosed?: boolean;
+  },
+): Promise<{
+  issues: GitHubIssue[];
+  hasNext: boolean;
+  nextPage?: number;
+}> {
+  const state = options?.includeClosed
+    ? options.state || "all"
+    : options?.state || "open";
+  const page = options?.page || 1;
+  const perPage = Math.min(options?.perPage || 100, 100);
+
+  const params = new URLSearchParams({
+    state,
+    page: page.toString(),
+    per_page: perPage.toString(),
+    sort: "created",
+    direction: "desc",
+  });
+
+  const response = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/issues?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `token ${accessToken}`,
+        Accept: "application/vnd.github.v3+json",
+      },
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`GitHub API error: ${response.statusText}`);
+  }
+
+  const issues = (await response.json()) as GitHubIssue[];
+
+  // Parse Link header for pagination
+  const linkHeader = response.headers.get("Link");
+  let hasNext = false;
+  let nextPage: number | undefined;
+
+  if (linkHeader) {
+    const links = linkHeader.split(",");
+    for (const link of links) {
+      const match = link.match(/<([^>]+)>;\s*rel="([^"]+)"/);
+      if (match && match[2] === "next" && match[1]) {
+        hasNext = true;
+        const url = new URL(match[1]);
+        const nextPageParam = url.searchParams.get("page");
+        if (nextPageParam) {
+          nextPage = parseInt(nextPageParam, 10);
+        }
+      }
+    }
+  }
+
+  return {
+    issues,
+    hasNext,
+    nextPage,
+  };
+}
+
+/**
+ * Fetch GitHub Dependabot alerts
+ * @param owner - Repository owner
+ * @param repo - Repository name
+ * @param accessToken - GitHub access token
+ * @param options - Optional fetch options
+ * @returns Array of Dependabot alerts with pagination info
+ */
+export async function fetchGitHubDependabotAlerts(
+  owner: string,
+  repo: string,
+  accessToken: string,
+  options?: {
+    state?: "open" | "dismissed" | "fixed";
+    page?: number;
+    perPage?: number;
+  },
+): Promise<{
+  alerts: GitHubDependabotAlert[];
+  hasNext: boolean;
+  nextPage?: number;
+}> {
+  const state = options?.state || "open";
+  const page = options?.page || 1;
+  const perPage = Math.min(options?.perPage || 100, 100);
+
+  const params = new URLSearchParams({
+    state,
+    page: page.toString(),
+    per_page: perPage.toString(),
+  });
+
+  const response = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/dependabot/alerts?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `token ${accessToken}`,
+        Accept: "application/vnd.github+json",
+      },
+    },
+  );
+
+  if (!response.ok) {
+    // If 403 or 404, Dependabot alerts may not be available
+    if (response.status === 403 || response.status === 404) {
+      return {
+        alerts: [],
+        hasNext: false,
+      };
+    }
+    throw new Error(`GitHub API error: ${response.statusText}`);
+  }
+
+  const alerts = (await response.json()) as GitHubDependabotAlert[];
+
+  // Parse Link header for pagination
+  const linkHeader = response.headers.get("Link");
+  let hasNext = false;
+  let nextPage: number | undefined;
+
+  if (linkHeader) {
+    const links = linkHeader.split(",");
+    for (const link of links) {
+      const match = link.match(/<([^>]+)>;\s*rel="([^"]+)"/);
+      if (match && match[2] === "next" && match[1]) {
+        hasNext = true;
+        const url = new URL(match[1]);
+        const nextPageParam = url.searchParams.get("page");
+        if (nextPageParam) {
+          nextPage = parseInt(nextPageParam, 10);
+        }
+      }
+    }
+  }
+
+  return {
+    alerts,
+    hasNext,
+    nextPage,
+  };
+}
+

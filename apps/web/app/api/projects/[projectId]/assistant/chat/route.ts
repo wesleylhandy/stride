@@ -27,6 +27,8 @@ import { Prisma } from "@stride/database";
 const chatRequestSchema = z.object({
   message: z.string().min(1).max(5000),
   sessionId: z.string().uuid().optional(),
+  providerId: z.string().optional(),
+  model: z.string().optional(),
 });
 
 /**
@@ -236,7 +238,11 @@ export async function POST(
           systemPrompt,
           userMessage: promptUserMessage,
         },
-        projectId
+        projectId,
+        {
+          providerId: validated.providerId,
+          model: validated.model,
+        }
       );
       assistantResponse = chatResponse.content;
       

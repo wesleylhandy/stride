@@ -25,6 +25,12 @@ export interface AIInfrastructureConfigFormProps {
       anthropicApiKey?: boolean;
       googleAiApiKey?: boolean;
     };
+    defaultModels?: {
+      openai?: string;
+      anthropic?: string;
+      googleAi?: string;
+      ollama?: string;
+    };
   };
   /**
    * Callback when form is submitted
@@ -99,8 +105,33 @@ export function AIInfrastructureConfigForm({
       openaiApiKey: '', // Never pre-fill secrets
       anthropicApiKey: '', // Never pre-fill secrets
       googleAiApiKey: '', // Never pre-fill secrets
+      openaiDefaultModel: initialConfig?.defaultModels?.openai || '',
+      anthropicDefaultModel: initialConfig?.defaultModels?.anthropic || '',
+      googleAiDefaultModel: initialConfig?.defaultModels?.googleAi || '',
+      ollamaDefaultModel: initialConfig?.defaultModels?.ollama || '',
     },
   });
+
+  // Sync form values when initialConfig changes (e.g., after parent refetches)
+  React.useEffect(() => {
+    reset({
+      aiGatewayUrl: initialConfig?.aiGatewayUrl || '',
+      llmEndpoint: initialConfig?.llmEndpoint || '',
+      openaiApiKey: '', // Never pre-fill secrets
+      anthropicApiKey: '', // Never pre-fill secrets
+      googleAiApiKey: '', // Never pre-fill secrets
+    }, { keepValues: false });
+    // Clear editing/deletion state when config updates from parent
+    setEditingFields(new Set());
+    setDeletedFields(new Set());
+  }, [
+    initialConfig?.aiGatewayUrl,
+    initialConfig?.llmEndpoint,
+    initialConfig?.configuredApiKeys?.openaiApiKey,
+    initialConfig?.configuredApiKeys?.anthropicApiKey,
+    initialConfig?.configuredApiKeys?.googleAiApiKey,
+    reset,
+  ]);
 
   // Watch all form values to compute custom dirty state
   const watchedValues = watch();
@@ -120,7 +151,7 @@ export function AIInfrastructureConfigForm({
         return true;
       }
     }
-    
+
     return false;
   }, [watchedValues, initialConfig, editingFields, deletedFields]);
 
@@ -160,75 +191,29 @@ export function AIInfrastructureConfigForm({
       // Idempotent save: only include fields that were actually changed
       const cleanedData: AIGatewayConfig = {};
       
-      // Always include URL fields if they differ from initial
-      if (data.aiGatewayUrl && data.aiGatewayUrl.trim() !== (initialConfig?.aiGatewayUrl || '')) {
-        cleanedData.aiGatewayUrl = data.aiGatewayUrl.trim();
+      // URLs: always send (they're always visible)
+      cleanedData.aiGatewayUrl = data.aiGatewayUrl?.trim() || '';
+      cleanedData.llmEndpoint = data.llmEndpoint?.trim() || '';
+
+      // API keys: only send if field is being edited/deleted OR is new (not saved yet)
+      // Empty string = delete, has value = update/add
+      if (editingFields.has('openaiApiKey') || deletedFields.has('openaiApiKey') || !configuredApiKeys.openaiApiKey) {
+        cleanedData.openaiApiKey = data.openaiApiKey?.trim() || '';
       }
-
-      if (data.llmEndpoint && data.llmEndpoint.trim() !== (initialConfig?.llmEndpoint || '')) {
-        cleanedData.llmEndpoint = data.llmEndpoint.trim();
+      if (editingFields.has('anthropicApiKey') || deletedFields.has('anthropicApiKey') || !configuredApiKeys.anthropicApiKey) {
+        cleanedData.anthropicApiKey = data.anthropicApiKey?.trim() || '';
       }
-
-      // For API keys: only include if:
-      // 1. Field is in edit mode AND has a value (updating)
-      // 2. Field is marked for deletion (deleting - handled by omitting from cleanedData)
-      // 3. Field is NOT in edit mode, NOT deleted, and NOT saved = new field (adding)
-      const apiKeyFields = [
-        { key: 'openaiApiKey' as const, field: 'openaiApiKey' },
-        { key: 'anthropicApiKey' as const, field: 'anthropicApiKey' },
-        { key: 'googleAiApiKey' as const, field: 'googleAiApiKey' },
-      ];
-
-      for (const { key, field } of apiKeyFields) {
-        const isEditing = editingFields.has(field);
-        const isDeleted = deletedFields.has(field);
-        const hasValue = data[key] && data[key]!.trim();
-        const wasSaved = configuredApiKeys[key];
-
-        if (isDeleted) {
-          // Field marked for deletion - don't include (will be removed)
-          continue;
-        }
-
-        if (isEditing && hasValue) {
-          // Field was edited and has a new value
-          cleanedData[key] = data[key]!.trim();
-        } else if (!wasSaved && hasValue) {
-          // New field (not saved before) with a value
-          cleanedData[key] = data[key]!.trim();
-        }
-        // Otherwise: field is saved but not edited/deleted = don't change (idempotent)
+      if (editingFields.has('googleAiApiKey') || deletedFields.has('googleAiApiKey') || !configuredApiKeys.googleAiApiKey) {
+        cleanedData.googleAiApiKey = data.googleAiApiKey?.trim() || '';
       }
-
-      // Track if we had deletions before clearing state
-      const hadDeletions = deletedFields.size > 0;
       
       await onSubmit(cleanedData);
       
-      // Reset form and state
+      // Clear edit/delete state after successful save
       setEditingFields(new Set());
       setDeletedFields(new Set());
-      reset({
-        aiGatewayUrl: data.aiGatewayUrl || initialConfig?.aiGatewayUrl || '',
-        llmEndpoint: data.llmEndpoint || initialConfig?.llmEndpoint || '',
-        openaiApiKey: '', // Never show secrets after save
-        anthropicApiKey: '', // Never show secrets after save
-        googleAiApiKey: '', // Never show secrets after save
-      }, { keepValues: false });
-
-      // Show appropriate success message
-      const hasAnyField = 
-        cleanedData.aiGatewayUrl ||
-        cleanedData.llmEndpoint ||
-        cleanedData.openaiApiKey ||
-        cleanedData.anthropicApiKey ||
-        cleanedData.googleAiApiKey;
       
-      if (hasAnyField || hadDeletions) {
-        toast.success('AI Gateway configuration has been updated successfully.');
-      } else {
-        toast.success('AI Gateway configuration has been cleared.');
-      }
+      toast.success('AI Gateway configuration has been updated successfully.');
     } catch (error) {
       console.error('Failed to save AI Gateway configuration:', error);
       const errorMessage =
@@ -293,6 +278,13 @@ export function AIInfrastructureConfigForm({
       });
     }
   };
+
+  // Map provider type to state key
+  const getProviderStateKey = (providerType: 'openai' | 'anthropic' | 'google-gemini' | 'ollama'): 'openai' | 'anthropic' | 'googleAi' | 'ollama' => {
+    if (providerType === 'google-gemini') return 'googleAi';
+    return providerType;
+  };
+
 
   return (
     <form onSubmit={handleSubmit(onSubmitForm)} className={cn('space-y-6', className)}>
