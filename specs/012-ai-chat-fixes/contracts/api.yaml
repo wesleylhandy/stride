@@ -1,0 +1,218 @@
+openapi: 3.0.3
+info:
+  title: AI Chat Documentation Accuracy and Streaming API
+  description: API contracts for documentation validation and streaming AI chat responses
+  version: 1.0.0
+
+servers:
+  - url: /api/projects/{projectId}/assistant/chat
+    description: Project-specific chat endpoint
+  - url: /api/settings/infrastructure/assistant/chat
+    description: Infrastructure chat endpoint
+
+paths:
+  /api/projects/{projectId}/assistant/chat:
+    post:
+      summary: Send chat message (streaming or non-streaming)
+      description: |
+        Send a message to the AI assistant. Supports both streaming and non-streaming modes.
+        Set `Accept: text/event-stream` header for streaming, or `Accept: application/json` for non-streaming.
+      operationId: chatStreaming
+      tags:
+        - chat
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Project ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+      responses:
+        '200':
+          description: Successful response (non-streaming)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+        '200 (streaming)':
+          description: Streaming response (SSE format)
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/event-stream
+            Cache-Control:
+              schema:
+                type: string
+                example: no-cache
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                example: |
+                  event: chunk
+                  data: {"content": "Hello", "done": false}
+
+                  event: chunk
+                  data: {"content": " world", "done": false}
+
+                  event: done
+                  data: {"done": true}
+        '400':
+          description: Bad request (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Too many requests (streaming connection limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              headers:
+                Retry-After:
+                  schema:
+                    type: integer
+                    example: 60
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/settings/infrastructure/assistant/chat:
+    post:
+      summary: Send infrastructure chat message (streaming or non-streaming)
+      description: |
+        Send a message to the AI assistant in infrastructure context.
+        Same API as project chat, but for infrastructure settings.
+      operationId: infrastructureChatStreaming
+      tags:
+        - chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+      responses:
+        '200':
+          description: Successful response (non-streaming)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+        '200 (streaming)':
+          description: Streaming response (SSE format)
+          content:
+            text/event-stream:
+              schema:
+                type: string
+
+components:
+  schemas:
+    ChatRequest:
+      type: object
+      required:
+        - message
+        - sessionId
+      properties:
+        message:
+          type: string
+          description: User message content
+          example: "How do I configure custom fields?"
+        sessionId:
+          type: string
+          description: Conversation session ID
+          example: "sess_123456"
+        stream:
+          type: boolean
+          description: Enable streaming (default: false, set Accept header for automatic detection)
+          default: false
+        providerId:
+          type: string
+          nullable: true
+          description: Optional AI provider ID to use
+        model:
+          type: string
+          nullable: true
+          description: Optional model name to use
+
+    ChatResponse:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          description: Conversation session ID
+        userMessage:
+          $ref: '#/components/schemas/Message'
+        assistantMessage:
+          $ref: '#/components/schemas/Message'
+        message:
+          type: string
+          description: Assistant response content (legacy field)
+        metadata:
+          type: object
+          description: Response metadata
+        suggestions:
+          type: array
+          items:
+            type: string
+          description: Suggested follow-up questions
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+        metadata:
+          type: object
+        createdAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error type
+          example: "Validation error"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Invalid request format"
+        details:
+          type: object
+          description: Additional error details
+
+    StreamingChunk:
+      type: object
+      properties:
+        content:
+          type: string
+          description: Partial content text
+        done:
+          type: boolean
+          description: Whether this is the final chunk
+        error:
+          type: string
+          nullable: true
+          description: Error message if chunk contains error

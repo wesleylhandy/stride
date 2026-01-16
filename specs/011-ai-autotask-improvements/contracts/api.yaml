@@ -1,0 +1,504 @@
+openapi: 3.0.3
+info:
+  title: AI Autotask and Automated Response Improvements API
+  version: 1.0.0
+  description: Enhanced AI triage endpoints with learning patterns and automated responses
+
+paths:
+  /api/projects/{projectId}/issues/{issueKey}/ai-triage:
+    post:
+      summary: Analyze issue with enhanced AI triage
+      description: |
+        Enhanced AI analysis endpoint that returns detailed categorization, priority, context extraction,
+        suggested actions, and confidence scores. Replaces/supersedes existing AI triage endpoint.
+      operationId: analyzeIssueEnhanced
+      tags:
+        - AI Triage
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: issueKey
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalyzeIssueRequest'
+            examples:
+              basic:
+                value:
+                  includeContext: true
+                  includeSuggestedActions: true
+      responses:
+        '200':
+          description: Analysis completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyzeIssueResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Issue not found
+        '429':
+          description: Rate limit exceeded
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+        '500':
+          description: AI provider unavailable or internal error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/projects/{projectId}/issues/{issueKey}/ai-triage/feedback:
+    post:
+      summary: Provide feedback on AI analysis for learning
+      description: |
+        User clicks "Learn from this" button to teach AI system about corrections or preferences.
+        Creates or updates learning patterns based on feedback.
+      operationId: provideFeedback
+      tags:
+        - AI Learning
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: issueKey
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeedbackRequest'
+      responses:
+        '200':
+          description: Feedback recorded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedbackResponse'
+        '400':
+          description: Invalid feedback data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Issue or analysis not found
+        '429':
+          description: Rate limit exceeded
+        '500':
+          description: Internal error
+
+  /api/projects/{projectId}/issues/{issueKey}/ai-triage/automated-response:
+    post:
+      summary: Generate automated response for issue (internal)
+      description: |
+        Internal endpoint called during issue creation or on manual trigger to generate
+        automated response comment. Not directly called by frontend.
+      operationId: generateAutomatedResponse
+      tags:
+        - Automated Responses
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: issueKey
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AutomatedResponseRequest'
+      responses:
+        '200':
+          description: Automated response created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomatedResponseResponse'
+        '400':
+          description: Invalid request
+        '404':
+          description: Issue not found
+        '500':
+          description: Internal error
+
+  /api/projects/{projectId}/learning-patterns:
+    get:
+      summary: List learning patterns for project
+      description: |
+        Retrieve all learning patterns for a project. Admin-only endpoint for transparency and debugging.
+      operationId: listLearningPatterns
+      tags:
+        - AI Learning
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: patternType
+          in: query
+          schema:
+            $ref: '#/components/schemas/PatternType'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Learning patterns retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearningPatternListResponse'
+        '403':
+          description: Insufficient permissions (admin required)
+        '404':
+          description: Project not found
+
+components:
+  schemas:
+    AnalyzeIssueRequest:
+      type: object
+      properties:
+        includeContext:
+          type: boolean
+          default: true
+          description: Whether to extract and return detailed context
+        includeSuggestedActions:
+          type: boolean
+          default: true
+          description: Whether to generate suggested next actions
+      additionalProperties: false
+
+    AnalyzeIssueResponse:
+      type: object
+      required:
+        - analysisId
+        - issueType
+        - priority
+        - urgency
+        - category
+        - confidenceScore
+        - reasoning
+      properties:
+        analysisId:
+          type: string
+          format: uuid
+          description: ID of the analysis result for linking to comments
+        issueType:
+          type: string
+          enum: [Bug, Feature, Task, Epic]
+        priority:
+          type: string
+          enum: [Low, Medium, High, Critical]
+          nullable: true
+        urgency:
+          type: string
+          enum: [critical, high, medium, low]
+        category:
+          type: string
+          enum: [bug, feature_request, technical_debt, configuration, integration, security, performance, documentation]
+        sentiment:
+          type: string
+          enum: [positive, neutral, negative]
+        customerEmotion:
+          type: string
+          enum: [calm, frustrated, angry, satisfied, confused]
+        keyIssues:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          maxItems: 3
+          description: Array of 1-3 specific key issues extracted
+        technicalExpertiseRequired:
+          type: string
+          enum: [backend, frontend, devops, full-stack, security, general]
+        issueSourceLikely:
+          type: string
+          enum: [monitoring_webhook, git_sync, manual_creation, security_advisory, unknown]
+        suggestedResponseTime:
+          type: string
+          enum: [immediate, urgent, standard, backlog]
+        suggestedAssignee:
+          type: string
+          nullable: true
+          description: Natural language description of who should handle this
+        escalationNeeded:
+          type: boolean
+        monitoringContext:
+          type: object
+          properties:
+            hasErrorTrace:
+              type: boolean
+            serviceName:
+              type: string
+              enum: [Sentry, Datadog, New Relic, null]
+              nullable: true
+            severityFromWebhook:
+              type: string
+              enum: [critical, high, medium, low, null]
+              nullable: true
+        extractedContext:
+          type: object
+          description: Extracted context information
+          properties:
+            errorTraces:
+              type: array
+              items:
+                type: string
+            stackTraces:
+              type: array
+              items:
+                type: string
+            affectedComponents:
+              type: array
+              items:
+                type: string
+            relatedIssueKeys:
+              type: array
+              items:
+                type: string
+              description: Related or duplicate issue keys identified during analysis (per FR-010 clarification)
+            externalServices:
+              type: array
+              items:
+                type: string
+        multipleIssuesDetected:
+          type: boolean
+          description: Whether multiple unrelated issues were detected in description (per FR-018 clarification)
+        multipleIssuesDetails:
+          type: array
+          items:
+            type: object
+            properties:
+              summary:
+                type: string
+              priority:
+                type: string
+                enum: [Low, Medium, High, Critical]
+              suggestedIssueType:
+                type: string
+                enum: [Bug, Feature, Task, Epic]
+          nullable: true
+          description: Details about multiple issues when detected, prioritized by urgency
+        sensitiveInformationDetected:
+          type: boolean
+          description: Whether sensitive information (credentials, tokens) was detected in issue (per FR-013 clarification)
+        suggestedActions:
+          type: array
+          items:
+            type: string
+          maxItems: 3
+          description: Array of suggested next actions (0-3 items)
+        reasoning:
+          type: string
+          description: Explanation of categorization and prioritization logic
+        confidenceScore:
+          type: number
+          format: float
+          minimum: 0.1
+          maximum: 1.0
+          description: Overall confidence score (0.1-1.0)
+        categoryConfidenceBreakdown:
+          type: object
+          description: Confidence scores per category option when ambiguous
+          additionalProperties:
+            type: number
+            format: float
+            minimum: 0.0
+            maximum: 1.0
+        clarificationRequested:
+          type: boolean
+          description: Whether clarification was requested (confidence < 0.6)
+        clarificationMessage:
+          type: string
+          nullable: true
+          description: Message requesting clarification if confidence < 0.6
+
+    FeedbackRequest:
+      type: object
+      required:
+        - analysisId
+        - feedbackType
+      properties:
+        analysisId:
+          type: string
+          format: uuid
+          description: ID of the AI analysis being fed back on
+        feedbackType:
+          type: string
+          enum: [priority_correction, assignment_correction, categorization_correction, routing_preference]
+          description: Type of feedback provided
+        correctedValue:
+          type: object
+          description: The corrected value (priority, assignee, category, etc.)
+          additionalProperties: true
+        explanation:
+          type: string
+          maxLength: 500
+          description: Optional explanation of the correction
+
+    FeedbackResponse:
+      type: object
+      properties:
+        patternId:
+          type: string
+          format: uuid
+          description: ID of created or updated learning pattern
+        patternType:
+          $ref: '#/components/schemas/PatternType'
+        confidenceLevel:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+        feedbackCount:
+          type: integer
+          minimum: 1
+        message:
+          type: string
+          description: Human-readable confirmation message
+
+    AutomatedResponseRequest:
+      type: object
+      required:
+        - analysisId
+        - responseType
+      properties:
+        analysisId:
+          type: string
+          format: uuid
+          description: ID of the AI analysis to generate response from
+        responseType:
+          type: string
+          enum: [initial_assessment, follow_up, clarification_request]
+        includeInDescription:
+          type: boolean
+          default: false
+          description: Whether to also include response content in issue description
+
+    AutomatedResponseResponse:
+      type: object
+      properties:
+        commentId:
+          type: string
+          format: uuid
+        content:
+          type: string
+          description: The generated automated response content
+        includeInDescription:
+          type: boolean
+
+    LearningPatternListResponse:
+      type: object
+      properties:
+        patterns:
+          type: array
+          items:
+            $ref: '#/components/schemas/LearningPattern'
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    LearningPattern:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        patternType:
+          $ref: '#/components/schemas/PatternType'
+        triggerConditions:
+          type: object
+          description: JSON object with conditions that match this pattern
+          additionalProperties: true
+        suggestedBehavior:
+          type: object
+          description: JSON object with suggested behavior when pattern matches
+          additionalProperties: true
+        confidenceLevel:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+        feedbackCount:
+          type: integer
+          minimum: 1
+        lastAppliedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PatternType:
+      type: string
+      enum:
+        - PRIORITY_ADJUSTMENT
+        - ASSIGNMENT_PREFERENCE
+        - CATEGORIZATION_CORRECTION
+        - ROUTING_PATTERN
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+            code:
+              type: string
+            details:
+              type: object
+              additionalProperties: true
