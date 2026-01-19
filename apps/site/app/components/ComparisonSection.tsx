@@ -26,7 +26,7 @@ export function ComparisonSection() {
     },
     {
       feature: "Open Source",
-      stride: "✅ MIT License",
+      stride: "✅ Open Source",
       linear: "❌ Proprietary",
       jira: "❌ Proprietary",
     },

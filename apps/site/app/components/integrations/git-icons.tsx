@@ -1,7 +1,7 @@
 /**
  * Git OAuth Icons
  * 
- * SVG icon representing Git services (GitHub, GitLab)
+ * SVG icon representing Git services (GitHub, GitLab, Bitbucket)
  */
 
 export function GitIcons() {

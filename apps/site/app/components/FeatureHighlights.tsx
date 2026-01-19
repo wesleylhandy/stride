@@ -33,7 +33,7 @@ export function FeatureHighlights() {
     {
       name: "Open Source",
       description:
-        "MIT licensed. Customize, extend, and contribute. Built by developers, for developers.",
+        "Open source licensed. Customize, extend, and contribute. Built by developers, for developers.",
       icon: "🌱",
     },
   ];
