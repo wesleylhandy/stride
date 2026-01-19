@@ -41,8 +41,8 @@ export default async function OnboardingPage() {
   const adminExists = await hasAdminUser();
 
   if (adminExists) {
-    // Admin already exists (e.g., created via /setup), skip to project step
-    redirect('/onboarding/project');
+    // Admin already exists (e.g., created via /setup), skip to project setup step
+    redirect('/onboarding/project-setup');
   } else {
     // No admin exists, start with admin creation
     redirect('/onboarding/admin');

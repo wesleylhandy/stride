@@ -151,7 +151,7 @@ export function ConfigEditor({
         </div>
 
         {/* CodeMirror Editor */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-auto">
           <CodeMirror
             value={yamlContent}
             onChange={(value) => setYamlContent(value)}
@@ -210,7 +210,7 @@ export function ConfigEditor({
               Configuration Preview
             </h4>
           </div>
-          <div className="h-64 overflow-hidden">
+          <div className="h-64 overflow-auto">
             <CodeMirror
               value={JSON.stringify(parsedConfig, null, 2)}
               extensions={[json()]}

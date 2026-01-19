@@ -112,7 +112,7 @@ export function CreateProjectForm({
       <div className="mx-auto max-w-2xl">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground dark:text-foreground-dark">
-            Create Your First Project
+            Create Project
           </h1>
           <p className="mt-2 text-foreground-secondary dark:text-foreground-dark-secondary">
             Create a project to organize your issues and workflows. You can add
@@ -305,15 +305,33 @@ export function CreateProjectForm({
           </div>
 
           <div className="flex justify-between">
-            <Button
-              variant="ghost"
-              onClick={() => router.push("/onboarding/admin")}
-            >
-              Back
-            </Button>
-            <Button type="submit" loading={isFormSubmitting}>
-              Create Project
-            </Button>
+            {onCancel ? (
+              <Button
+                variant="ghost"
+                onClick={onCancel}
+              >
+                Back
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                onClick={() => router.push("/onboarding/admin")}
+              >
+                Back
+              </Button>
+            )}
+            <div className="flex gap-3">
+              <Button
+                variant="secondary"
+                onClick={() => router.push("/projects")}
+                type="button"
+              >
+                Skip for now
+              </Button>
+              <Button type="submit" loading={isFormSubmitting}>
+                Create Project
+              </Button>
+            </div>
           </div>
         </form>
       </div>
