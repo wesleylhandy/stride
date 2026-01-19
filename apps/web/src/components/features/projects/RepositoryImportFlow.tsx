@@ -18,6 +18,11 @@ export interface RepositoryImportFlowProps {
     github: boolean;
     gitlab: boolean;
   };
+  /**
+   * Custom redirect URL after successful import
+   * Defaults to the imported project page
+   */
+  returnTo?: string;
 }
 
 type FlowStep = 'provider-selection' | 'oauth-pending' | 'repository-list' | 'import-form' | 'error';
@@ -39,6 +44,7 @@ type FlowStep = 'provider-selection' | 'oauth-pending' | 'repository-list' | 'im
  */
 export function RepositoryImportFlow({
   availableProviders,
+  returnTo,
 }: RepositoryImportFlowProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -54,84 +60,8 @@ export function RepositoryImportFlow({
   const [page, setPage] = React.useState(1);
   const [isProcessingCallback, setIsProcessingCallback] = React.useState(false);
 
-  // Import mutation
-  const importMutation = useMutation({
-    mutationFn: async (data: ImportProjectData) => {
-      const response = await fetch('/api/projects/import', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getCsrfHeaders(), // Include CSRF token from cookie
-        },
-        credentials: 'include', // Include cookies for CSRF token
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to import project');
-      }
-
-      return response.json();
-    },
-    onSuccess: (data) => {
-      // Invalidate projects list query to refresh the list
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
-      
-      // Redirect to the newly created project
-      router.push(`/projects/${data.project.id}`);
-    },
-    onError: (err) => {
-      setError(err instanceof Error ? err.message : 'Failed to import project');
-      setStep('error');
-    },
-  });
-
-  // Check for OAuth callback (code in URL params) or selected repository
-  React.useEffect(() => {
-    const code = searchParams.get('code');
-    const errorParam = searchParams.get('error');
-    const errorDescription = searchParams.get('error_description');
-    const state = searchParams.get('state');
-    const repositoryParam = searchParams.get('repository');
-
-    // Handle OAuth errors
-    if (errorParam) {
-      setError(errorDescription || errorParam || 'OAuth authorization failed');
-      setStep('error');
-      // Clean up URL
-      router.replace('/projects/import');
-      return;
-    }
-
-    // Handle OAuth success (code present)
-    // Note: Don't check step here - OAuth callback can happen at any time after redirect
-    // Also check that we're not already processing a callback
-    if (code && state && !isProcessingCallback) {
-      handleOAuthCallback(code, state);
-      return;
-    }
-
-    // Handle repository selection from URL params (if returning to import form)
-    if (repositoryParam && selectedProvider && accessToken && step === 'repository-list') {
-      // Try to load repository from sessionStorage or fetch it
-      const stored = sessionStorage.getItem('selected_repository');
-      if (stored) {
-        try {
-          const repoData = JSON.parse(stored);
-          setSelectedRepository(repoData);
-          setStep('import-form');
-          // Clean up URL
-          router.replace('/projects/import');
-        } catch {
-          // Invalid stored data, ignore
-        }
-      }
-    }
-  }, [searchParams]);
-
-  // Handle OAuth callback
-  const handleOAuthCallback = async (code: string, state: string) => {
+  // Handle OAuth callback - defined before useEffect that uses it
+  const handleOAuthCallback = React.useCallback(async (code: string, state: string) => {
     // Prevent multiple simultaneous callback processing
     if (isProcessingCallback) {
       console.log('OAuth callback already processing, ignoring duplicate');
@@ -202,8 +132,9 @@ export function RepositoryImportFlow({
       sessionStorage.removeItem('oauth_state');
       sessionStorage.removeItem('oauth_provider');
 
-      // Clean up URL
-      router.replace('/projects/import');
+      // Clean up URL - use returnTo if provided, otherwise default to /projects/import
+      const cleanUrl = returnTo ? new URL(returnTo, window.location.origin).pathname : '/projects/import';
+      router.replace(cleanUrl);
     } catch (err) {
       console.error('OAuth callback error:', err);
       setError(err instanceof Error ? err.message : 'Failed to complete OAuth flow');
@@ -213,7 +144,89 @@ export function RepositoryImportFlow({
       setIsLoading(false);
       setIsProcessingCallback(false);
     }
-  };
+  }, [returnTo, router, isProcessingCallback]);
+
+  // Import mutation
+  const importMutation = useMutation({
+    mutationFn: async (data: ImportProjectData) => {
+      const response = await fetch('/api/projects/import', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getCsrfHeaders(), // Include CSRF token from cookie
+        },
+        credentials: 'include', // Include cookies for CSRF token
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to import project');
+      }
+
+      return response.json();
+    },
+    onSuccess: (data) => {
+      // Invalidate projects list query to refresh the list
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      
+      // Redirect to custom URL if provided, otherwise to the newly created project
+      if (returnTo) {
+        router.push(returnTo);
+      } else {
+        router.push(`/projects/${data.project.id}`);
+      }
+    },
+    onError: (err) => {
+      setError(err instanceof Error ? err.message : 'Failed to import project');
+      setStep('error');
+    },
+  });
+
+  // Check for OAuth callback (code in URL params) or selected repository
+  React.useEffect(() => {
+    const code = searchParams.get('code');
+    const errorParam = searchParams.get('error');
+    const errorDescription = searchParams.get('error_description');
+    const state = searchParams.get('state');
+    const repositoryParam = searchParams.get('repository');
+
+    // Handle OAuth errors
+    if (errorParam) {
+      setError(errorDescription || errorParam || 'OAuth authorization failed');
+      setStep('error');
+      // Clean up URL - use returnTo if provided, otherwise default to /projects/import
+      const cleanUrl = returnTo ? new URL(returnTo, window.location.origin).pathname : '/projects/import';
+      router.replace(cleanUrl);
+      return;
+    }
+
+    // Handle OAuth success (code present)
+    // Note: Don't check step here - OAuth callback can happen at any time after redirect
+    // Also check that we're not already processing a callback
+    if (code && state && !isProcessingCallback) {
+      handleOAuthCallback(code, state);
+      return;
+    }
+
+    // Handle repository selection from URL params (if returning to import form)
+    if (repositoryParam && selectedProvider && accessToken && step === 'repository-list') {
+      // Try to load repository from sessionStorage or fetch it
+      const stored = sessionStorage.getItem('selected_repository');
+      if (stored) {
+        try {
+          const repoData = JSON.parse(stored);
+          setSelectedRepository(repoData);
+          setStep('import-form');
+          // Clean up URL - use returnTo if provided, otherwise default to /projects/import
+          const cleanUrl = returnTo ? new URL(returnTo, window.location.origin).pathname : '/projects/import';
+          router.replace(cleanUrl);
+        } catch {
+          // Invalid stored data, ignore
+        }
+      }
+    }
+  }, [searchParams, returnTo, router, selectedProvider, accessToken, step, handleOAuthCallback, isProcessingCallback]);
 
   // Handle provider selection and initiate OAuth
   const handleProviderSelect = async (provider: 'GitHub' | 'GitLab') => {
@@ -223,8 +236,10 @@ export function RepositoryImportFlow({
 
     try {
       // Get OAuth authorization URL
+      // Use returnTo prop if provided, otherwise use current location
+      const returnToUrl = returnTo || window.location.href;
       const response = await fetch(
-        `/api/repositories/oauth/authorize?type=${provider}&returnTo=${encodeURIComponent(window.location.href)}`,
+        `/api/repositories/oauth/authorize?type=${provider}&returnTo=${encodeURIComponent(returnToUrl)}`,
       );
 
       if (!response.ok) {
@@ -262,8 +277,9 @@ export function RepositoryImportFlow({
     setSelectedRepository(repository);
     setStep('import-form');
     
-    // Clean up URL
-    router.replace('/projects/import');
+    // Clean up URL - use returnTo if provided, otherwise default to /projects/import
+    const cleanUrl = returnTo ? new URL(returnTo, window.location.origin).pathname : '/projects/import';
+    router.replace(cleanUrl);
   };
 
   // Handle import form submission

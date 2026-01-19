@@ -25,8 +25,8 @@ export default function AdminAccountPage() {
         const data = await response.json();
 
         if (data.adminExists) {
-          // Admin already exists, skip to project step
-          router.replace("/onboarding/project");
+          // Admin already exists, skip to project setup step
+          router.replace("/onboarding/project-setup");
           return;
         }
       } catch (err) {
@@ -91,8 +91,8 @@ export default function AdminAccountPage() {
         return;
       }
 
-      // Redirect to next step (project creation)
-      router.push("/onboarding/project");
+      // Redirect to next step (project setup)
+      router.push("/onboarding/project-setup");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unexpected error occurred");
       setLoading(false);

@@ -38,15 +38,22 @@ export function ProjectsEmptyState() {
         </h2>
         
         <p className="text-foreground-secondary dark:text-foreground-dark-secondary mb-8">
-          Get started by creating your first project. You can link a repository
+          Get started by creating a project. You can link a repository
           and start managing issues right away.
         </p>
         
-        <Link href="/onboarding/project">
-          <Button size="lg">
-            Create Your First Project
-          </Button>
-        </Link>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Link href="/projects/import">
+            <Button variant="secondary" size="lg">
+              Import Project
+            </Button>
+          </Link>
+          <Link href="/onboarding/project">
+            <Button size="lg">
+              Create Project
+            </Button>
+          </Link>
+        </div>
       </div>
     </div>
   );
