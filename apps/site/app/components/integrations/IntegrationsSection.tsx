@@ -8,7 +8,7 @@ export function IntegrationsSection() {
   const integrations = [
     {
       name: 'SMTP Email',
-      description: 'Send email invitations with any SMTP-compatible service',
+      description: 'Send email invitations and notifications with any SMTP-compatible service',
       icon: <SMTPIcons />,
       services: ['SendGrid', 'AWS SES', 'Mailgun', 'Gmail', 'Microsoft 365', 'Self-hosted'],
     },
@@ -28,7 +28,7 @@ export function IntegrationsSection() {
       name: 'Git OAuth',
       description: 'Connect your repositories for seamless webhook integration',
       icon: <GitIcons />,
-      services: ['GitHub', 'GitLab'],
+      services: ['GitHub', 'GitLab', 'Bitbucket'],
     },
     {
       name: 'Monitoring Webhooks',

@@ -5,6 +5,16 @@
 **Status**: Draft  
 **Input**: User description: "We need to add a CHANGELOG and we need to follow changelog best practices (https://keepachangelog.com/en/1.0.0/ ) as well as Semantic Versioning Best practices (https://semver.org/spec/v2.0.0.html )"
 
+## Clarifications
+
+### Session 2026-01-27
+
+- Q: Should spec completion tracking be a functional requirement or implementation detail only? → A: Add as functional requirement with success criteria
+- Q: What should be the scope of git history reconstruction? → A: Required for initial 0.1.0, optional for future versions
+- Q: Should prioritization framework (P1/P2/P3) be a functional requirement or implementation detail? → A: Add as functional requirement with contributor guidance user story
+- Q: Should SPEC_STATUS.md tracking file be a functional requirement or implementation detail? → A: Implementation detail for plan.md, not a functional requirement
+- Q: Should git tag creation be required or optional for initial version 0.1.0? → A: Required functional requirement for initial 0.1.0
+
 ## User Scenarios & Testing
 
 ### User Story 1 - Discover What Changed (Priority: P1)
@@ -58,6 +68,23 @@ A maintainer needs to create a new release version in the changelog, moving unre
 
 ---
 
+### User Story 4 - Prioritize Contributor Work (Priority: P2)
+
+A contributor wants to know which features or specs to work on next and can see prioritization guidance to make informed decisions about what to tackle first.
+
+**Why this priority**: Contributors need guidance on what to work on to maximize project value. Prioritization helps ensure critical features (P1) are completed before nice-to-haves (P3), reducing wasted effort and enabling better coordination between contributors.
+
+**Independent Test**: Can be fully tested by having a contributor review prioritization information (P1/P2/P3 tiers) and successfully identify which specs are highest priority and should be worked on next. Success when contributors can make informed decisions about what to work on without asking maintainers.
+
+**Acceptance Scenarios**:
+
+1. **Given** a contributor wants to choose what to work on, **When** they review prioritization information, **Then** they can see specs organized by priority tiers (P1/P2/P3)
+2. **Given** a contributor is choosing between multiple specs, **When** they review prioritization, **Then** they can identify which specs are critical path (P1) vs nice-to-have (P3)
+3. **Given** a contributor wants to understand dependencies, **When** they review prioritization information, **Then** they can see which specs depend on others being completed first
+4. **Given** a contributor wants to work on a P1 spec, **When** they check completion status, **Then** they can see which P1 specs are incomplete and available to work on
+
+---
+
 ### Edge Cases
 
 - What happens when a change doesn't clearly fit into one category? → Use the most appropriate category, or create a new entry in "Changed" with clear description
@@ -81,9 +108,16 @@ A maintainer needs to create a new release version in the changelog, moving unre
 - **FR-008**: CHANGELOG.md MUST clearly mark breaking changes with migration instructions
 - **FR-009**: CHANGELOG.md MUST support linking to issues and pull requests when available
 - **FR-010**: CHANGELOG.md MUST support linking to version comparisons (git tags) when available
-- **FR-011**: CHANGELOG.md MUST include an initial version entry (0.1.0) documenting the current state
+- **FR-011**: CHANGELOG.md MUST include an initial version entry (0.1.0) documenting the current state. This initial entry MUST reconstruct changelog entries from git history for all completed specs up to the 0.1.0 baseline. Future versions may optionally use reconstruction, but primarily rely on "Unreleased" section entries.
 - **FR-012**: CONTRIBUTING.md MUST reference CHANGELOG.md location and maintenance guidelines
 - **FR-013**: Breaking changes MUST be documented in CHANGELOG.md before release (as required by CONTRIBUTING.md)
+- **FR-014**: The system MUST provide a mechanism to track spec completion status (completed vs incomplete) to enable accurate changelog reconstruction from git history
+- **FR-015**: Spec completion tracking MUST use multi-source analysis (tasks.md completion, git history, spec.md status, checklist completion) to determine completion status
+- **FR-016**: The system MUST provide a mechanism to reconstruct changelog entries from git history for the initial version (0.1.0) by mapping commits to specs and extracting change information (Added/Changed/Fixed). Reconstruction for future versions is optional.
+- **FR-017**: The system MUST provide prioritization guidance (P1/P2/P3 tiers) to help contributors identify which specs to work on next
+- **FR-018**: Prioritization framework MUST organize specs by priority tiers: P1 (critical path, foundation, security), P2 (high value, enhancements), P3 (nice-to-have, advanced features)
+- **FR-019**: Prioritization framework MUST document dependency relationships between specs to enable contributors to work on dependencies first
+- **FR-020**: A git tag MUST be created for the initial version (v0.1.0) to enable version comparison links in CHANGELOG.md and establish a clear baseline for future releases
 
 ### Key Entities
 
@@ -99,6 +133,14 @@ A maintainer needs to create a new release version in the changelog, moving unre
   - Attributes: Change entries grouped by type, temporary staging area
   - Relationships: Contains changelog entries that will move to version sections on release
 
+- **Spec Completion Status**: Represents the completion state of a feature specification
+  - Attributes: Status (Complete/In Progress/Draft/Blocked), completion percentage, source indicators (tasks.md, git history, spec.md status, checklist completion)
+  - Relationships: Maps to changelog entries for completed specs, links to git commits/PRs
+
+- **Prioritization Framework**: Represents the priority and dependency structure for feature specifications
+  - Attributes: Priority tier (P1/P2/P3), dependencies (which specs this depends on), blocking relationships (which specs this blocks)
+  - Relationships: Organizes specs by priority, maps dependencies between specs
+
 ## Success Criteria
 
 ### Measurable Outcomes
@@ -110,6 +152,10 @@ A maintainer needs to create a new release version in the changelog, moving unre
 - **SC-005**: All version numbers in CHANGELOG.md follow Semantic Versioning 2.0.0 format
 - **SC-006**: Users can identify breaking changes and migration requirements without reading code or documentation
 - **SC-007**: Maintainers can create a new version entry (move Unreleased to versioned section) in under 5 minutes
+- **SC-008**: Spec completion status can be determined accurately (90%+ accuracy) by analyzing tasks.md completion, git history, and spec.md status fields
+- **SC-009**: Changelog entries for completed specs can be reconstructed from git history with proper categorization (Added/Changed/Fixed) in under 10 minutes per spec
+- **SC-010**: Contributors can identify which specs to work on next (P1/P2/P3 prioritization) in under 2 minutes by reviewing prioritization information
+- **SC-011**: Prioritization framework enables contributors to make informed decisions about what to work on (without asking maintainers) 90%+ of the time
 
 ## Non-Functional Requirements
 
@@ -145,11 +191,14 @@ A maintainer needs to create a new release version in the changelog, moving unre
 ## Assumptions
 
 - Current project version is 0.1.0 (from package.json) - this will be the first documented version
+- Initial version (0.1.0) requires reconstructing changelog entries from git history for all completed specs; future versions primarily use "Unreleased" section entries
 - Single CHANGELOG.md for entire monorepo (packages are not independently versioned)
 - Manual maintenance initially (automation can be added later if needed)
 - Git tags will be created in format `vMAJOR.MINOR.PATCH` (e.g., `v0.1.0`) to match changelog versions
+- Initial version (0.1.0) requires git tag creation (v0.1.0) as a functional requirement to enable version comparison links
 - Contributors will update "Unreleased" section during development
 - Maintainers will move "Unreleased" to versioned sections on release
+- Tracking artifacts (e.g., SPEC_STATUS.md) are implementation details defined in plan.md, not functional requirements - they support spec completion tracking but are internal tools
 
 ## Dependencies
 
@@ -157,7 +206,7 @@ A maintainer needs to create a new release version in the changelog, moving unre
 - **Semantic Versioning Standard**: Version numbers must comply with https://semver.org/spec/v2.0.0.html
 - **CONTRIBUTING.md**: Already references changelog entries requirement (line 464)
 - **package.json**: Contains current version (0.1.0) that will be documented
-- **Git Repository**: For version tags and comparison links (when available)
+- **Git Repository**: For version tags and comparison links (v0.1.0 tag required for initial version, tags recommended for all future versions)
 
 ## Success Criteria Validation
 

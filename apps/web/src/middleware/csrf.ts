@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 
 /**
  * CSRF token cookie name
@@ -55,14 +54,61 @@ function getCsrfTokenFromHeader(request: NextRequest): string | null {
 }
 
 /**
+ * Determine if cookie should be secure based on environment
+ * Matches the exact logic used for session cookies in apps/web/app/api/auth/login/route.ts
+ * 
+ * Security behavior (secure by default in production):
+ * - If COOKIE_SECURE="true": Always secure (HTTPS required)
+ * - If COOKIE_SECURE="false": Never secure (explicit opt-in for local testing)
+ * - If NODE_ENV=production and COOKIE_SECURE not set: Secure (HTTPS required)
+ * - If NODE_ENV=development: Not secure (allows HTTP for local development)
+ * 
+ * IMPORTANT: Production defaults to secure=true. To test production builds locally over HTTP,
+ * explicitly set COOKIE_SECURE=false. This is insecure and should never be used in actual production.
+ * 
+ * This follows the principle: secure by default, explicit opt-in required for insecure mode.
+ */
+function shouldUseSecureCookie(_request: NextRequest): boolean {
+  // Explicit override takes precedence
+  if (process.env.COOKIE_SECURE === "true") {
+    return true;
+  }
+  if (process.env.COOKIE_SECURE === "false") {
+    // Warn if production but explicitly allowing insecure cookies
+    if (process.env.NODE_ENV === "production") {
+      console.warn(
+        "⚠️  SECURITY WARNING: COOKIE_SECURE=false in production. " +
+        "This is insecure and should only be used for local testing of production builds. " +
+        "Never use this in actual production deployments."
+      );
+    }
+    return false;
+  }
+
+  // In production, default to secure (requires HTTPS)
+  // This matches session cookie behavior - secure by default, no back doors
+  // For local testing of production builds, explicitly set COOKIE_SECURE=false
+  if (process.env.NODE_ENV === "production") {
+    return true;
+  }
+
+  // In development, don't require HTTPS
+  return false;
+}
+
+/**
  * Set CSRF token in cookie
  * Token is sent in a separate cookie that JavaScript can read
  * (not httpOnly) so client can send it in header
  */
-function setCsrfTokenCookie(response: NextResponse, token: string): void {
+function setCsrfTokenCookie(
+  response: NextResponse,
+  token: string,
+  request: NextRequest,
+): void {
   response.cookies.set(CSRF_TOKEN_COOKIE, token, {
     httpOnly: false, // Allow JavaScript to read for header submission
-    secure: process.env.NODE_ENV === "production",
+    secure: shouldUseSecureCookie(request),
     sameSite: "lax",
     path: "/",
     maxAge: 60 * 60 * 24, // 24 hours
@@ -119,7 +165,7 @@ export async function csrfMiddleware(
       // Generate and set token for future use
       const newToken = generateCsrfToken();
       const response = NextResponse.next();
-      setCsrfTokenCookie(response, newToken);
+      setCsrfTokenCookie(response, newToken, request);
       return response;
     }
     return null;
@@ -162,11 +208,13 @@ export async function getOrCreateCsrfToken(
 /**
  * Set CSRF token in response
  * Use this when creating new sessions or when token needs refresh
+ * Note: This function requires a request to determine secure cookie setting
  */
 export function setCsrfTokenInResponse(
   response: NextResponse,
   token: string,
+  request: NextRequest,
 ): NextResponse {
-  setCsrfTokenCookie(response, token);
+  setCsrfTokenCookie(response, token, request);
   return response;
 }
